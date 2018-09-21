@@ -1,33 +1,47 @@
 package legends.contollers;
 
 import legends.businesslogic.SomeUsefulWork;
-import legends.models.Player;
-import legends.models.Team;
+import legends.dao.AuthDAO;
+import legends.models.TeamType;
+import legends.requestviews.Authentication;
+import legends.responseviews.Team;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping(path = "/public")
+@RequestMapping(path = "/test")
 public class PublicController {
 
 	private final SomeUsefulWork usefulWork;
+	private final AuthDAO authDAO;
 
-	public PublicController(SomeUsefulWork usefulWork) {
+	public PublicController(SomeUsefulWork usefulWork, AuthDAO authDAO) {
 		this.usefulWork = usefulWork;
+		this.authDAO = authDAO;
 	}
-
 
 	@GetMapping(path = "/get")
 	public String simpleGet() {
-		return "Hello, Spring!";
+		return "Hello, Vlad!";
+	}
+
+	@PostMapping
+	public ResponseEntity<Team> simplePost(@RequestBody Authentication body) {
+		if (body.getLogin().equals("admin")) return new ResponseEntity<>(
+				new Team(body.getLogin(), 1, TeamType.ADMIN), HttpStatus.OK);
+		if (body.getLogin().equals("moderator")) return new ResponseEntity<>(
+				new Team(body.getLogin(), 2, TeamType.MODERATOR), HttpStatus.OK);
+		if (body.getLogin().equals("player")) return new ResponseEntity<>(
+				new Team(body.getLogin(), 42, TeamType.PLAYER), HttpStatus.OK);
+		return new ResponseEntity<>(HttpStatus.FORBIDDEN);
 	}
 
 
-	@GetMapping(path = "/get/{pathVariable}")
-	public ResponseEntity<String> getWithPathVariables(@PathVariable String pathVariable) {
+	@GetMapping(path = "/auth/{pathVariable}")
+	public ResponseEntity<Team> getWithPathVariables(@PathVariable String pathVariable) {
 		return new ResponseEntity<>(
-				pathVariable,
+				authDAO.getUser("admin", pathVariable),
 				HttpStatus.ACCEPTED
 		);
 	}
@@ -42,14 +56,14 @@ public class PublicController {
 	}
 
 
-	@PostMapping(path = "/post/{teamName}")
-	public ResponseEntity<Team> getWithQueryParams(
-			@RequestBody Player player,
-			@PathVariable String teamName
-	) {
-		return new ResponseEntity<>(
-				new Team(teamName, player),
-				HttpStatus.CREATED
-		);
-	}
+//	@PostMapping(path = "/post/{teamName}")
+//	public ResponseEntity<Team> getWithQueryParams(
+//			@RequestBody Player player,
+//			@PathVariable String teamName
+//	) {
+//		return new ResponseEntity<>(
+//				new Team(teamName, player),
+//				HttpStatus.CREATED
+//		);
+//	}
 }
