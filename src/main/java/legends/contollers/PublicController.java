@@ -4,7 +4,7 @@ import legends.businesslogic.SomeUsefulWork;
 import legends.dao.AuthDAO;
 import legends.models.TeamType;
 import legends.requestviews.Authentication;
-import legends.responseviews.TeamInfo;
+import legends.responseviews.TeamAuth;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -27,19 +27,19 @@ public class PublicController {
 	}
 
 	@PostMapping
-	public ResponseEntity<TeamInfo> simplePost(@RequestBody Authentication body) {
+	public ResponseEntity<TeamAuth> simplePost(@RequestBody Authentication body) {
 		if (body.getLogin().equals("admin")) return new ResponseEntity<>(
-				new TeamInfo(body.getLogin(), 1, TeamType.ADMIN), HttpStatus.OK);
+				new TeamAuth(body.getLogin(), 1, TeamType.ADMIN), HttpStatus.OK);
 		if (body.getLogin().equals("moderator")) return new ResponseEntity<>(
-				new TeamInfo(body.getLogin(), 2, TeamType.MODERATOR), HttpStatus.OK);
+				new TeamAuth(body.getLogin(), 2, TeamType.MODERATOR), HttpStatus.OK);
 		if (body.getLogin().equals("player")) return new ResponseEntity<>(
-				new TeamInfo(body.getLogin(), 42, TeamType.PLAYER), HttpStatus.OK);
+				new TeamAuth(body.getLogin(), 42, TeamType.PLAYER), HttpStatus.OK);
 		return new ResponseEntity<>(HttpStatus.FORBIDDEN);
 	}
 
 
 	@GetMapping(path = "/auth/{pathVariable}")
-	public ResponseEntity<TeamInfo> getWithPathVariables(@PathVariable String pathVariable) {
+	public ResponseEntity<TeamAuth> getWithPathVariables(@PathVariable String pathVariable) {
 		return new ResponseEntity<>(
 				authDAO.getUser("admin", pathVariable),
 				HttpStatus.ACCEPTED
@@ -57,12 +57,12 @@ public class PublicController {
 
 
 //	@PostMapping(path = "/post/{teamName}")
-//	public ResponseEntity<TeamInfo> getWithQueryParams(
+//	public ResponseEntity<TeamAuth> getWithQueryParams(
 //			@RequestBody Player player,
 //			@PathVariable String teamName
 //	) {
 //		return new ResponseEntity<>(
-//				new TeamInfo(teamName, player),
+//				new TeamAuth(teamName, player),
 //				HttpStatus.CREATED
 //		);
 //	}

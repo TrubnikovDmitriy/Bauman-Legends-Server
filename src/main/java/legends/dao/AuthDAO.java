@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators.UUIDGenerator;
 import legends.models.TeamType;
 import legends.requestviews.FullTeam;
 import legends.requestviews.Player;
-import legends.responseviews.TeamInfo;
+import legends.responseviews.TeamAuth;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -34,7 +34,7 @@ public class AuthDAO {
 	}
 
 	@Nullable
-	public TeamInfo getUser(@Nullable String login, @Nullable String pass) {
+	public TeamAuth getUser(@Nullable String login, @Nullable String pass) {
 		if (login == null || pass == null) return null;
 		try {
 			return jdbcTemplate.queryForObject(
@@ -42,7 +42,7 @@ public class AuthDAO {
 							"FROM auth AS a JOIN teams AS t ON a.team_id = t.id " +
 							"WHERE a.login=? AND a.pass=?",
 					new Object[] { login, pass },
-					(rs, i) -> new TeamInfo(
+					(rs, i) -> new TeamAuth(
 							rs.getString("team_name"),
 							rs.getInt("team_id"),
 							TeamType.values()[rs.getInt("team_type")]
