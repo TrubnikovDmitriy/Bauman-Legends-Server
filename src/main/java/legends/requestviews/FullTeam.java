@@ -6,7 +6,7 @@ import java.util.List;
 
 public class FullTeam {
 
-	@JsonProperty private String name;
+	@JsonProperty("team_name") private String name;
 	@JsonProperty private Player leader;
 	@JsonProperty private List<Player> members;
 

@@ -8,21 +8,29 @@ import legends.responseviews.TeamInfo;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Repository;
 
+import javax.sql.DataSource;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Repository
 public class AuthDAO {
 
 	private final JdbcTemplate jdbcTemplate;
+	private final SimpleJdbcInsert jdbcInsert;
 
-	public AuthDAO(JdbcTemplate jdbcTemplate) {
-		this.jdbcTemplate = jdbcTemplate;
+	public AuthDAO(DataSource dataSource) {
+		this.jdbcTemplate = new JdbcTemplate(dataSource);
+		this.jdbcInsert = new SimpleJdbcInsert(dataSource)
+				.withTableName("teams")
+				.usingGeneratedKeyColumns("id");
 	}
 
 	@Nullable
@@ -51,12 +59,13 @@ public class AuthDAO {
 		final List<Player> members = team.getMembers();
 		members.add(leader);
 
-		// Forming the team
-		final Integer teamID = jdbcTemplate.queryForObject(
-				"INSERT INTO teams(name, leader_name) VALUES (?, ?)",
-				new Object[] { team.getName(), leader.getFirstName() + leader.getSecondName() },
-				Integer.class
-		);
+		// Forming the team and retieve its ID
+		final Map<String, Object> parameters = new HashMap<>(2);
+		parameters.put("name", team.getName());
+		parameters.put("leader_name", leader.getFirstName() + ' ' + leader.getSecondName());
+		parameters.put("score", 0);
+		final int teamID = jdbcInsert.executeAndReturnKey(parameters).intValue();
+
 
 		// Inserting all members of team
 		jdbcTemplate.batchUpdate(
@@ -67,7 +76,7 @@ public class AuthDAO {
 							throws SQLException {
 						ps.setString(1, members.get(rowNumber).getFirstName());
 						ps.setString(2, members.get(rowNumber).getSecondName());
-						ps.setInt(4, teamID);
+						ps.setInt(3, teamID);
 					}
 
 					@Override
