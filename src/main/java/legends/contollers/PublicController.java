@@ -4,7 +4,7 @@ import legends.businesslogic.SomeUsefulWork;
 import legends.dao.AuthDAO;
 import legends.models.TeamType;
 import legends.requestviews.Authentication;
-import legends.responseviews.Team;
+import legends.responseviews.TeamInfo;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -27,19 +27,19 @@ public class PublicController {
 	}
 
 	@PostMapping
-	public ResponseEntity<Team> simplePost(@RequestBody Authentication body) {
+	public ResponseEntity<TeamInfo> simplePost(@RequestBody Authentication body) {
 		if (body.getLogin().equals("admin")) return new ResponseEntity<>(
-				new Team(body.getLogin(), 1, TeamType.ADMIN), HttpStatus.OK);
+				new TeamInfo(body.getLogin(), 1, TeamType.ADMIN), HttpStatus.OK);
 		if (body.getLogin().equals("moderator")) return new ResponseEntity<>(
-				new Team(body.getLogin(), 2, TeamType.MODERATOR), HttpStatus.OK);
+				new TeamInfo(body.getLogin(), 2, TeamType.MODERATOR), HttpStatus.OK);
 		if (body.getLogin().equals("player")) return new ResponseEntity<>(
-				new Team(body.getLogin(), 42, TeamType.PLAYER), HttpStatus.OK);
+				new TeamInfo(body.getLogin(), 42, TeamType.PLAYER), HttpStatus.OK);
 		return new ResponseEntity<>(HttpStatus.FORBIDDEN);
 	}
 
 
 	@GetMapping(path = "/auth/{pathVariable}")
-	public ResponseEntity<Team> getWithPathVariables(@PathVariable String pathVariable) {
+	public ResponseEntity<TeamInfo> getWithPathVariables(@PathVariable String pathVariable) {
 		return new ResponseEntity<>(
 				authDAO.getUser("admin", pathVariable),
 				HttpStatus.ACCEPTED
@@ -57,12 +57,12 @@ public class PublicController {
 
 
 //	@PostMapping(path = "/post/{teamName}")
-//	public ResponseEntity<Team> getWithQueryParams(
+//	public ResponseEntity<TeamInfo> getWithQueryParams(
 //			@RequestBody Player player,
 //			@PathVariable String teamName
 //	) {
 //		return new ResponseEntity<>(
-//				new Team(teamName, player),
+//				new TeamInfo(teamName, player),
 //				HttpStatus.CREATED
 //		);
 //	}

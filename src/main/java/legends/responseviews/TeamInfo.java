@@ -3,15 +3,15 @@ package legends.responseviews;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import legends.models.TeamType;
 
-public class Team {
+public class TeamInfo {
 
 	@JsonProperty private String teamName;
 	@JsonProperty private Integer teamNumber;
 	@JsonProperty private TeamType teamType;
 
-	public Team() { }
+	public TeamInfo() { }
 
-	public Team(String teamName, Integer teamNumber, TeamType teamType) {
+	public TeamInfo(String teamName, Integer teamNumber, TeamType teamType) {
 		this.teamName = teamName;
 		this.teamNumber = teamNumber;
 		this.teamType = teamType;

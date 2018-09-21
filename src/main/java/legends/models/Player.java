@@ -3,8 +3,6 @@ package legends.models;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import javax.validation.constraints.NotNull;
-
 public class Player {
 
 	@JsonProperty(value = "first_name", required = true)

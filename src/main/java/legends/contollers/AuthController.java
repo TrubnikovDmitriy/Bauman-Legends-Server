@@ -2,7 +2,8 @@ package legends.contollers;
 
 import legends.dao.AuthDAO;
 import legends.requestviews.Authentication;
-import legends.responseviews.Team;
+import legends.requestviews.FullTeam;
+import legends.responseviews.TeamInfo;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,15 +24,24 @@ public class AuthController {
 	}
 
 	@PostMapping
-	public ResponseEntity<Team> signIn(@RequestBody Authentication body) {
+	public ResponseEntity<TeamInfo> signIn(@RequestBody Authentication body) {
 		if (!body.isValid()) {
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
-		final Team team = authDAO.getUser(body.getLogin(), body.getPassword());
+		final TeamInfo team = authDAO.getUser(body.getLogin(), body.getPassword());
 		if (team != null) {
 			return new ResponseEntity<>(team, HttpStatus.OK);
 		} else {
 			return new ResponseEntity<>(HttpStatus.FORBIDDEN);
 		}
+	}
+
+	@PostMapping("/team")
+	public ResponseEntity signUpTeam(@RequestBody FullTeam team) {
+		if (!team.isValid()) {
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+		}
+		authDAO.signUpTeam(team);
+		return new ResponseEntity(HttpStatus.CREATED);
 	}
 }
