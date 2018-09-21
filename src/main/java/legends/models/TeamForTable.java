@@ -1,4 +1,4 @@
-package legends.responseviews;
+package legends.models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.jdbc.core.RowMapper;
@@ -9,7 +9,7 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 
-public class TeamTable {
+public class TeamForTable {
 
 	@JsonProperty("team_id")
 	private Integer id;
@@ -41,11 +41,11 @@ public class TeamTable {
 	@JsonProperty("is_active")
 	private Boolean isActive;
 
-	public static final class Mapper implements RowMapper<TeamTable> {
+	public static final class Mapper implements RowMapper<TeamForTable> {
 
 		@Override
-		public TeamTable mapRow(ResultSet rs, int rowNum) throws SQLException {
-			final TeamTable postModel = new TeamTable();
+		public TeamForTable mapRow(ResultSet rs, int rowNum) throws SQLException {
+			final TeamForTable postModel = new TeamForTable();
 			postModel.id = rs.getInt("id");
 			postModel.name = rs.getString("name");
 			postModel.leaderName = rs.getString("leader_name");

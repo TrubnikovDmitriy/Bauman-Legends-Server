@@ -3,13 +3,12 @@ package legends.contollers;
 import legends.dao.AuthDAO;
 import legends.dao.TeamDAO;
 import legends.requestviews.FullTeam;
-import legends.responseviews.TeamTable;
+import legends.responseviews.Table;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.NotNull;
-import java.util.List;
 
 
 @RestController
@@ -35,8 +34,11 @@ public class ModeratorController {
 	}
 
 	@GetMapping("/team")
-	public ResponseEntity<List<TeamTable>> getTeams(
+	public ResponseEntity<Table> getTeams(
 			@RequestParam(name = "full", defaultValue = "false") Boolean flag) {
-		return new ResponseEntity<>(teamDAO.getTeams(flag), HttpStatus.OK);
+		return new ResponseEntity<>(
+				new Table(teamDAO.getTeams(flag)),
+				HttpStatus.OK
+		);
 	}
 }
