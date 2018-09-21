@@ -6,14 +6,14 @@ import legends.models.TeamType;
 public class TeamInfo {
 
 	@JsonProperty private String teamName;
-	@JsonProperty private Integer teamNumber;
+	@JsonProperty private Integer teamID;
 	@JsonProperty private TeamType teamType;
 
 	public TeamInfo() { }
 
-	public TeamInfo(String teamName, Integer teamNumber, TeamType teamType) {
+	public TeamInfo(String teamName, Integer teamID, TeamType teamType) {
 		this.teamName = teamName;
-		this.teamNumber = teamNumber;
+		this.teamID = teamID;
 		this.teamType = teamType;
 	}
 
@@ -25,12 +25,12 @@ public class TeamInfo {
 		this.teamName = teamName;
 	}
 
-	public Integer getTeamNumber() {
-		return teamNumber;
+	public Integer getTeamID() {
+		return teamID;
 	}
 
-	public void setTeamNumber(Integer teamNumber) {
-		this.teamNumber = teamNumber;
+	public void setTeamID(Integer teamID) {
+		this.teamID = teamID;
 	}
 
 	public TeamType getTeamType() {

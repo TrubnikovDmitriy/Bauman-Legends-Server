@@ -60,14 +60,13 @@ public class AuthDAO {
 
 		// Inserting all members of team
 		jdbcTemplate.batchUpdate(
-				"INSERT INTO players(first_name, second_name, phone, team_id) VALUES (?, ?, ?, ?)",
+				"INSERT INTO players(first_name, second_name, team_id) VALUES (?, ?, ?)",
 				new BatchPreparedStatementSetter() {
 					@Override
 					public void setValues(PreparedStatement ps, int rowNumber)
 							throws SQLException {
 						ps.setString(1, members.get(rowNumber).getFirstName());
 						ps.setString(2, members.get(rowNumber).getSecondName());
-						ps.setString(3, members.get(rowNumber).getPhone());
 						ps.setInt(4, teamID);
 					}
 

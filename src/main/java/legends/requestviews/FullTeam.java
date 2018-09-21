@@ -13,7 +13,7 @@ public class FullTeam {
 	public FullTeam() { }
 
 	public boolean isValid() {
-		if (leader == null || !leader.isValid() || leader.getPhone() == null) {
+		if (leader == null || !leader.isValid()) {
 			return false;
 		}
 		for (final Player member : members) {

@@ -4,9 +4,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Player {
 
-	@JsonProperty private String firstName;
-	@JsonProperty private String secondName;
-	@JsonProperty private String phone;
+	@JsonProperty("first_name") private String firstName;
+	@JsonProperty("second_name") private String secondName;
 
 	public Player() { }
 
@@ -29,13 +28,5 @@ public class Player {
 
 	public void setSecondName(String secondName) {
 		this.secondName = secondName;
-	}
-
-	public String getPhone() {
-		return phone;
-	}
-
-	public void setPhone(String phone) {
-		this.phone = phone;
 	}
 }
