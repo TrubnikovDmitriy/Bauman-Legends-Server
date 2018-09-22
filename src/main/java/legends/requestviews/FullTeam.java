@@ -1,6 +1,10 @@
 package legends.requestviews;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
+import jdk.nashorn.internal.objects.annotations.Setter;
 
 import java.util.List;
 

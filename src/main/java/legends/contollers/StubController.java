@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping(path = "/test")
-public class PublicController {
+public class StubController {
 
 	@GetMapping(path = "/get")
 	public String simpleGet() {

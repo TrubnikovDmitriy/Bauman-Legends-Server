@@ -33,8 +33,9 @@ public class TeamInfo {
 	@JsonProperty
 	private String password;
 
-	public void eraseLoginPass() {
+	public TeamInfo eraseLoginPass() {
 		login = password = null;
+		return this;
 	}
 
 	public static final class Mapper implements RowMapper<TeamInfo> {

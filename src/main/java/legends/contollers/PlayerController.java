@@ -1,6 +1,8 @@
 package legends.contollers;
 
 import legends.dao.TeamDAO;
+import legends.exceptions.LegendException;
+import legends.responseviews.ErrorMessage;
 import legends.responseviews.Table;
 import legends.responseviews.TeamInfo;
 import org.springframework.http.HttpStatus;
@@ -21,8 +23,7 @@ public class PlayerController {
 	}
 
 	@GetMapping("/team")
-	public ResponseEntity<Table> getTeams(
-			@RequestParam(name = "full", defaultValue = "false") Boolean flag) {
+	public ResponseEntity<Table> getTeams(@RequestParam(name = "full", defaultValue = "false") Boolean flag) {
 		return new ResponseEntity<>(
 				new Table(teamDAO.getTeams(flag)),
 				HttpStatus.OK
@@ -31,9 +32,15 @@ public class PlayerController {
 
 	@GetMapping("/team/{teamID}")
 	public ResponseEntity getTeams(@PathVariable Integer teamID) {
-//		try {
-			final TeamInfo teamInfo = teamDAO.getTeamForPlayer(teamID);
-//		} catch ()
+		final TeamInfo teamInfo = teamDAO.getTeamForPlayer(teamID);
 		return new ResponseEntity<>(teamInfo, HttpStatus.OK);
+	}
+
+	@ExceptionHandler(LegendException.class)
+	public ResponseEntity<ErrorMessage> excpetionHandler(LegendException exception) {
+		return new ResponseEntity<>(
+				new ErrorMessage(exception.getErrorMessage()),
+				exception.getStatus()
+		);
 	}
 }

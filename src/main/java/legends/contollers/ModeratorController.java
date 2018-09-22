@@ -2,7 +2,9 @@ package legends.contollers;
 
 import legends.dao.AuthDAO;
 import legends.dao.TeamDAO;
+import legends.exceptions.LegendException;
 import legends.requestviews.FullTeam;
+import legends.responseviews.ErrorMessage;
 import legends.responseviews.Table;
 import legends.responseviews.TeamInfo;
 import org.springframework.http.HttpStatus;
@@ -45,9 +47,15 @@ public class ModeratorController {
 
 	@GetMapping("/team/{teamID}")
 	public ResponseEntity getTeams(@PathVariable Integer teamID) {
-//		try {
-			final TeamInfo teamInfo = teamDAO.getTeamForModerator(teamID);
-//		} catch ()
+		final TeamInfo teamInfo = teamDAO.getTeamForModerator(teamID);
 		return new ResponseEntity<>(teamInfo, HttpStatus.OK);
+	}
+
+	@ExceptionHandler(LegendException.class)
+	public ResponseEntity<ErrorMessage> excpetionHandler(LegendException exception) {
+		return new ResponseEntity<>(
+				new ErrorMessage(exception.getErrorMessage()),
+				exception.getStatus()
+		);
 	}
 }
