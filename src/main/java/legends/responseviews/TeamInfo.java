@@ -1,13 +1,10 @@
 package legends.responseviews;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import legends.models.TeamForTable;
 import org.springframework.jdbc.core.RowMapper;
 
-import java.sql.Array;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Arrays;
 import java.util.List;
 
 public class TeamInfo {
