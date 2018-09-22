@@ -1,6 +1,7 @@
 package legends.dao;
 
 import legends.models.TeamForTable;
+import legends.responseviews.TeamInfo;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -33,4 +34,26 @@ public class TeamDAO {
 			);
 		}
 	}
+
+	public TeamInfo getTeamForModerator(final Integer teamID) {
+		final List<String> members = jdbcTemplate.query(
+				"SELECT first_name, second_name FROM players WHERE team_id=?",
+				new Object[] { teamID },
+				(rs, n) -> rs.getString(1) + ' ' + rs.getString(2)
+		);
+		return jdbcTemplate.queryForObject(
+				"SELECT t.id id, name, leader_name, score, start_time, " +
+						"a.login login, a.pass pass FROM teams AS t " +
+						"JOIN auth AS a ON t.id = a.team_id WHERE t.id=?",
+				new Object[]{teamID},
+				new TeamInfo.Mapper(members)
+		);
+	}
+
+	public TeamInfo getTeamForPlayer(final Integer teamID) {
+		final TeamInfo team = getTeamForModerator(teamID);
+		team.eraseLoginPass();
+		return team;
+	}
+
 }
