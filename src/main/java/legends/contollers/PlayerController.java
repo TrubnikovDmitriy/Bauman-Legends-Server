@@ -1,8 +1,12 @@
 package legends.contollers;
 
+import legends.Configuration;
+import legends.dao.FinalStageDAO;
+import legends.dao.PilotStageDAO;
 import legends.dao.TeamDAO;
 import legends.exceptions.LegendException;
 import legends.requestviews.Answer;
+import legends.requestviews.Team;
 import legends.responseviews.ErrorMessage;
 import legends.responseviews.Table;
 import legends.responseviews.TeamInfo;
@@ -17,9 +21,15 @@ import javax.validation.constraints.NotNull;
 @RequestMapping(path = "/player")
 public class PlayerController {
 
+	private final @NotNull FinalStageDAO finalStageDAO;
+	private final @NotNull PilotStageDAO pilotStageDAO;
 	private final @NotNull TeamDAO teamDAO;
 
-	public PlayerController(@NotNull TeamDAO teamDAO) {
+	public PlayerController(@NotNull FinalStageDAO finalStageDAO,
+	                        @NotNull PilotStageDAO pilotStageDAO,
+	                        @NotNull TeamDAO teamDAO) {
+		this.finalStageDAO = finalStageDAO;
+		this.pilotStageDAO = pilotStageDAO;
 		this.teamDAO = teamDAO;
 	}
 
@@ -37,7 +47,28 @@ public class PlayerController {
 		return new ResponseEntity<>(teamInfo, HttpStatus.OK);
 	}
 
-	@PostMapping("/pilot")
+	@GetMapping("/task")
+	public ResponseEntity getCurrentTask(@RequestBody Team team) {
+
+		if (Configuration.finalStage) {
+			return new ResponseEntity<>(
+					finalStageDAO.getCurrentTask(team.ID),
+					HttpStatus.OK
+			);
+
+		} else if (Configuration.pilotStage) {
+			return new ResponseEntity<>(
+					pilotStageDAO.getCurrentTask(team.ID),
+					HttpStatus.OK
+			);
+
+		} else {
+			// TODO: Если команда получила логин-пароль до того, как я запустил разогрев.
+			return null;
+		}
+	}
+
+	@PostMapping("/task")
 	public ResponseEntity answerToPilotStage(@RequestBody Answer answer) {
 		return null;
 	}
