@@ -8,6 +8,8 @@ public abstract class LegendException extends RuntimeException {
 	@NonNull protected String errorMessage;
 	@NonNull protected HttpStatus status;
 
+	public LegendException() { }
+
 	public LegendException(Throwable throwable) {
 		super(throwable);
 	}

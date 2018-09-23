@@ -46,10 +46,11 @@ public class ModeratorController {
 	}
 
 	@GetMapping("/team/{teamID}")
-	public ResponseEntity getTeams(@PathVariable Integer teamID) {
+	public ResponseEntity<TeamInfo> getTeams(@PathVariable Integer teamID) {
 		final TeamInfo teamInfo = teamDAO.getTeamForModerator(teamID);
 		return new ResponseEntity<>(teamInfo, HttpStatus.OK);
 	}
+
 
 	@ExceptionHandler(LegendException.class)
 	public ResponseEntity<ErrorMessage> excpetionHandler(LegendException exception) {

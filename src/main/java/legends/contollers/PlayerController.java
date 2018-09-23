@@ -2,6 +2,7 @@ package legends.contollers;
 
 import legends.dao.TeamDAO;
 import legends.exceptions.LegendException;
+import legends.requestviews.Answer;
 import legends.responseviews.ErrorMessage;
 import legends.responseviews.Table;
 import legends.responseviews.TeamInfo;
@@ -35,6 +36,12 @@ public class PlayerController {
 		final TeamInfo teamInfo = teamDAO.getTeamForPlayer(teamID);
 		return new ResponseEntity<>(teamInfo, HttpStatus.OK);
 	}
+
+	@PostMapping("/pilot")
+	public ResponseEntity answerToPilotStage(@RequestBody Answer answer) {
+		return null;
+	}
+
 
 	@ExceptionHandler(LegendException.class)
 	public ResponseEntity<ErrorMessage> excpetionHandler(LegendException exception) {
