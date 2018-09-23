@@ -1,6 +1,7 @@
 package legends.models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import legends.Configuration;
 import org.springframework.jdbc.core.RowMapper;
 
 import java.sql.Array;
@@ -48,33 +49,21 @@ public class TeamForTable {
 			final TeamForTable postModel = new TeamForTable();
 			postModel.id = rs.getInt("id");
 			postModel.name = rs.getString("name");
+			postModel.score = rs.getInt("score");
 			postModel.leaderName = rs.getString("leader_name");
 			postModel.startTime = rs.getInt("start_time");
 			postModel.finishTime = rs.getInt("finish_time");
 			postModel.failsCount = rs.getInt("fails_count");
-			postModel.score = rs.getInt("score");
+			postModel.isActive = rs.getBoolean("started") && !rs.getBoolean("finished");
 
 			// Calculate the progress
-			final Integer currentFinalTask = rs.getInt("current_final_task_id");
-			final Integer currentBeginTask = rs.getInt("current_begin_task_id");
-			postModel.isActive = (currentFinalTask != 0);
-
-			final Array arraySQL = rs.getArray("final_tasks_arr");
-			if (arraySQL != null) {
+			if (Configuration.finalStage) {
+				final Array arraySQL = rs.getArray("final_tasks_arr");
 				final List<Integer> finalTasksArr = Arrays.asList(
 						(Integer[]) arraySQL.getArray());
 
-				final int index;
-				if (currentFinalTask == 0 && currentBeginTask == 0) {
-					// Already over
-					index = finalTasksArr.size() - 1;
-				} else {
-					// Not yet started {-1} or During in process [0;size)
-					index = finalTasksArr.indexOf(currentFinalTask);
-				}
-
 				postModel.totalNumberOfTask = finalTasksArr.size();
-				postModel.numberOfTask = index + 1; // [0;...) -> [1;...)
+				postModel.numberOfTask = rs.getInt("task_count");
 
 			} else {
 				postModel.totalNumberOfTask = 0;

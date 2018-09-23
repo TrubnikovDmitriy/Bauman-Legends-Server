@@ -21,17 +21,16 @@ public class TeamDAO {
 	public List<TeamForTable> getTeams(final boolean fullList) {
 		if (fullList) {
 			return jdbcTemplate.query(
-					"SELECT id, name, score, leader_name, " +
-							"current_final_task_id, current_begin_task_id, final_tasks_arr, " +
-							"start_time, finish_time, fails_count FROM teams",
+					"SELECT id, name, score, leader_name, final_tasks_arr, start_time, finish_time, fails_count, finished, started, " +
+							"(SELECT COUNT(ct.id) FROM current_tasks AS ct WHERE ct.type='FINAL') AS task_count " +
+							"FROM teams",
 					new TeamForTable.Mapper()
 			);
 		} else {
 			return jdbcTemplate.query(
-					"SELECT id, name, score, leader_name, current_final_task_id, " +
-							"current_begin_task_id, final_tasks_arr, " +
-							"start_time, finish_time, fails_count " +
-							"FROM teams WHERE current_begin_task_id IS NOT NULL",
+					"SELECT id, name, score, leader_name, final_tasks_arr, start_time, finish_time, fails_count, finished, started, " +
+							"(SELECT COUNT(ct.id) FROM current_tasks AS ct WHERE ct.type='FINAL') AS task_count " +
+							"FROM teams WHERE started=TRUE AND finished=FALSE",
 					new TeamForTable.Mapper()
 			);
 		}
@@ -51,7 +50,7 @@ public class TeamDAO {
 					new Object[]{teamID},
 					new TeamInfo.Mapper(members)
 			);
-			
+
 		} catch (EmptyResultDataAccessException e) {
 			throw new TeamDoesNotExist(e, teamID);
 		}
