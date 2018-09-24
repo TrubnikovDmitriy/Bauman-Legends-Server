@@ -63,7 +63,7 @@ public class PlayerController {
 
 		} else {
 			// TODO: Если команда получила логин-пароль до того, как я запустил разогрев.
-			return null;
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
 	}
 

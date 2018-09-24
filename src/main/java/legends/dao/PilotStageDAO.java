@@ -1,6 +1,7 @@
 package legends.dao;
 
 import legends.exceptions.PhotoKeyDoesNotExist;
+import legends.models.TaskType;
 import legends.responseviews.PilotTask;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -20,9 +21,10 @@ public class PilotStageDAO {
 	public PilotTask getCurrentTask(final Integer teamID) {
 		try {
 			return jdbcTemplate.queryForObject(
-					"SELECT task_id, start_time, points, type " +
-							"FROM current_tasks WHERE team_id=? AND success IS NULL",
-					new Object[] { teamID },
+					"SELECT task_id, start_time, points, ts.type " +
+							"FROM current_tasks JOIN tasks ts ON task_id=ts.id " +
+							"WHERE team_id=? AND success IS NULL AND ts.type<>?",
+					new Object[] { teamID, TaskType.FINAL.name() },
 					new PilotTask.Mapper()
 			);
 		} catch (EmptyResultDataAccessException e) {
@@ -36,9 +38,10 @@ public class PilotStageDAO {
 	public String getPhotoKey(final Integer teamID) {
 		try {
 			return jdbcTemplate.queryForObject(
-					"SELECT answers FROM current_tasks " +
-							"WHERE team_id=? AND success IS NULL AND type='PILOT'",
-					new Object[]{teamID},
+					"SELECT ts.answers FROM current_tasks ct " +
+							"JOIN tasks ts ON task_id=ts.id " +
+							"WHERE team_id=? AND success IS NULL AND ct.type=?",
+					new Object[] { teamID, TaskType.PHOTO.name() },
 					String.class
 			);
 

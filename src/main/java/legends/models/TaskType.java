@@ -1,7 +1,7 @@
 package legends.models;
 
 public enum TaskType {
-	PILOT,
+	PHOTO,
 	EXTRA,
 	FINAL
 }

@@ -6,6 +6,7 @@ import legends.dao.TeamDAO;
 import legends.exceptions.LegendException;
 import legends.requestviews.FullTeam;
 import legends.responseviews.ErrorMessage;
+import legends.responseviews.PhotoKey;
 import legends.responseviews.Table;
 import legends.responseviews.TeamInfo;
 import org.springframework.http.HttpStatus;
@@ -56,11 +57,9 @@ public class ModeratorController {
 	}
 
 	@GetMapping("/photo/{teamID}")
-	public ResponseEntity<String> getPhotoKey(@PathVariable Integer teamID) {
-		return new ResponseEntity<>(
-				pilotStageDAO.getPhotoKey(teamID),
-				HttpStatus.OK
-		);
+	public ResponseEntity<PhotoKey> getPhotoKey(@PathVariable Integer teamID) {
+		final String key = pilotStageDAO.getPhotoKey(teamID);
+		return new ResponseEntity<>(new PhotoKey(key), HttpStatus.OK);
 	}
 
 

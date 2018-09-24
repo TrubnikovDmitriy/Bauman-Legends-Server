@@ -1,5 +1,6 @@
 package legends.dao;
 
+import legends.models.TaskType;
 import legends.responseviews.FinalTask;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -18,9 +19,10 @@ public class FinalStageDAO {
 	public FinalTask getCurrentTask(final Integer teamID) {
 		try {
 			return jdbcTemplate.queryForObject(
-					"SELECT task_id, type, start_time, points, duration " +
-							"FROM current_tasks WHERE team_id=? AND success IS NULL",
-					new Object[] { teamID },
+					"SELECT task_id, ct.type, start_time, points, duration " +
+							"FROM current_tasks ct JOIN tasks ts ON task_id=ts.id " +
+							"WHERE team_id=? AND success IS NULL AND ts.type=?",
+					new Object[] { teamID, TaskType.FINAL.name() },
 					new FinalTask.Mapper()
 			);
 		} catch (EmptyResultDataAccessException e) {
