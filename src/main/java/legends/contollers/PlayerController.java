@@ -6,7 +6,6 @@ import legends.dao.PilotStageDAO;
 import legends.dao.TeamDAO;
 import legends.exceptions.LegendException;
 import legends.requestviews.Answer;
-import legends.requestviews.Team;
 import legends.responseviews.ErrorMessage;
 import legends.responseviews.Table;
 import legends.responseviews.TeamInfo;
@@ -47,18 +46,18 @@ public class PlayerController {
 		return new ResponseEntity<>(teamInfo, HttpStatus.OK);
 	}
 
-	@GetMapping("/task")
-	public ResponseEntity getCurrentTask(@RequestBody Team team) {
+	@GetMapping("/task/{teamID}")
+	public ResponseEntity getCurrentTask(@PathVariable Integer teamID) {
 
 		if (Configuration.finalStage) {
 			return new ResponseEntity<>(
-					finalStageDAO.getCurrentTask(team.ID),
+					finalStageDAO.getCurrentTask(teamID),
 					HttpStatus.OK
 			);
 
 		} else if (Configuration.pilotStage) {
 			return new ResponseEntity<>(
-					pilotStageDAO.getCurrentTask(team.ID),
+					pilotStageDAO.getCurrentTask(teamID),
 					HttpStatus.OK
 			);
 
