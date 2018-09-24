@@ -21,7 +21,7 @@ public class PilotStageDAO {
 	public PilotTask getCurrentTask(final Integer teamID) {
 		try {
 			return jdbcTemplate.queryForObject(
-					"SELECT task_id, start_time, points, ts.type " +
+					"SELECT task_id, points, ts.type " +
 							"FROM current_tasks JOIN tasks ts ON task_id=ts.id " +
 							"WHERE team_id=? AND success IS NULL AND ts.type<>?",
 					new Object[] { teamID, TaskType.FINAL.name() },

@@ -1,7 +1,8 @@
 package legends.models;
 
 public enum TeamType {
-	PLAYER,
+	ADMIN,
 	MODERATOR,
-	ADMIN
+	PLAYER
 }
+// TODO replace INT in database on TEXT for TeamType

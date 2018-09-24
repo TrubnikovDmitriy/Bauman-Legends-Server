@@ -1,6 +1,5 @@
 package legends.dao;
 
-import com.fasterxml.jackson.annotation.ObjectIdGenerators.UUIDGenerator;
 import legends.models.TeamType;
 import legends.requestviews.FullTeam;
 import legends.requestviews.Player;
@@ -14,8 +13,11 @@ import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
+import java.sql.Array;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,10 +25,12 @@ import java.util.Map;
 @Repository
 public class AuthDAO {
 
-	private final JdbcTemplate jdbcTemplate;
-	private final SimpleJdbcInsert jdbcInsert;
+	@NonNull private final DataSource dataSource;
+	@NonNull private final JdbcTemplate jdbcTemplate;
+	@NonNull private final SimpleJdbcInsert jdbcInsert;
 
-	public AuthDAO(DataSource dataSource) {
+	public AuthDAO(@NonNull DataSource dataSource) {
+		this.dataSource = dataSource;
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
 		this.jdbcInsert = new SimpleJdbcInsert(dataSource)
 				.withTableName("teams")
@@ -45,7 +49,7 @@ public class AuthDAO {
 					(rs, i) -> new TeamAuth(
 							rs.getString("team_name"),
 							rs.getInt("team_id"),
-							TeamType.values()[rs.getInt("team_type")]
+							TeamType.valueOf(rs.getString("team_type"))
 					)
 			);
 		} catch (EmptyResultDataAccessException e) {
@@ -64,6 +68,10 @@ public class AuthDAO {
 		parameters.put("name", team.getName());
 		parameters.put("leader_name", leader.getFirstName() + ' ' + leader.getSecondName());
 		parameters.put("score", 0);
+		final Array emptyArray = getEmptySQLArray();
+		parameters.put("final_tasks_arr", emptyArray);
+		parameters.put("pilot_tasks_arr", emptyArray);
+
 		final int teamID = jdbcInsert.executeAndReturnKey(parameters).intValue();
 
 
@@ -88,8 +96,16 @@ public class AuthDAO {
 
 		// Creating account for team
 		jdbcTemplate.update(
-				"INSERT INTO auth(team_id, pass, login) VALUES(?, DEFAULT, ?)",
+				"INSERT INTO auth(team_id, login, pass, type) VALUES(?, ?, DEFAULT, DEFAULT)",
 				teamID, team.getName() + '-' + teamID
 		);
+	}
+
+	private Array getEmptySQLArray() {
+		try(final Connection connection = dataSource.getConnection()) {
+			return connection.createArrayOf("integer", Collections.EMPTY_LIST.toArray());
+		} catch (SQLException e) {
+			throw new RuntimeException(e);
+		}
 	}
 }

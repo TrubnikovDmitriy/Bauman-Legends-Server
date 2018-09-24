@@ -15,9 +15,6 @@ public class PilotTask {
 	@JsonProperty("task_type")
 	private TaskType type;
 
-	@JsonProperty("start_time")
-	private Integer startTime;
-
 	@JsonProperty("points")
 	private Integer points;
 
@@ -29,7 +26,6 @@ public class PilotTask {
 			final PilotTask task = new PilotTask();
 
 			task.id = rs.getInt("task_id");
-			task.startTime = rs.getInt("start_time");
 			task.points = rs.getInt("points");
 			task.type = TaskType.valueOf(rs.getString("type"));
 
