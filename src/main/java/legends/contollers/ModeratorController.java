@@ -1,6 +1,7 @@
 package legends.contollers;
 
 import legends.dao.AuthDAO;
+import legends.dao.PilotStageDAO;
 import legends.dao.TeamDAO;
 import legends.exceptions.LegendException;
 import legends.requestviews.FullTeam;
@@ -20,11 +21,14 @@ public class ModeratorController {
 
 	private final @NotNull AuthDAO authDAO;
 	private final @NotNull TeamDAO teamDAO;
+	private final @NotNull PilotStageDAO pilotStageDAO;
 
 	public ModeratorController(@NotNull AuthDAO authDAO,
-	                           @NotNull TeamDAO teamDAO) {
+	                           @NotNull TeamDAO teamDAO,
+	                           @NotNull PilotStageDAO pilotStageDAO) {
 		this.authDAO = authDAO;
 		this.teamDAO = teamDAO;
+		this.pilotStageDAO = pilotStageDAO;
 	}
 
 	@PostMapping("/team")
@@ -46,9 +50,17 @@ public class ModeratorController {
 	}
 
 	@GetMapping("/team/{teamID}")
-	public ResponseEntity<TeamInfo> getTeams(@PathVariable Integer teamID) {
+	public ResponseEntity<TeamInfo> getTeam(@PathVariable Integer teamID) {
 		final TeamInfo teamInfo = teamDAO.getTeamForModerator(teamID);
 		return new ResponseEntity<>(teamInfo, HttpStatus.OK);
+	}
+
+	@GetMapping("/photo/{teamID}")
+	public ResponseEntity<String> getPhotoKey(@PathVariable Integer teamID) {
+		return new ResponseEntity<>(
+				pilotStageDAO.getPhotoKey(teamID),
+				HttpStatus.OK
+		);
 	}
 
 
