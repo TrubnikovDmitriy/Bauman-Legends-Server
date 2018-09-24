@@ -87,16 +87,9 @@ public class AuthDAO {
 		);
 
 		// Creating account for team
-		final String password = generatePassword(team);
 		jdbcTemplate.update(
-				"INSERT INTO auth(team_id, pass, login) VALUES(?, ?, ?)",
-				teamID, password, team.getName() + '-' + teamID
+				"INSERT INTO auth(team_id, pass, login) VALUES(?, DEFAULT, ?)",
+				teamID, team.getName() + '-' + teamID
 		);
-	}
-
-
-	private static UUIDGenerator passwordGenerator = new UUIDGenerator();
-	private static String generatePassword(Object seed) {
-		return passwordGenerator.generateId(seed).toString().split("-")[0];
 	}
 }

@@ -2,8 +2,8 @@ package legends;
 
 public class Configuration {
 
-	public static boolean pilotStage = false;
-	public static boolean finalStage = false;
+	public static volatile boolean pilotStage = false;
+	public static volatile boolean finalStage = false;
 
 	static final Character SEPARATOR = ';';
 }
