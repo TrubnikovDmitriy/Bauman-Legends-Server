@@ -18,7 +18,7 @@ public class AuthController {
 
 	private final @NotNull AuthDAO authDAO;
 
-	public AuthController(AuthDAO authDAO) {
+	public AuthController(@NotNull AuthDAO authDAO) {
 		this.authDAO = authDAO;
 	}
 

@@ -18,7 +18,10 @@ public class StageController {
 				"<h2>Запустить финальный этап: GET /controlpanel/startfinal/{key}</h2>" +
 				"<br/>" +
 				"<h3>Отключить разогревочный этап: GET /controlpanel/stoppilot/{key}</h3>" +
-				"<h3>Запустить финальный этап: GET /controlpanel/stopfinal/{key}</h3>";
+				"<h3>Запустить финальный этап: GET /controlpanel/stopfinal/{key}</h3>" +
+				"<br/>" +
+				"<h4>Разогрев: " + Configuration.pilotStage + "</h4>" +
+				"<h4>Финал: " + Configuration.finalStage + "</h4>";
 	}
 
 	@GetMapping("/startpilot/{legendKey}")

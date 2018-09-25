@@ -68,6 +68,9 @@ public class AuthDAO {
 		parameters.put("name", team.getName());
 		parameters.put("leader_name", leader.getFirstName() + ' ' + leader.getSecondName());
 		parameters.put("score", 0);
+		parameters.put("fails_count", 0);
+		parameters.put("started", false);
+		parameters.put("finished", false);
 		final Array emptyArray = getEmptySQLArray();
 		parameters.put("final_tasks_arr", emptyArray);
 		parameters.put("pilot_tasks_arr", emptyArray);
