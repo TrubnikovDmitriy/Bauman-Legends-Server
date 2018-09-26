@@ -19,7 +19,7 @@ public class Router {
 	private String teamName;
 
 	@JsonProperty("players_count")
-	private Integer playerCount;
+	private Integer playersCount;
 
 	@JsonProperty("tasks_list_ids")
 	private List<Integer> tasksIDs;
@@ -47,9 +47,10 @@ public class Router {
 			final Router router = new Router();
 			router.teamID = rs.getInt("id");
 			router.teamName = rs.getString("name");
-			router.playerCount = rs.getInt("players_count");
+			router.playersCount = rs.getInt("players_count");
 			router.failsCount = rs.getInt("fails_count");
 			router.startTime = rs.getInt("start_time");
+			if (rs.wasNull()) router.startTime = null;
 			router.tasksIDs = Arrays.asList(
 					(Integer[]) rs.getArray("final_tasks_arr").getArray());
 			router.tasks = map.getOrDefault(router.teamID, Collections.emptyList());

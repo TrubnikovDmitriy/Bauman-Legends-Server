@@ -31,8 +31,11 @@ public class Trail {
 			final Trail trail = new Trail();
 			trail.taskID = rs.getInt("task_id");
 			trail.success = rs.getBoolean("success");
+			if (rs.wasNull()) trail.success = null;
 			trail.startTime = rs.getInt("start_time");
+			if (rs.wasNull()) trail.startTime = null;
 			trail.finishTime = rs.getInt("finish_time");
+			if (rs.wasNull()) trail.finishTime = null;
 			return trail;
 		}
 	}
