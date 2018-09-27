@@ -63,6 +63,14 @@ public class ModeratorController {
 		return new ResponseEntity<>(new PhotoKey(key), HttpStatus.OK);
 	}
 
+	@GetMapping("/prepare/{teamID}")
+	public ResponseEntity prepareTeam(@PathVariable Integer teamID) {
+		return new ResponseEntity<>(
+				pilotStageDAO.prepateTeam(teamID),
+				HttpStatus.OK
+		);
+	}
+
 	@GetMapping("/start/{teamID}")
 	public ResponseEntity startTeam(@PathVariable Integer teamID) {
 
