@@ -1,9 +1,9 @@
 package legends.dao;
 
 import legends.exceptions.TeamDoesNotExist;
+import legends.models.Router;
 import legends.models.TeamForTable;
 import legends.models.Trail;
-import legends.models.Router;
 import legends.responseviews.TeamInfo;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;

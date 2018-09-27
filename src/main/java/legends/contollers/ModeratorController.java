@@ -1,5 +1,6 @@
 package legends.contollers;
 
+import legends.Configuration;
 import legends.dao.AuthDAO;
 import legends.dao.PilotStageDAO;
 import legends.dao.TeamDAO;
@@ -60,6 +61,21 @@ public class ModeratorController {
 	public ResponseEntity<PhotoKey> getPhotoKey(@PathVariable Integer teamID) {
 		final String key = pilotStageDAO.getPhotoKey(teamID);
 		return new ResponseEntity<>(new PhotoKey(key), HttpStatus.OK);
+	}
+
+	@GetMapping("/start/{teamID}")
+	public ResponseEntity startTeam(@PathVariable Integer teamID) {
+
+		if (!Configuration.finalStage) {
+			return new ResponseEntity<>(
+					new ErrorMessage("Финальный этап еще не начинался. " +
+							"Если же вы уверены, что сейчас 12 октября, " +
+							"срочно напишите Трубникову 'vk.com/trubnikovdv'."),
+					HttpStatus.BAD_REQUEST
+			);
+		}
+		pilotStageDAO.startTeam(teamID);
+		return new ResponseEntity(HttpStatus.CREATED);
 	}
 
 
