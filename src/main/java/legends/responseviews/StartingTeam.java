@@ -26,7 +26,7 @@ public class StartingTeam {
 	@JsonProperty("players_count")
 	private Integer playersCount;
 
-	@JsonProperty("extra_tasl_count")
+	@JsonProperty("extra_task_count")
 	private Integer extraTaskCount;
 
 	@JsonProperty("photo_task_count")

@@ -58,7 +58,7 @@ public class PilotStageDAO {
 		}
 	}
 
-	public StartingTeam prepateTeam(final Integer teamID) {
+	public StartingTeam prepareTeam(final Integer teamID) {
 		return jdbcTemplate.queryForObject(
 				"SELECT id, name, start_time, started, finished, " +
 						"(SELECT COUNT(id) FROM players WHERE team_id=? GROUP BY team_id) AS players_count, " +

@@ -66,7 +66,7 @@ public class ModeratorController {
 	@GetMapping("/prepare/{teamID}")
 	public ResponseEntity prepareTeam(@PathVariable Integer teamID) {
 		return new ResponseEntity<>(
-				pilotStageDAO.prepateTeam(teamID),
+				pilotStageDAO.prepareTeam(teamID),
 				HttpStatus.OK
 		);
 	}
@@ -83,7 +83,22 @@ public class ModeratorController {
 			);
 		}
 		pilotStageDAO.startTeam(teamID);
-		return new ResponseEntity(HttpStatus.CREATED);
+		return new ResponseEntity(HttpStatus.ACCEPTED);
+	}
+
+	@GetMapping("/start/{teamID}")
+	public ResponseEntity stopTeam(@PathVariable Integer teamID) {
+
+		if (!Configuration.finalStage) {
+			return new ResponseEntity<>(
+					new ErrorMessage("Финальный этап еще не начинался. " +
+							"Если же вы уверены, что сейчас 12 октября, " +
+							"срочно напишите Трубникову 'vk.com/trubnikovdv'."),
+					HttpStatus.BAD_REQUEST
+			);
+		}
+		// TODO stop team
+		return new ResponseEntity(HttpStatus.ACCEPTED);
 	}
 
 
