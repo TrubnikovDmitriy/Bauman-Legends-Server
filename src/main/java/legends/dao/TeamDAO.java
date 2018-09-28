@@ -1,9 +1,11 @@
 package legends.dao;
 
+import legends.exceptions.TaskIsNotExist;
 import legends.exceptions.TeamDoesNotExist;
 import legends.models.Router;
 import legends.models.TeamForTable;
 import legends.models.Trail;
+import legends.requestviews.Answer;
 import legends.responseviews.TeamInfo;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -96,7 +98,6 @@ public class TeamDAO {
 					new Router.Mapper(map)
 			);
 		}
-//		return null;
 	}
 
 	private static class HashMapper implements RowMapper<Object> {
@@ -115,6 +116,24 @@ public class TeamDAO {
 			trails.add(mapper.mapRow(rs, i));
 			map.put(teamID, trails);
 			return null;
+		}
+	}
+
+	public void validateAnswer(final Answer answer) {
+		try {
+			jdbcTemplate.queryForObject(
+					"SELECT id FROM current_tasks WHERE " +
+							"team_id=? AND task_id=? AND type=? AND success IS NULL;",
+					new Object[] {
+							answer.getTeamID(),
+							answer.getTaskID(),
+							answer.getTaskType().name()
+					},
+					Integer.class
+			);
+
+		} catch (EmptyResultDataAccessException ignore) {
+			throw new TaskIsNotExist();
 		}
 	}
 }

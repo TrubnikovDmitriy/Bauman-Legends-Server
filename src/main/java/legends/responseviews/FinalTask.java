@@ -32,11 +32,6 @@ public class FinalTask {
 	@JsonIgnoreProperties
 	private Integer lastTaskID;
 
-	@JsonIgnore
-	public Boolean isAnswered() {
-		return isAnswered;
-	}
-
 	@JsonProperty("is_finished")
 	public Boolean isFinished() {
 		return id.equals(lastTaskID);

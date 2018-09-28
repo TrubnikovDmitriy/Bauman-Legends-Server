@@ -5,4 +5,3 @@ public enum TeamType {
 	MODERATOR,
 	PLAYER
 }
-// TODO replace INT in database on TEXT for TeamType

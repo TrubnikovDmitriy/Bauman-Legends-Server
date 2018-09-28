@@ -104,6 +104,14 @@ public class AuthDAO {
 		);
 	}
 
+	private void createPilotTasksArray() {
+		// TODO CREATE
+	}
+
+	private void createFinalTasksArray() {
+		// TODO DELETE
+	}
+
 	private Array getEmptySQLArray() {
 		try(final Connection connection = dataSource.getConnection()) {
 			return connection.createArrayOf("integer", Collections.EMPTY_LIST.toArray());

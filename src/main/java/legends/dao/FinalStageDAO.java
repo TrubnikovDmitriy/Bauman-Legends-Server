@@ -2,12 +2,14 @@ package legends.dao;
 
 import legends.Configuration;
 import legends.exceptions.CriticalInternalError;
+import legends.exceptions.TaskIsAlreadyAnswered;
 import legends.exceptions.TeamAlreadyStarted;
 import legends.models.TaskType;
 import legends.responseviews.FinalTask;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +26,7 @@ public class FinalStageDAO {
 		this.jdbcTemplate = jdbcTemplate;
 	}
 
+	@Nullable
 	public FinalTask getCurrentTask(final Integer teamID) {
 		try {
 			// Take the last task for team
@@ -121,6 +124,7 @@ public class FinalStageDAO {
 				"UPDATE teams tms SET score=score+(SELECT points FROM tasks tsk WHERE tsk.id=?) WHERE tms.id=?",
 				currentTaskID, teamID
 		);
+		// TODO check race condition
 	}
 
 	public synchronized boolean isAnswered(final Integer teamID,
@@ -136,12 +140,16 @@ public class FinalStageDAO {
 
 	private synchronized void insertNewCurrentTask(final Integer teamID,
 	                                               final Integer taskIndex) {
-		// Indexing in the database begins with ONE!
-		jdbcTemplate.update(
-				"INSERT INTO current_tasks(task_id, team_id, start_time, success, type, finish_time) " +
-						"VALUES ((SELECT t.final_tasks_arr[?] FROM teams t WHERE t.id=?), ?, ?, NULL, ?, NULL)",
-				taskIndex, teamID, teamID, Configuration.currentTimestamp(), TaskType.FINAL.name()
-		);
+		try {
+			// Indexing in the database begins with ONE!
+			jdbcTemplate.update(
+					"INSERT INTO current_tasks(task_id, team_id, start_time, success, type, finish_time) " +
+							"VALUES ((SELECT t.final_tasks_arr[?] FROM teams t WHERE t.id=?), ?, ?, NULL, ?, NULL)",
+					taskIndex, teamID, teamID, Configuration.currentTimestamp(), TaskType.FINAL.name()
+			);
+		} catch (DuplicateKeyException ignore) {
+			throw new TaskIsAlreadyAnswered();
+		}
 
 		// TODO scheduler
 	}

@@ -49,14 +49,7 @@ public class PlayerController {
 	public ResponseEntity getCurrentTask(@PathVariable Integer teamID) {
 
 		if (Configuration.finalStage) return getCurrentTaskFinal(teamID);
-		if (Configuration.pilotStage) {
-			// TODO like final
-			return new ResponseEntity<>(
-					pilotStageDAO.getCurrentTask(teamID),
-					HttpStatus.OK
-			);
-
-		}
+		if (Configuration.pilotStage) return getCurrentTaskPilot(teamID);
 
 		// Если команда получила логин-пароль до того, как я запустил разогрев.
 		return new ResponseEntity<>(
@@ -84,12 +77,19 @@ public class PlayerController {
 
 		return new ResponseEntity<>(currentTask, HttpStatus.OK);
 	}
+	private ResponseEntity getCurrentTaskPilot(final Integer teamID) {
+		return new ResponseEntity<>(
+				pilotStageDAO.getCurrentTask(teamID),
+				HttpStatus.OK
+		);
+	}
 
 	@PostMapping("/task")
 	public ResponseEntity checkAnswer(@RequestBody Answer answer) {
 
+		teamDAO.validateAnswer(answer);
 		if (Configuration.finalStage) return checkAnswerFinal(answer);
-		if (Configuration.pilotStage) return null;// TODO checkAnswerPilot for pilot
+		if (Configuration.pilotStage) return checkAnswerPilot(answer);
 
 		return new ResponseEntity<>(
 				new ErrorMessage("Ни один из этапов Легенд еще не запущен"),
@@ -110,18 +110,45 @@ public class PlayerController {
 		);
 
 		if (isCorrect) {
+			// Stop the timer and increase score
 			finalStageDAO.acceptCurrentTask(answer.getTeamID(), answer.getTaskID());
-			return new ResponseEntity<>(new Result(true), HttpStatus.ACCEPTED);
-		} else {
-			return new ResponseEntity<>(new Result(false), HttpStatus.ACCEPTED);
 		}
+
+		return new ResponseEntity<>(
+				new Result(isCorrect, TaskType.FINAL, null),
+				HttpStatus.ACCEPTED
+		);
+	}
+	private ResponseEntity checkAnswerPilot(final Answer answer) {
+		if (answer.getTaskType() == TaskType.FINAL) {
+			return new ResponseEntity<>(
+					new ErrorMessage("Финальный этап начнёт в пятницу 12 октября."),
+					HttpStatus.BAD_REQUEST
+			);
+		}
+
+		final Result result = pilotStageDAO.checkAnswer(
+				answer.getTaskID(),
+				answer.getAnswer(),
+				answer.getTaskType()
+		);
+
+		if (result.isCorrect()) {
+			pilotStageDAO.acceptCurrentAndTakeNextTasks(
+					answer.getTeamID(),
+					answer.getTaskID(),
+					true
+			);
+		}
+		return new ResponseEntity<>(result, HttpStatus.ACCEPTED);
 	}
 
 	@PostMapping("/next")
 	public ResponseEntity takeNextAnswer(@RequestBody Answer answer) {
 
+		teamDAO.validateAnswer(answer);
 		if (Configuration.finalStage) return takeNextAnswerFinal(answer);
-		if (Configuration.pilotStage) return null; // TODO pilot
+		if (Configuration.pilotStage) return takeNextAnswerExtra(answer);
 
 		return new ResponseEntity<>(
 				new ErrorMessage("Ни один из этапов Легенд еще не запущен"),
@@ -144,6 +171,22 @@ public class PlayerController {
 
 		finalStageDAO.takeNextTask(answer.getTeamID(), answer.getTaskID());
 		return getCurrentTaskFinal(answer.getTeamID());
+	}
+	private ResponseEntity takeNextAnswerExtra(final Answer answer) {
+
+		if (answer.getTaskType() != TaskType.EXTRA) {
+			return new ResponseEntity<>(
+					new ErrorMessage("Пропускать можно только дополнительные задания"),
+					HttpStatus.FORBIDDEN
+			);
+		}
+
+		pilotStageDAO.acceptCurrentAndTakeNextTasks(
+				answer.getTeamID(),
+				answer.getTaskID(),
+				false
+		);
+		return getCurrentTaskPilot(answer.getTeamID());
 	}
 
 
