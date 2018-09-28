@@ -115,7 +115,9 @@ public class PilotStageDAO {
 		}
 		final List<String> answersList = Arrays.asList(
 				correctAnswers.split(Configuration.SEPARATOR));
-		final boolean isCorrect = answersList.contains(playerAnswer.toLowerCase());
+
+		final boolean isCorrect = (playerAnswer != null) &&
+				answersList.contains(playerAnswer.toLowerCase());
 
 		String tooltip = null;
 		// Extra tasks should return tooltips
