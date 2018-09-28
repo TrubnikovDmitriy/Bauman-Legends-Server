@@ -2,6 +2,7 @@ package legends.contollers;
 
 import legends.Configuration;
 import legends.dao.AuthDAO;
+import legends.dao.FinalStageDAO;
 import legends.dao.PilotStageDAO;
 import legends.dao.TeamDAO;
 import legends.exceptions.LegendException;
@@ -24,13 +25,16 @@ public class ModeratorController {
 	private final @NotNull AuthDAO authDAO;
 	private final @NotNull TeamDAO teamDAO;
 	private final @NotNull PilotStageDAO pilotStageDAO;
+	private final @NotNull FinalStageDAO finalStageDAO;
 
 	public ModeratorController(@NotNull AuthDAO authDAO,
 	                           @NotNull TeamDAO teamDAO,
-	                           @NotNull PilotStageDAO pilotStageDAO) {
+	                           @NotNull PilotStageDAO pilotStageDAO,
+	                           @NotNull FinalStageDAO finalStageDAO) {
 		this.authDAO = authDAO;
 		this.teamDAO = teamDAO;
 		this.pilotStageDAO = pilotStageDAO;
+		this.finalStageDAO = finalStageDAO;
 	}
 
 	@PostMapping("/team")
@@ -82,11 +86,11 @@ public class ModeratorController {
 					HttpStatus.BAD_REQUEST
 			);
 		}
-		pilotStageDAO.startTeam(teamID);
+		finalStageDAO.startTeam(teamID);
 		return new ResponseEntity(HttpStatus.ACCEPTED);
 	}
 
-	@GetMapping("/start/{teamID}")
+	@GetMapping("/stop/{teamID}")
 	public ResponseEntity stopTeam(@PathVariable Integer teamID) {
 
 		if (!Configuration.finalStage) {
@@ -97,7 +101,7 @@ public class ModeratorController {
 					HttpStatus.BAD_REQUEST
 			);
 		}
-		// TODO stop team
+		// TODO stop single team
 		return new ResponseEntity(HttpStatus.ACCEPTED);
 	}
 

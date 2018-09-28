@@ -1,14 +1,23 @@
 package legends.contollers;
 
 import legends.Configuration;
+import legends.dao.PilotStageDAO;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.constraints.NotNull;
+
 @RestController
 @RequestMapping(path = "/controlpanel")
 public class StageController {
+
+	private final @NotNull PilotStageDAO pilotStageDAO;
+
+	public StageController(@NotNull PilotStageDAO pilotStageDAO) {
+		this.pilotStageDAO = pilotStageDAO;
+	}
 
 	@GetMapping
 	public String simpleGet() {
@@ -44,6 +53,7 @@ public class StageController {
 	public String stoptPilot(@PathVariable String legendKey) {
 		final String secretKey = System.getenv("LEGEND_KEY");
 		if (!secretKey.equals(legendKey)) return "<h2>Неверный ключ</h2>";
+		pilotStageDAO.stopPilotStage();
 		Configuration.pilotStage = false;
 		return "<h2>Разогревочный этап остановлен.</h2>";
 	}

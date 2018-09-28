@@ -4,8 +4,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Player {
 
-	@JsonProperty("first_name") private String firstName;
-	@JsonProperty("second_name") private String secondName;
+	@JsonProperty(value = "first_name", required = true) private String firstName;
+	@JsonProperty(value = "second_name", required = true) private String secondName;
 
 	public Player() { }
 

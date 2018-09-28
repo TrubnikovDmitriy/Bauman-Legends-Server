@@ -9,7 +9,7 @@ public class Configuration {
 	public static volatile boolean pilotStage = false; // TODO false by default
 	public static volatile boolean finalStage = true; // TODO false by default
 
-	static final Character SEPARATOR = ';';
+	public static final String SEPARATOR = ";";
 
 	@NonNull public static Integer currentTimestamp() {
 		return new Long(Calendar.getInstance().getTimeInMillis() / 1000).intValue();

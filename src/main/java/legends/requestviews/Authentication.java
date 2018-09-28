@@ -4,8 +4,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Authentication {
 
-	@JsonProperty private String login;
-	@JsonProperty private String password;
+	@JsonProperty(required = true) private String login;
+	@JsonProperty(required = true) private String password;
 
 	public Authentication() { }
 
