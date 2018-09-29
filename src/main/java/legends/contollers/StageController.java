@@ -23,46 +23,33 @@ public class StageController {
 	public String simpleGet() {
 		return "<h1>Панель упарвления:</h1>" +
 				"<br/>" +
-				"<h2>Запустить разогревочный этап: GET /controlpanel/startpilot/{key}</h2>" +
-				"<h2>Запустить финальный этап: GET /controlpanel/startfinal/{key}</h2>" +
+				"<h2>Запустить разогревочный этап: GET /controlpanel/start/pilot</h2>" +
+				"<h2>Запустить финальный этап: GET /controlpanel/start/final</h2>" +
 				"<br/>" +
-				"<h3>Отключить разогревочный этап: GET /controlpanel/stoppilot/{key}</h3>" +
-				"<h3>Запустить финальный этап: GET /controlpanel/stopfinal/{key}</h3>" +
-				"<br/>" +
-				"<h4>Разогрев: " + Configuration.pilotStage + "</h4>" +
-				"<h4>Финал: " + Configuration.finalStage + "</h4>";
+				"<h3>Разогрев: " + Configuration.pilotStage + "</h3>" +
+				"<h3>Финал: " + Configuration.finalStage + "</h3>";
 	}
 
-	@GetMapping("/startpilot/{legendKey}")
-	public String startPilot(@PathVariable String legendKey) {
-		final String secretKey = System.getenv("LEGEND_KEY");
-		if (!secretKey.equals(legendKey)) return "<h2>Неверный ключ</h2>";
+//	@GetMapping("/start/pilot/{legendKey}")
+//	public String startPilot(@PathVariable String legendKey) {
+	@GetMapping("/start/pilot")
+	public String startPilot() {
+//		final String secretKey = System.getenv("LEGEND_KEY");
+//		if (!secretKey.equals(legendKey)) return "<h2>Неверный ключ</h2>";
 		Configuration.pilotStage = true;
-		return "<h2>Разогревочный этап запущен.</h2>";
+		Configuration.finalStage = false;
+		return "<h2>Разогревочный этап запущен.</h2><h2>Финальный этап остановлен.</h2>";
 	}
 
-	@GetMapping("/startfinal/{legendKey}")
-	public String startFinal(@PathVariable String legendKey) {
-		final String secretKey = System.getenv("LEGEND_KEY");
-		if (!secretKey.equals(legendKey)) return "<h2>Неверный ключ</h2>";
-		Configuration.finalStage = true;
-		return "<h2>Финальный этап запущен.</h2>";
-	}
-
-	@GetMapping("/stoppilot/{legendKey}")
-	public String stoptPilot(@PathVariable String legendKey) {
-		final String secretKey = System.getenv("LEGEND_KEY");
-		if (!secretKey.equals(legendKey)) return "<h2>Неверный ключ</h2>";
+//	@GetMapping("/start/final/{legendKey}")
+//	public String startFinal(@PathVariable String legendKey) {
+	@GetMapping("/start/final")
+	public String startFinal() {
+//		final String secretKey = System.getenv("LEGEND_KEY");
+//		if (!secretKey.equals(legendKey)) return "<h2>Неверный ключ</h2>";
 		pilotStageDAO.stopPilotStage();
 		Configuration.pilotStage = false;
-		return "<h2>Разогревочный этап остановлен.</h2>";
-	}
-
-	@GetMapping("/stopfinal/{legendKey}")
-	public String stopFinal(@PathVariable String legendKey) {
-		final String secretKey = System.getenv("LEGEND_KEY");
-		if (!secretKey.equals(legendKey)) return "<h2>Неверный ключ</h2>";
-		Configuration.finalStage = false;
-		return "<h2>Финальный этап остановлен.</h2>";
+		Configuration.finalStage = true;
+		return "<h2>Разогревочный этап остановлен.</h2><h2>Финальный этап запущен.</h2>";
 	}
 }

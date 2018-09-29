@@ -82,20 +82,7 @@ public class AuthDAO {
 		// Inserting all members of team
 		jdbcTemplate.batchUpdate(
 				"INSERT INTO players(first_name, second_name, team_id) VALUES (?, ?, ?)",
-				new BatchPreparedStatementSetter() {
-					@Override
-					public void setValues(PreparedStatement ps, int rowNumber)
-							throws SQLException {
-						ps.setString(1, members.get(rowNumber).getFirstName());
-						ps.setString(2, members.get(rowNumber).getSecondName());
-						ps.setInt(3, teamID);
-					}
-
-					@Override
-					public int getBatchSize() {
-						return members.size();
-					}
-				}
+				new BatchTeamSetter(members, teamID)
 		);
 
 		// Creating account for team
@@ -146,6 +133,30 @@ public class AuthDAO {
 			return connection.createArrayOf("integer", Collections.EMPTY_LIST.toArray());
 		} catch (SQLException e) {
 			throw new RuntimeException(e);
+		}
+	}
+
+	private static class BatchTeamSetter implements BatchPreparedStatementSetter {
+
+		private final List<Player> members;
+		private final int teamID;
+
+		BatchTeamSetter(List<Player> members, int teamID) {
+			this.members = members;
+			this.teamID = teamID;
+		}
+
+		@Override
+		public void setValues(PreparedStatement ps, int rowNumber)
+				throws SQLException {
+			ps.setString(1, members.get(rowNumber).getFirstName());
+			ps.setString(2, members.get(rowNumber).getSecondName());
+			ps.setInt(3, teamID);
+		}
+
+		@Override
+		public int getBatchSize() {
+			return members.size();
 		}
 	}
 }
