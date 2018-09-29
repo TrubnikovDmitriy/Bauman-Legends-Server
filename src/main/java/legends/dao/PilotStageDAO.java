@@ -8,7 +8,6 @@ import legends.models.TaskType;
 import legends.responseviews.PilotTask;
 import legends.responseviews.Result;
 import legends.responseviews.StartingTeam;
-import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;

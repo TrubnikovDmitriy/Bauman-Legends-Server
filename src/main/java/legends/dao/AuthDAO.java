@@ -1,5 +1,7 @@
 package legends.dao;
 
+import legends.models.PilotModel;
+import legends.models.TaskType;
 import legends.models.TeamType;
 import legends.requestviews.FullTeam;
 import legends.requestviews.Player;
@@ -71,9 +73,8 @@ public class AuthDAO {
 		parameters.put("fails_count", 0);
 		parameters.put("started", false);
 		parameters.put("finished", false);
-		final Array emptyArray = getEmptySQLArray();
-		parameters.put("final_tasks_arr", emptyArray);
-		parameters.put("pilot_tasks_arr", emptyArray);
+		parameters.put("final_tasks_arr", getFinalTasksArray());
+		parameters.put("pilot_tasks_arr", getPilotTasksArray());
 
 		final int teamID = jdbcInsert.executeAndReturnKey(parameters).intValue();
 
@@ -104,14 +105,42 @@ public class AuthDAO {
 		);
 	}
 
-	private void createPilotTasksArray() {
-		// TODO CREATE
+	private Array getPilotTasksArray() {
+
+		final List<PilotModel> pilotTasks = jdbcTemplate.query(
+				"SELECT id, extra_id FROM tasks WHERE type=?",
+				new Object[]{TaskType.PHOTO.name()},
+				(rs, i) -> new PilotModel(rs.getInt(1), rs.getInt(2))
+		);
+
+		Collections.shuffle(pilotTasks);
+		final List<Integer> indexes = PilotModel.getPilotPairIndexes(pilotTasks);
+
+		try(final Connection connection = dataSource.getConnection()) {
+			return connection.createArrayOf("integer", indexes.toArray());
+		} catch (SQLException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
-	private void createFinalTasksArray() {
-		// TODO DELETE
+	private Array getFinalTasksArray() {
+
+		final List<Integer> finalTasks = jdbcTemplate.query(
+				"SELECT id FROM tasks WHERE type=?",
+				new Object[]{ TaskType.FINAL.name() },
+				(rs, i) -> rs.getInt(1)
+		);
+
+		Collections.shuffle(finalTasks);
+
+		try(final Connection connection = dataSource.getConnection()) {
+			return connection.createArrayOf("integer", finalTasks.toArray());
+		} catch (SQLException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
+	@SuppressWarnings("unused")
 	private Array getEmptySQLArray() {
 		try(final Connection connection = dataSource.getConnection()) {
 			return connection.createArrayOf("integer", Collections.EMPTY_LIST.toArray());

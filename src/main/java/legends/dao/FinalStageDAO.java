@@ -138,7 +138,7 @@ public class FinalStageDAO {
 							"WHERE tms.id=?",
 					currentTaskID, teamID
 			);
-			// TODO check race condition
+
 		} catch (EmptyResultDataAccessException ignore) {
 			throw new TaskIsAlreadyAnswered();
 		}
