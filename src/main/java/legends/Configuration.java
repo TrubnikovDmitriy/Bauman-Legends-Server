@@ -6,8 +6,8 @@ import java.util.Calendar;
 
 public class Configuration {
 
-	public static volatile boolean pilotStage = true; // TODO false by default
-	public static volatile boolean finalStage = false; // TODO false by default
+	public static volatile boolean pilotStage = false; // TODO false by default
+	public static volatile boolean finalStage = true; // TODO false by default
 
 	public static final String SEPARATOR = ";";
 

@@ -114,17 +114,34 @@ public class FinalStageDAO {
 	@Transactional
 	public synchronized void acceptCurrentTask(final Integer teamID,
 	                                           final Integer currentTaskID) {
-		// Close the current task with boolean value 'success'
-		jdbcTemplate.update(
-				"UPDATE current_tasks SET (success, finish_time) = (TRUE, ?) " +
-						"WHERE team_id=? AND task_id=?",
-				Configuration.currentTimestamp(), teamID, currentTaskID
-		);
-		jdbcTemplate.update(
-				"UPDATE teams tms SET score=score+(SELECT points FROM tasks tsk WHERE tsk.id=?) WHERE tms.id=?",
-				currentTaskID, teamID
-		);
-		// TODO check race condition
+		try {
+			// It is necessary to make sure that the question is not yet answered
+			// So this `queryForObject` prevents the race condition
+			jdbcTemplate.queryForObject(
+					"SELECT id FROM current_tasks " +
+							"WHERE team_id=? AND task_id=? AND success IS NULL",
+					new Object[]{teamID, currentTaskID},
+					Integer.class
+			);
+
+			// Close the current task with boolean value 'success'
+			jdbcTemplate.update(
+					"UPDATE current_tasks SET (success, finish_time) = (TRUE, ?) " +
+							"WHERE team_id=? AND task_id=?",
+					Configuration.currentTimestamp(), teamID, currentTaskID
+			);
+
+			// Increase score of team
+			jdbcTemplate.update(
+					"UPDATE teams tms SET " +
+							"score=score+(SELECT points FROM tasks tsk WHERE tsk.id=?) " +
+							"WHERE tms.id=?",
+					currentTaskID, teamID
+			);
+			// TODO check race condition
+		} catch (EmptyResultDataAccessException ignore) {
+			throw new TaskIsAlreadyAnswered();
+		}
 	}
 
 	public synchronized boolean isAnswered(final Integer teamID,

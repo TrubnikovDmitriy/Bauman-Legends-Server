@@ -11,6 +11,7 @@ import legends.responseviews.StartingTeam;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,9 +43,12 @@ public class PilotStageDAO {
 		} catch (EmptyResultDataAccessException e) {
 			throw new PhotoKeyDoesNotExist(e, teamID);
 
-		} catch (DataAccessException e) {
-			// TODO: Обработать ситуацию, когда current task'a нет или их несколько
-			throw e;
+		} catch (IncorrectResultSizeDataAccessException ignore) {
+			throw new CriticalInternalError(
+					"Произошла ошибка. Команда №" + teamID + ' ' +
+					"выполняет сразу несколько фотоквестов. " +
+					"Срочно напишите Трубникову Диме"
+			);
 		}
 	}
 
