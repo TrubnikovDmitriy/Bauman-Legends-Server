@@ -4,9 +4,7 @@ import legends.Configuration;
 import legends.exceptions.CriticalInternalError;
 import legends.exceptions.PhotoKeyDoesNotExist;
 import legends.exceptions.TaskIsAlreadyAnswered;
-import legends.exceptions.TaskIsNotExist;
 import legends.models.TaskType;
-import legends.requestviews.Answer;
 import legends.responseviews.PilotTask;
 import legends.responseviews.Result;
 import legends.responseviews.StartingTeam;
@@ -14,7 +12,6 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.scheduling.config.Task;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -55,8 +52,8 @@ public class PilotStageDAO {
 		return jdbcTemplate.queryForObject(
 				"SELECT id, name, start_time, started, finished, " +
 						"(SELECT COUNT(id) FROM players WHERE team_id=? GROUP BY team_id) AS players_count, " +
-						"(SELECT COUNT(id) FROM current_tasks WHERE type='PHOTO' AND team_id=? GROUP BY team_id) AS photo_count, " +
-						"(SELECT COUNT(id) FROM current_tasks WHERE type='EXTRA' AND team_id=? GROUP BY team_id) AS extra_count " +
+						"(SELECT COUNT(id) FROM current_tasks WHERE type='PHOTO' AND success=TRUE AND team_id=? GROUP BY team_id) AS photo_count, " +
+						"(SELECT COUNT(id) FROM current_tasks WHERE type='EXTRA' AND success=TRUE AND team_id=? GROUP BY team_id) AS extra_count " +
 						"FROM teams WHERE id=?;",
 				new Object[] { teamID, teamID, teamID, teamID },
 				new StartingTeam.Mapper()
@@ -77,11 +74,11 @@ public class PilotStageDAO {
 					"SELECT task_id, ct.type, points, success, " +
 							"pilot_tasks_arr[array_length(pilot_tasks_arr, 1)] AS last_task_id " +
 							"FROM current_tasks ct " +
-							"  JOIN tasks ts ON task_id=ts.id " +
-							"  JOIN teams tm ON team_id=? " +
+							"  JOIN tasks ts ON ts.id=ct.task_id " +
+							"  JOIN teams tm ON tm.id=ct.team_id " +
 							"WHERE team_id=? AND (ct.type=? OR ct.type=?) " +
 							"ORDER BY ct.id DESC LIMIT 1",
-					new Object[] { teamID, teamID, TaskType.PHOTO.name(), TaskType.EXTRA.name() },
+					new Object[] { teamID, TaskType.PHOTO.name(), TaskType.EXTRA.name() },
 					new PilotTask.Mapper()
 			);
 

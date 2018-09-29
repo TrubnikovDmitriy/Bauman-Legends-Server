@@ -1,6 +1,5 @@
 package legends.responseviews;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import legends.models.TaskType;
@@ -9,6 +8,7 @@ import org.springframework.jdbc.core.RowMapper;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+@SuppressWarnings("unused")
 public class FinalTask {
 
 	@JsonProperty("task_id")
@@ -34,7 +34,7 @@ public class FinalTask {
 
 	@JsonProperty("is_finished")
 	public Boolean isFinished() {
-		return id.equals(lastTaskID);
+		return id.equals(lastTaskID) && isAnswered;
 	}
 
 	public static final class Mapper implements RowMapper<FinalTask> {

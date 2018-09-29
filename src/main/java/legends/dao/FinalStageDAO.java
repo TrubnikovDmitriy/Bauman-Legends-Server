@@ -34,11 +34,11 @@ public class FinalStageDAO {
 					"SELECT task_id, ct.type, ct.start_time, points, duration, success, " +
 							"  final_tasks_arr[array_length(final_tasks_arr, 1)] AS last_task_id " +
 							"FROM current_tasks ct " +
-							"  JOIN tasks ts ON task_id=ts.id " +
-							"  JOIN teams tm ON team_id=? " +
+							"  JOIN tasks ts ON ts.id=ct.task_id " +
+							"  JOIN teams tm ON tm.id=ct.team_id " +
 							"WHERE team_id=? AND ct.type=? " +
 							"ORDER BY ct.id DESC LIMIT 1",
-					new Object[] { teamID, teamID, TaskType.FINAL.name() },
+					new Object[] { teamID, TaskType.FINAL.name() },
 					new FinalTask.Mapper()
 			);
 
