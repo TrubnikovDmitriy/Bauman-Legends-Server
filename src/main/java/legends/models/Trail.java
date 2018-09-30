@@ -20,6 +20,9 @@ public class Trail {
 	@JsonProperty("finish_time")
 	private Integer finishTime;
 
+	@JsonProperty("duration")
+	private Integer duration;
+
 
 	public static final class Mapper implements RowMapper<Trail> {
 		@Override
@@ -32,6 +35,7 @@ public class Trail {
 			if (rs.wasNull()) trail.startTime = null;
 			trail.finishTime = rs.getInt("finish_time");
 			if (rs.wasNull()) trail.finishTime = null;
+			trail.duration = rs.getInt("duration");
 			return trail;
 		}
 	}

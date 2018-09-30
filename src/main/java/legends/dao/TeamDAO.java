@@ -3,6 +3,7 @@ package legends.dao;
 import legends.exceptions.TaskIsNotExist;
 import legends.exceptions.TeamDoesNotExist;
 import legends.models.Router;
+import legends.models.TaskType;
 import legends.models.TeamForTable;
 import legends.models.Trail;
 import legends.requestviews.Answer;
@@ -79,8 +80,10 @@ public class TeamDAO {
 		final HashMap<Integer, List<Trail>> map = new HashMap<>();
 		if (fullList) {
 			jdbcTemplate.query(
-					"SELECT task_id, team_id, start_time, finish_time, success " +
-							"FROM current_tasks WHERE type='FINAL'",
+					"SELECT task_id, team_id, start_time, finish_time, success, duration " +
+							"  FROM current_tasks ct JOIN tasks t ON ct.task_id=t.id " +
+							"WHERE ct.type=?",
+					new Object[] { TaskType.FINAL.name() },
 					new HashMapper(map)
 			);
 			return jdbcTemplate.query(
@@ -90,9 +93,12 @@ public class TeamDAO {
 			);
 		} else {
 			jdbcTemplate.query(
-					"SELECT task_id, team_id, ct.start_time, ct.finish_time, success " +
-							"FROM current_tasks ct JOIN teams t ON ct.team_id = t.id " +
-							"WHERE type='FINAL' AND t.started=TRUE AND finished=FALSE",
+					"SELECT task_id, team_id, ct.start_time, ct.finish_time, success, duration " +
+							"FROM current_tasks ct " +
+							"  JOIN teams tms ON ct.team_id = tms.id " +
+							"  JOIN tasks tsk ON ct.task_id = tsk.id " +
+							"WHERE ct.type=? AND tms.started=TRUE AND tms.finished=FALSE",
+					new Object[] { TaskType.FINAL.name() },
 					new HashMapper(map)
 			);
 			return jdbcTemplate.query(
@@ -101,25 +107,6 @@ public class TeamDAO {
 							"WHERE started=TRUE and finished=FALSE GROUP BY teams.id",
 					new Router.Mapper(map)
 			);
-		}
-	}
-
-	private static class HashMapper implements RowMapper<Object> {
-		final RowMapper<Trail> mapper = new Trail.Mapper();
-		private final HashMap<Integer, List<Trail>> map;
-
-		HashMapper(@NotNull HashMap<Integer, List<Trail>> map) {
-			this.map = map;
-		}
-
-		@Nullable
-		@Override
-		public Object mapRow(ResultSet rs, int i) throws SQLException {
-			final Integer teamID = rs.getInt("team_id");
-			final List<Trail> trails = map.getOrDefault(teamID, new LinkedList<>());
-			trails.add(mapper.mapRow(rs, i));
-			map.put(teamID, trails);
-			return null;
 		}
 	}
 
@@ -138,6 +125,26 @@ public class TeamDAO {
 
 		} catch (EmptyResultDataAccessException ignore) {
 			throw new TaskIsNotExist();
+		}
+	}
+
+
+	private static class HashMapper implements RowMapper<Object> {
+		final RowMapper<Trail> mapper = new Trail.Mapper();
+		private final HashMap<Integer, List<Trail>> map;
+
+		HashMapper(@NotNull HashMap<Integer, List<Trail>> map) {
+			this.map = map;
+		}
+
+		@Nullable
+		@Override
+		public Object mapRow(ResultSet rs, int i) throws SQLException {
+			final Integer teamID = rs.getInt("team_id");
+			final List<Trail> trails = map.getOrDefault(teamID, new LinkedList<>());
+			trails.add(mapper.mapRow(rs, i));
+			map.put(teamID, trails);
+			return null;
 		}
 	}
 }
