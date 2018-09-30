@@ -146,7 +146,6 @@ public class PlayerController {
 	@PostMapping("/next")
 	public ResponseEntity takeNextAnswer(@RequestBody Answer answer) {
 
-		teamDAO.validateAnswer(answer);
 		if (Configuration.finalStage) return takeNextAnswerFinal(answer);
 		if (Configuration.pilotStage) return takeNextAnswerExtra(answer);
 
