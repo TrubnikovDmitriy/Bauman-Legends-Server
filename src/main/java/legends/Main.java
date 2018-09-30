@@ -8,4 +8,5 @@ public class Main {
 	public static void main(String[] args) {
 		SpringApplication.run(legends.Main.class, args);
 	}
+	// TODO logger
 }

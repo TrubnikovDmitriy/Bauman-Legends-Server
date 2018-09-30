@@ -1,5 +1,6 @@
 package legends.responseviews;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import legends.models.TaskType;
@@ -12,29 +13,39 @@ import java.sql.SQLException;
 public class FinalTask {
 
 	@JsonProperty("task_id")
-	private Integer id;
+	private int id;
 
 	@JsonProperty("task_type")
 	private TaskType type;
 
 	@JsonProperty("start_time")
-	private Integer startTime;
+	private int startTime;
 
 	@JsonProperty("duration")
-	private Integer duration;
+	private int duration;
 
 	@JsonProperty("points")
-	private Integer points;
+	private int points;
 
 	@JsonProperty("is_answered")
 	private Boolean isAnswered;
 
 	@JsonIgnoreProperties
-	private Integer lastTaskID;
+	private int lastTaskID;
 
 	@JsonProperty("is_finished")
 	public Boolean isFinished() {
-		return id.equals(lastTaskID) && isAnswered;
+		return (id == lastTaskID) && isAnswered;
+	}
+
+	@JsonIgnore
+	public int getID() {
+		return id;
+	}
+
+	@JsonIgnore
+	public int getLastTaskID() {
+		return lastTaskID;
 	}
 
 	public static final class Mapper implements RowMapper<FinalTask> {

@@ -3,7 +3,6 @@ package legends.contollers;
 import legends.Configuration;
 import legends.dao.PilotStageDAO;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -28,6 +27,8 @@ public class StageController {
 				"<br/>" +
 				"<h3>Разогрев: " + Configuration.pilotStage + "</h3>" +
 				"<h3>Финал: " + Configuration.finalStage + "</h3>";
+
+		// TODO return the secret key in prod
 	}
 
 //	@GetMapping("/start/pilot/{legendKey}")
