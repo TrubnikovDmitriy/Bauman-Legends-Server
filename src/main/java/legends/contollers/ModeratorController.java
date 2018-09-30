@@ -101,7 +101,7 @@ public class ModeratorController {
 					HttpStatus.BAD_REQUEST
 			);
 		}
-		// TODO stop single team
+		finalStageDAO.stopTeam(teamID);
 		return new ResponseEntity(HttpStatus.ACCEPTED);
 	}
 

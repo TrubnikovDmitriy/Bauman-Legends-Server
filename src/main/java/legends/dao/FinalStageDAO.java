@@ -4,6 +4,7 @@ import legends.Configuration;
 import legends.exceptions.CriticalInternalError;
 import legends.exceptions.TaskIsAlreadyAnswered;
 import legends.exceptions.TeamAlreadyStarted;
+import legends.exceptions.TeamNotYetFinished;
 import legends.models.NewTask;
 import legends.models.TaskType;
 import legends.responseviews.FinalTask;
@@ -88,6 +89,21 @@ public class FinalStageDAO {
 		} catch (DuplicateKeyException ignore) {
 			throw new TeamAlreadyStarted(teamID);
 		}
+	}
+
+	public void stopTeam(final Integer teamID) {
+
+		// Check that the team has completed all the tasks
+		final FinalTask currentTask = this.getCurrentTask(teamID);
+		if (currentTask == null || !currentTask.isFinished()) {
+			throw new TeamNotYetFinished(teamID);
+		}
+
+		jdbcTemplate.update(
+				"UPDATE teams SET finish_time=?, finished=TRUE " +
+						"WHERE id=? AND started=TRUE AND finished=FALSE",
+				Configuration.currentTimestamp(), teamID
+		);
 	}
 
 
