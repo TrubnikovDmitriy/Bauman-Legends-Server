@@ -10,7 +10,9 @@ public class Authentication {
 	public Authentication() { }
 
 	public boolean isValid() {
-		return login != null && password != null;
+		login = login.trim();
+		login = login.toLowerCase();
+		return !login.isEmpty() && !password.isEmpty();
 	}
 
 

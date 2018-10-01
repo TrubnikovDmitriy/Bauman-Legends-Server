@@ -88,7 +88,7 @@ public class AuthDAO {
 		// Creating account for team
 		jdbcTemplate.update(
 				"INSERT INTO auth(team_id, login, pass, type) VALUES(?, ?, DEFAULT, DEFAULT)",
-				teamID, team.getName() + '-' + teamID
+				teamID, team.getName().replace(' ', '_') + '-' + teamID
 		);
 	}
 

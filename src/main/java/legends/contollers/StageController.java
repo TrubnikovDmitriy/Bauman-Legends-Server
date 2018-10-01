@@ -37,6 +37,7 @@ public class StageController {
 	public String startPilot() {
 //		final String secretKey = System.getenv("LEGEND_KEY");
 //		if (!secretKey.equals(legendKey)) return "<h2>Неверный ключ</h2>";
+		pilotStageDAO.startPilotStage();
 		Configuration.pilotStage = true;
 		Configuration.finalStage = false;
 		return "<h2>Разогревочный этап запущен.</h2><h2>Финальный этап остановлен.</h2>";

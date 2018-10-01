@@ -4,6 +4,7 @@ import legends.Configuration;
 import legends.exceptions.CriticalInternalError;
 import legends.exceptions.PhotoKeyDoesNotExist;
 import legends.exceptions.TaskIsAlreadyAnswered;
+import legends.exceptions.TeamDoesNotExist;
 import legends.models.TaskType;
 import legends.responseviews.PilotTask;
 import legends.responseviews.Result;
@@ -52,15 +53,30 @@ public class PilotStageDAO {
 	}
 
 	public StartingTeam prepareTeam(final Integer teamID) {
-		return jdbcTemplate.queryForObject(
-				"SELECT id, name, start_time, started, finished, " +
-						"(SELECT COUNT(id) FROM players WHERE team_id=? GROUP BY team_id) AS players_count, " +
-						"(SELECT COUNT(id) FROM current_tasks WHERE type='PHOTO' AND success=TRUE AND team_id=? GROUP BY team_id) AS photo_count, " +
-						"(SELECT COUNT(id) FROM current_tasks WHERE type='EXTRA' AND success=TRUE AND team_id=? GROUP BY team_id) AS extra_count " +
-						"FROM teams WHERE id=?;",
-				new Object[] { teamID, teamID, teamID, teamID },
-				new StartingTeam.Mapper()
+		try {
+			return jdbcTemplate.queryForObject(
+					"SELECT id, name, start_time, started, finished, " +
+							"(SELECT COUNT(id) FROM players WHERE team_id=? GROUP BY team_id) AS players_count, " +
+							"(SELECT COUNT(id) FROM current_tasks WHERE type='PHOTO' AND success=TRUE AND team_id=? GROUP BY team_id) AS photo_count, " +
+							"(SELECT COUNT(id) FROM current_tasks WHERE type='EXTRA' AND success=TRUE AND team_id=? GROUP BY team_id) AS extra_count " +
+							"FROM teams WHERE id=?;",
+					new Object[]{teamID, teamID, teamID, teamID},
+					new StartingTeam.Mapper()
+			);
+		} catch (EmptyResultDataAccessException e) {
+			throw new TeamDoesNotExist(e, teamID);
+		}
+	}
+
+	public void startPilotStage() {
+		// TODO DELETE it is in prodcuction!!!
+		jdbcTemplate.update("DELETE FROM current_tasks");
+		jdbcTemplate.update(
+				"INSERT INTO current_tasks (team_id, task_id, start_time, type) " +
+				"SELECT id, pilot_tasks_arr[1], ?, 'PHOTO' FROM teams",
+				Configuration.currentTimestamp()
 		);
+		jdbcTemplate.update("UPDATE teams SET (started, finished)=(TRUE, FALSE)");
 	}
 
 	public synchronized void stopPilotStage() {

@@ -4,13 +4,17 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Player {
 
-	@JsonProperty(value = "first_name", required = true) private String firstName;
-	@JsonProperty(value = "second_name", required = true) private String secondName;
+	@JsonProperty(value = "first_name", required = true)
+	private String firstName;
+	@JsonProperty(value = "second_name", required = true)
+	private String secondName;
 
 	public Player() { }
 
 	public boolean isValid() {
-		return firstName != null && secondName != null;
+		firstName = firstName.trim();
+		secondName = secondName.trim();
+		return !firstName.isEmpty() && !secondName.isEmpty();
 	}
 
 

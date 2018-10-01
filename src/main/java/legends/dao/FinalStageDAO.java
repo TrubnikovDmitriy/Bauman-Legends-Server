@@ -30,6 +30,7 @@ public class FinalStageDAO {
 	public FinalStageDAO(JdbcTemplate jdbcTemplate) {
 		this.jdbcTemplate = jdbcTemplate;
 		this.scheduler = Executors.newScheduledThreadPool(1);
+		// TODO: Rerun scheduler after server's restart
 	}
 
 	@Nullable
