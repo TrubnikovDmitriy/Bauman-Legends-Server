@@ -80,10 +80,12 @@ public class TeamDAO {
 		final HashMap<Integer, List<Trail>> map = new HashMap<>();
 		if (fullList) {
 			jdbcTemplate.query(
-					"SELECT task_id, team_id, start_time, finish_time, success, duration, content " +
-							"  FROM current_tasks ct JOIN tasks t ON ct.task_id=t.id " +
-							"WHERE ct.type=?",
-					new Object[] { TaskType.FINAL.name() },
+					"SELECT" +
+							"  tsk.id task_id, tms.id team_id, cur.start_time, " +
+							"  cur.finish_time, success, duration, content " +
+							"FROM teams tms " +
+							"  JOIN tasks tsk ON tsk.id=ANY(tms.final_tasks_arr::int[]) " +
+							"  FULL JOIN current_tasks cur ON tsk.id = cur.task_id;",
 					new HashMapper(map)
 			);
 			return jdbcTemplate.query(
@@ -93,12 +95,13 @@ public class TeamDAO {
 			);
 		} else {
 			jdbcTemplate.query(
-					"SELECT task_id, team_id, ct.start_time, ct.finish_time, success, duration, content " +
-							"FROM current_tasks ct " +
-							"  JOIN teams tms ON ct.team_id = tms.id " +
-							"  JOIN tasks tsk ON ct.task_id = tsk.id " +
-							"WHERE ct.type=? AND tms.started=TRUE AND tms.finished=FALSE",
-					new Object[] { TaskType.FINAL.name() },
+					"SELECT" +
+							"  tsk.id task_id, tms.id team_id, cur.start_time, " +
+							"  cur.finish_time, success, duration, content " +
+							"FROM teams tms " +
+							"  JOIN tasks tsk ON tsk.id=ANY(tms.final_tasks_arr::int[]) " +
+							"  FULL JOIN current_tasks cur ON tsk.id = cur.task_id " +
+							"WHERE tms.started=TRUE AND tms.finished=FALSE",
 					new HashMapper(map)
 			);
 			return jdbcTemplate.query(

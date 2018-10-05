@@ -7,8 +7,6 @@ public class Authentication {
 	@JsonProperty(required = true) private String login;
 	@JsonProperty(required = true) private String password;
 
-	public Authentication() { }
-
 	public boolean isValid() {
 		login = login.trim();
 		return !login.isEmpty() && !password.isEmpty();
