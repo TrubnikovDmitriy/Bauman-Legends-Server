@@ -87,7 +87,7 @@ public class FinalStageDAO {
 					"UPDATE teams SET start_time=?, started=TRUE WHERE id=?",
 					Configuration.currentTimestamp(), teamID
 			);
-		} catch (DuplicateKeyException ignore) {
+		} catch (TaskIsAlreadyAnswered ignore) {
 			throw new TeamAlreadyStarted(teamID);
 		}
 	}

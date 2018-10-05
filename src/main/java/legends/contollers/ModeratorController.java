@@ -7,10 +7,7 @@ import legends.dao.PilotStageDAO;
 import legends.dao.TeamDAO;
 import legends.exceptions.LegendException;
 import legends.requestviews.FullTeam;
-import legends.responseviews.ErrorMessage;
-import legends.responseviews.PhotoKey;
-import legends.responseviews.Table;
-import legends.responseviews.TeamInfo;
+import legends.responseviews.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -62,9 +59,9 @@ public class ModeratorController {
 	}
 
 	@GetMapping("/photo/{teamID}")
-	public ResponseEntity<PhotoKey> getPhotoKey(@PathVariable Integer teamID) {
-		final String key = pilotStageDAO.getPhotoKey(teamID);
-		return new ResponseEntity<>(new PhotoKey(key), HttpStatus.OK);
+	public ResponseEntity<PhotoAnswer> getPhotoKey(@PathVariable Integer teamID) {
+		final PhotoAnswer photoAnswer = pilotStageDAO.getPhotoKey(teamID);
+		return new ResponseEntity<>(photoAnswer, HttpStatus.OK);
 	}
 
 	@GetMapping("/prepare/{teamID}")

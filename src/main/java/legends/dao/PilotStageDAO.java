@@ -6,6 +6,7 @@ import legends.exceptions.PhotoKeyDoesNotExist;
 import legends.exceptions.TaskIsAlreadyAnswered;
 import legends.exceptions.TeamDoesNotExist;
 import legends.models.TaskType;
+import legends.responseviews.PhotoAnswer;
 import legends.responseviews.PilotTask;
 import legends.responseviews.Result;
 import legends.responseviews.StartingTeam;
@@ -30,14 +31,14 @@ public class PilotStageDAO {
 		this.jdbcTemplate = jdbcTemplate;
 	}
 
-	public String getPhotoKey(final Integer teamID) {
+	public PhotoAnswer getPhotoKey(final Integer teamID) {
 		try {
 			return jdbcTemplate.queryForObject(
-					"SELECT ts.answers FROM current_tasks ct " +
-							"JOIN tasks ts ON task_id=ts.id " +
+					"SELECT task_id AS id, ts.answers AS key, ts.content AS answer " +
+							"FROM current_tasks ct JOIN tasks ts ON task_id=ts.id " +
 							"WHERE team_id=? AND success IS NULL AND ct.type=?",
 					new Object[] { teamID, TaskType.PHOTO.name() },
-					String.class
+					new PhotoAnswer.Mapper()
 			);
 
 		} catch (EmptyResultDataAccessException e) {
