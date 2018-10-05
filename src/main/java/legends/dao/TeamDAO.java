@@ -93,7 +93,7 @@ public class TeamDAO {
 			);
 		} else {
 			jdbcTemplate.query(
-					"SELECT task_id, team_id, ct.start_time, ct.finish_time, success, duration " +
+					"SELECT task_id, team_id, ct.start_time, ct.finish_time, success, duration, content " +
 							"FROM current_tasks ct " +
 							"  JOIN teams tms ON ct.team_id = tms.id " +
 							"  JOIN tasks tsk ON ct.task_id = tsk.id " +
