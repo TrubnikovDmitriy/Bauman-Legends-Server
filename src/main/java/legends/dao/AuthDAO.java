@@ -46,7 +46,7 @@ public class AuthDAO {
 			return jdbcTemplate.queryForObject(
 					"SELECT a.team_id AS team_id, t.name AS team_name, a.type AS team_type " +
 							"FROM auth AS a JOIN teams AS t ON a.team_id = t.id " +
-							"WHERE a.login=? AND a.pass=?",
+							"WHERE LOWER(a.login)=LOWER(?) AND a.pass=?",
 					new Object[] { login, pass },
 					(rs, i) -> new TeamAuth(
 							rs.getString("team_name"),
@@ -88,7 +88,7 @@ public class AuthDAO {
 		// Creating account for team
 		jdbcTemplate.update(
 				"INSERT INTO auth(team_id, login, pass, type) VALUES(?, ?, DEFAULT, DEFAULT)",
-				teamID, team.getName().replace(' ', '_') + '-' + teamID
+				teamID, "Team-" + teamID
 		);
 	}
 

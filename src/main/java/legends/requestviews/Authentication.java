@@ -11,7 +11,6 @@ public class Authentication {
 
 	public boolean isValid() {
 		login = login.trim();
-		login = login.toLowerCase();
 		return !login.isEmpty() && !password.isEmpty();
 	}
 

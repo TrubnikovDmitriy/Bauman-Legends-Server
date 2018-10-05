@@ -80,7 +80,7 @@ public class TeamDAO {
 		final HashMap<Integer, List<Trail>> map = new HashMap<>();
 		if (fullList) {
 			jdbcTemplate.query(
-					"SELECT task_id, team_id, start_time, finish_time, success, duration " +
+					"SELECT task_id, team_id, start_time, finish_time, success, duration, content " +
 							"  FROM current_tasks ct JOIN tasks t ON ct.task_id=t.id " +
 							"WHERE ct.type=?",
 					new Object[] { TaskType.FINAL.name() },

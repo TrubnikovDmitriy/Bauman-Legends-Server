@@ -23,12 +23,16 @@ public class Trail {
 	@JsonProperty("duration")
 	private Integer duration;
 
+	@JsonProperty("content")
+	private String content;
+
 
 	public static final class Mapper implements RowMapper<Trail> {
 		@Override
 		public Trail mapRow(ResultSet rs, int rowNum) throws SQLException {
 			final Trail trail = new Trail();
 			trail.taskID = rs.getInt("task_id");
+			trail.content = rs.getString("content");
 			trail.success = rs.getBoolean("success");
 			if (rs.wasNull()) trail.success = null;
 			trail.startTime = rs.getInt("start_time");

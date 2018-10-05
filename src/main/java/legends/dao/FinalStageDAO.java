@@ -63,7 +63,7 @@ public class FinalStageDAO {
 	                           final String playerAnswer) {
 
 		final String correctAnswers = jdbcTemplate.queryForObject(
-				"SELECT answers FROM tasks WHERE id=?",
+				"SELECT LOWER(answers) FROM tasks WHERE id=?",
 				new Object[] { taskID },
 				String.class
 		);

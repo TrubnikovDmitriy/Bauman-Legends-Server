@@ -76,7 +76,7 @@ public class PilotStageDAO {
 				"SELECT id, pilot_tasks_arr[1], ?, 'PHOTO' FROM teams",
 				Configuration.currentTimestamp()
 		);
-		jdbcTemplate.update("UPDATE teams SET (started, finished)=(TRUE, FALSE)");
+		jdbcTemplate.update("UPDATE teams SET (started, finished)=(FALSE, FALSE)");
 	}
 
 	public synchronized void stopPilotStage() {
