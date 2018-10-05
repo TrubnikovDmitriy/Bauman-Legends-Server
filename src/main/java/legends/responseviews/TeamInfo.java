@@ -54,9 +54,10 @@ public class TeamInfo {
 			team.teamName= rs.getString("name");
 			team.leaderName = rs.getString("leader_name");
 			team.score = rs.getInt("score");
-			team.startTime = rs.getInt("start_time");
 			team.login = rs.getString("login");
 			team.password = rs.getString("pass");
+			team.startTime = rs.getInt("start_time");
+			if (rs.wasNull()) team.startTime = null;
 
 			this.members.remove(team.leaderName);
 			team.membersNames = this.members;

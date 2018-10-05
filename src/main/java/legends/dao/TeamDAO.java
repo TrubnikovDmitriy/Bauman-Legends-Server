@@ -85,7 +85,7 @@ public class TeamDAO {
 							"  cur.finish_time, success, duration, content " +
 							"FROM teams tms " +
 							"  JOIN tasks tsk ON tsk.id=ANY(tms.final_tasks_arr::int[]) " +
-							"  FULL JOIN current_tasks cur ON tsk.id = cur.task_id;",
+							"  FULL JOIN current_tasks cur ON tms.id=cur.team_id AND tsk.id = cur.task_id;",
 					new HashMapper(map)
 			);
 			return jdbcTemplate.query(
@@ -100,7 +100,7 @@ public class TeamDAO {
 							"  cur.finish_time, success, duration, content " +
 							"FROM teams tms " +
 							"  JOIN tasks tsk ON tsk.id=ANY(tms.final_tasks_arr::int[]) " +
-							"  FULL JOIN current_tasks cur ON tsk.id = cur.task_id " +
+							"  FULL JOIN current_tasks cur ON tms.id=cur.team_id AND tsk.id = cur.task_id " +
 							"WHERE tms.started=TRUE AND tms.finished=FALSE",
 					new HashMapper(map)
 			);
