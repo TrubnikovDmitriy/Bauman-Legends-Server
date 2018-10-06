@@ -61,7 +61,8 @@ public class TeamDAO {
 					"SELECT number, tooltip FROM current_tasks ctsk " +
 							"  JOIN tasks tsk ON ctsk.task_id = tsk.id " +
 							"  JOIN statues st ON tsk.statue_number = st.number " +
-							"WHERE ctsk.team_id=? AND ctsk.type=? AND ctsk.success IS TRUE;",
+							"WHERE ctsk.team_id=? AND ctsk.type=? AND ctsk.success IS TRUE " +
+							"ORDER BY number;",
 					new Object[]{teamID, TaskType.EXTRA.name()},
 					(rs, i) -> new Tooltip(rs.getInt(1), rs.getString(2))
 			);
