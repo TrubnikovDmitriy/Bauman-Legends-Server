@@ -9,7 +9,7 @@ import legends.exceptions.LegendException;
 import legends.requestviews.FullTeam;
 import legends.responseviews.ErrorMessage;
 import legends.responseviews.PhotoAnswer;
-import legends.responseviews.TableOfTeams;
+import legends.responseviews.Table;
 import legends.responseviews.TeamInfo;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -47,10 +47,10 @@ public class ModeratorController {
 	}
 
 	@GetMapping("/team")
-	public ResponseEntity<TableOfTeams> getTeams(
+	public ResponseEntity<Table> getTeams(
 			@RequestParam(name = "full", defaultValue = "false") Boolean flag) {
 		return new ResponseEntity<>(
-				new TableOfTeams(teamDAO.getTeams(flag)),
+				new Table(teamDAO.getTeams(flag)),
 				HttpStatus.OK
 		);
 	}

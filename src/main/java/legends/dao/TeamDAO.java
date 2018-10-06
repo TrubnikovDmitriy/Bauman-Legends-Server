@@ -56,12 +56,22 @@ public class TeamDAO {
 					new Object[]{teamID},
 					(rs, n) -> rs.getString(1) + ' ' + rs.getString(2)
 			);
+
+			final List<Tooltip> tooltips = jdbcTemplate.query(
+					"SELECT number, tooltip FROM current_tasks ctsk " +
+							"  JOIN tasks tsk ON ctsk.task_id = tsk.id " +
+							"  JOIN statues st ON tsk.statue_number = st.number " +
+							"WHERE ctsk.team_id=? AND ctsk.type=? AND ctsk.success IS TRUE;",
+					new Object[]{teamID, TaskType.EXTRA.name()},
+					(rs, i) -> new Tooltip(rs.getInt(1), rs.getString(2))
+			);
+
 			return jdbcTemplate.queryForObject(
 					"SELECT t.id id, name, leader_name, score, start_time, " +
 							"a.login login, a.pass pass FROM teams AS t " +
 							"JOIN auth AS a ON t.id = a.team_id WHERE t.id=?",
 					new Object[]{teamID},
-					new TeamInfo.Mapper(members)
+					new TeamInfo.Mapper(members, tooltips)
 			);
 
 		} catch (EmptyResultDataAccessException e) {
@@ -126,20 +136,6 @@ public class TeamDAO {
 		} catch (EmptyResultDataAccessException ignore) {
 			throw new TaskIsNotExist();
 		}
-	}
-
-	public List<Tooltip> getTooltipsOfTeam(final Integer teamID) {
-		return jdbcTemplate.query(
-				"SELECT number, tooltip FROM current_tasks ctsk " +
-						"  JOIN tasks tsk ON ctsk.task_id = tsk.id " +
-						"  JOIN statues st ON tsk.statue_number = st.number " +
-						"WHERE ctsk.team_id=? AND ctsk.type=? AND ctsk.success IS TRUE;",
-				new Object[] { teamID, TaskType.EXTRA.name() },
-				(rs, i) -> new Tooltip(
-						rs.getInt("number"),
-						rs.getString("tooltip")
-				)
-		);
 	}
 
 

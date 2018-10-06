@@ -1,8 +1,11 @@
 package legends.responseviews;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import legends.models.Tooltip;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.lang.NonNull;
 
+import javax.validation.constraints.NotNull;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
@@ -24,6 +27,9 @@ public class TeamInfo {
 	@JsonProperty("start_time")
 	private Integer startTime;
 
+	@JsonProperty("tooltips_table")
+	private List<Tooltip> tooltips;
+
 	@JsonProperty
 	private Integer score;
 
@@ -33,17 +39,26 @@ public class TeamInfo {
 	@JsonProperty
 	private String password;
 
+
 	public TeamInfo eraseLoginPass() {
 		login = password = null;
 		return this;
 	}
 
+	public void setTooltips(List<Tooltip> tooltips) {
+		this.tooltips = tooltips;
+	}
+
+
 	public static final class Mapper implements RowMapper<TeamInfo> {
 
 		private final List<String> members;
+		private final List<Tooltip> tooltips;
 
-		public Mapper(List<String> members) {
+		public Mapper(@NonNull List<String> members,
+		              @NotNull List<Tooltip> tooltips) {
 			this.members = members;
+			this.tooltips = tooltips;
 		}
 
 		@Override
@@ -59,8 +74,11 @@ public class TeamInfo {
 			team.startTime = rs.getInt("start_time");
 			if (rs.wasNull()) team.startTime = null;
 
+			// Remove leader name from list of members' names
 			this.members.remove(team.leaderName);
 			team.membersNames = this.members;
+
+			team.tooltips = tooltips;
 
 			return team;
 		}

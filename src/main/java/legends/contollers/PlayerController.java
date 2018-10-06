@@ -34,9 +34,9 @@ public class PlayerController {
 	}
 
 	@GetMapping("/team")
-	public ResponseEntity<TableOfTeams> getTeams(@RequestParam(name = "full", defaultValue = "false") Boolean flag) {
+	public ResponseEntity<Table> getTeams(@RequestParam(name = "full", defaultValue = "false") Boolean flag) {
 		return new ResponseEntity<>(
-				new TableOfTeams(teamDAO.getTeams(flag)),
+				new Table(teamDAO.getTeams(flag)),
 				HttpStatus.OK
 		);
 	}
@@ -190,12 +190,6 @@ public class PlayerController {
 		return getCurrentTaskPilot(answer.getTeamID());
 	}
 
-
-	@GetMapping("/tooltips/{teamID}")
-	public ResponseEntity<TableOfTooltips> getTooltip(@PathVariable Integer teamID) {
-		final List<Tooltip> tooltipList = teamDAO.getTooltipsOfTeam(teamID);
-		return new ResponseEntity<>(new TableOfTooltips(tooltipList), HttpStatus.OK);
-	}
 
 	@ExceptionHandler(LegendException.class)
 	public ResponseEntity<ErrorMessage> excpetionHandler(LegendException exception) {
