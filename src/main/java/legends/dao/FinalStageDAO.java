@@ -34,7 +34,7 @@ public class FinalStageDAO {
 	public FinalStageDAO(JdbcTemplate jdbcTemplate) {
 		this.jdbcTemplate = jdbcTemplate;
 		this.scheduler = Executors.newScheduledThreadPool(1);
-		this.logger = LoggerFactory.getLogger(getClass().getSimpleName());
+		this.logger = LoggerFactory.getLogger(FinalStageDAO.class);
 		refreshScheduler();
 	}
 

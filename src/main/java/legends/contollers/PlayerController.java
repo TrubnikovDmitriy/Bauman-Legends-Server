@@ -6,9 +6,11 @@ import legends.dao.PilotStageDAO;
 import legends.dao.TeamDAO;
 import legends.exceptions.LegendException;
 import legends.models.TaskType;
-import legends.models.Tooltip;
 import legends.requestviews.Answer;
+import legends.requestviews.SecretKey;
 import legends.responseviews.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +22,8 @@ import java.util.List;
 @RestController
 @RequestMapping(path = "/player")
 public class PlayerController {
+
+	private final Logger logger = LoggerFactory.getLogger(PlayerController.class);
 
 	private final @NotNull FinalStageDAO finalStageDAO;
 	private final @NotNull PilotStageDAO pilotStageDAO;
@@ -190,9 +194,23 @@ public class PlayerController {
 		return getCurrentTaskPilot(answer.getTeamID());
 	}
 
+	@GetMapping("/statues/{teamID}")
+	public ResponseEntity<OpenedStatues> getOpenedStatues(@PathVariable Integer teamID) {
+		final List<Integer> numbers = teamDAO.getOpenedStatues(teamID);
+		return new ResponseEntity<>(new OpenedStatues(numbers), HttpStatus.OK);
+	}
+
+	@PostMapping("/statues")
+	public ResponseEntity<KeyAnswer> getOpenedStatues(@RequestBody SecretKey secretKey) {
+		final KeyAnswer answer = teamDAO.checkKey(secretKey);
+		final HttpStatus httpStatus = answer.isAccepted() ? HttpStatus.ACCEPTED : HttpStatus.FORBIDDEN;
+		return new ResponseEntity<>(answer, httpStatus);
+	}
+
 
 	@ExceptionHandler(LegendException.class)
 	public ResponseEntity<ErrorMessage> excpetionHandler(LegendException exception) {
+		logger.debug("Handle exception", exception);
 		return new ResponseEntity<>(
 				new ErrorMessage(exception.getErrorMessage()),
 				exception.getStatus()

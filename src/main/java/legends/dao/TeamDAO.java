@@ -1,10 +1,15 @@
 package legends.dao;
 
+import legends.exceptions.CriticalInternalError;
 import legends.exceptions.TaskIsNotExist;
 import legends.exceptions.TeamDoesNotExist;
 import legends.models.*;
 import legends.requestviews.Answer;
+import legends.requestviews.SecretKey;
+import legends.responseviews.KeyAnswer;
 import legends.responseviews.TeamInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -22,9 +27,11 @@ import java.util.List;
 public class TeamDAO {
 
 	private final JdbcTemplate jdbcTemplate;
+	private final Logger logger;
 
 	public TeamDAO(JdbcTemplate jdbcTemplate) {
 		this.jdbcTemplate = jdbcTemplate;
+		this.logger = LoggerFactory.getLogger(TeamDAO.class);
 	}
 
 	public List<TeamForTable> getTeams(final boolean fullList) {
@@ -33,8 +40,9 @@ public class TeamDAO {
 					"SELECT " +
 							"  id, name, score, leader_name, final_tasks_arr, " +
 							"  start_time, finish_time, finished, started, fails_count, " +
-							"  (SELECT COUNT(ct.task_id) FROM current_tasks AS ct WHERE ct.team_id=tms.id AND ct.type='FINAL') AS task_count " +
-							"FROM teams AS tms",
+							"  (SELECT COUNT(ct.task_id) FROM current_tasks AS ct WHERE ct.team_id=tms.id AND ct.type=?) AS task_count " +
+							"FROM teams AS tms JOIN auth a ON tms.id=a.team_id WHERE type=?",
+					new Object[] { TaskType.FINAL.name(), TeamType.PLAYER.name() },
 					new TeamForTable.Mapper()
 			);
 		} else {
@@ -42,8 +50,10 @@ public class TeamDAO {
 					"SELECT " +
 							"  id, name, score, leader_name, final_tasks_arr, " +
 							"  start_time, finish_time, finished, started, fails_count, " +
-							"  (SELECT COUNT(ct.task_id) FROM current_tasks AS ct WHERE ct.team_id=tms.id AND ct.type='FINAL') AS task_count " +
-							"FROM teams AS tms WHERE started=TRUE AND finished=FALSE",
+							"  (SELECT COUNT(ct.task_id) FROM current_tasks AS ct WHERE ct.team_id=tms.id AND ct.type=?) AS task_count " +
+							"FROM teams AS tms JOIN auth a ON tms.id=a.team_id " +
+							"WHERE type=? AND started=TRUE AND finished=FALSE",
+					new Object[] { TaskType.FINAL.name(), TeamType.PLAYER.name() },
 					new TeamForTable.Mapper()
 			);
 		}
@@ -136,6 +146,43 @@ public class TeamDAO {
 
 		} catch (EmptyResultDataAccessException ignore) {
 			throw new TaskIsNotExist();
+		}
+	}
+
+	public List<Integer> getOpenedStatues(final Integer teamID) {
+		return jdbcTemplate.query(
+				"SELECT statue_number FROM extra_points WHERE team_id=? AND used=TRUE",
+				new Object[] { teamID },
+				(rs, i) -> rs.getInt(1)
+		);
+	}
+
+	public synchronized KeyAnswer checkKey(final SecretKey key) {
+
+		try {
+			// Check that such code exists for this command
+			final KeyAnswer answer = jdbcTemplate.queryForObject(
+					"SELECT points, statue_number FROM extra_points " +
+							"WHERE team_id=? AND secret_key=? AND used=FALSE",
+					new Object[]{key.getTeamID(), key.getKey()},
+					new KeyAnswer.Mapper()
+			);
+
+			// Mark the code as 'used'
+			jdbcTemplate.update(
+					"UPDATE extra_points SET used=TRUE WHERE team_id=? AND secret_key=?",
+					key.getTeamID(), key.getKey()
+			);
+
+			if (answer == null) throw new CriticalInternalError(getClass().getSimpleName());
+			answer.setAccept(true);
+
+			return answer;
+
+		} catch (EmptyResultDataAccessException ignore) {
+			final KeyAnswer answer = new KeyAnswer();
+			answer.setAccept(false);
+			return answer;
 		}
 	}
 
