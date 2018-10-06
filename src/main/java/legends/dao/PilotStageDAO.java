@@ -127,7 +127,7 @@ public class PilotStageDAO {
 			throw new CriticalInternalError(
 					"Если Вы это видите, значит Вы - счастливчики :)." +
 							"Напишите Трубникову Диме 'vk.com/trubnikovdv' со словами: " +
-							"\"Check answer pilot, taskID=" + taskID + "\"."
+							"\"PilotStageDAO::checkAnswer, taskID=" + taskID + "\"."
 			);
 		}
 		final List<String> answersList = Arrays.asList(
@@ -140,7 +140,7 @@ public class PilotStageDAO {
 		// Extra tasks should return tooltips
 		if (taskType == TaskType.EXTRA) {
 			tooltip = jdbcTemplate.queryForObject(
-					"SELECT tooltip FROM tooltips WHERE extra_id=?",
+					"SELECT tooltip FROM tasks JOIN statues ON statue_number=number WHERE id=?",
 					new Object[] { taskID },
 					String.class
 			);

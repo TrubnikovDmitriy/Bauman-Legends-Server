@@ -2,10 +2,7 @@ package legends.dao;
 
 import legends.exceptions.TaskIsNotExist;
 import legends.exceptions.TeamDoesNotExist;
-import legends.models.Router;
-import legends.models.TaskType;
-import legends.models.TeamForTable;
-import legends.models.Trail;
+import legends.models.*;
 import legends.requestviews.Answer;
 import legends.responseviews.TeamInfo;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -129,6 +126,20 @@ public class TeamDAO {
 		} catch (EmptyResultDataAccessException ignore) {
 			throw new TaskIsNotExist();
 		}
+	}
+
+	public List<Tooltip> getTooltipsOfTeam(final Integer teamID) {
+		return jdbcTemplate.query(
+				"SELECT number, tooltip FROM current_tasks ctsk " +
+						"  JOIN tasks tsk ON ctsk.task_id = tsk.id " +
+						"  JOIN statues st ON tsk.statue_number = st.number " +
+						"WHERE ctsk.team_id=? AND ctsk.type=? AND ctsk.success IS TRUE;",
+				new Object[] { teamID, TaskType.EXTRA.name() },
+				(rs, i) -> new Tooltip(
+						rs.getInt("number"),
+						rs.getString("tooltip")
+				)
+		);
 	}
 
 

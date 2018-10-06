@@ -5,12 +5,12 @@ import legends.models.TeamForTable;
 
 import java.util.List;
 
-public class Table {
+public class TableOfTeams {
 
 	@JsonProperty
 	private final List<TeamForTable> teams;
 
-	public Table(List<TeamForTable> teams) {
+	public TableOfTeams(List<TeamForTable> teams) {
 		this.teams = teams;
 	}
 }

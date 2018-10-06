@@ -6,6 +6,7 @@ import legends.dao.PilotStageDAO;
 import legends.dao.TeamDAO;
 import legends.exceptions.LegendException;
 import legends.models.TaskType;
+import legends.models.Tooltip;
 import legends.requestviews.Answer;
 import legends.responseviews.*;
 import org.springframework.http.HttpStatus;
@@ -13,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 
 @RestController
@@ -32,9 +34,9 @@ public class PlayerController {
 	}
 
 	@GetMapping("/team")
-	public ResponseEntity<Table> getTeams(@RequestParam(name = "full", defaultValue = "false") Boolean flag) {
+	public ResponseEntity<TableOfTeams> getTeams(@RequestParam(name = "full", defaultValue = "false") Boolean flag) {
 		return new ResponseEntity<>(
-				new Table(teamDAO.getTeams(flag)),
+				new TableOfTeams(teamDAO.getTeams(flag)),
 				HttpStatus.OK
 		);
 	}
@@ -188,6 +190,12 @@ public class PlayerController {
 		return getCurrentTaskPilot(answer.getTeamID());
 	}
 
+
+	@GetMapping("/tooltips/{teamID}")
+	public ResponseEntity<TableOfTooltips> getTooltip(@PathVariable Integer teamID) {
+		final List<Tooltip> tooltipList = teamDAO.getTooltipsOfTeam(teamID);
+		return new ResponseEntity<>(new TableOfTooltips(tooltipList), HttpStatus.OK);
+	}
 
 	@ExceptionHandler(LegendException.class)
 	public ResponseEntity<ErrorMessage> excpetionHandler(LegendException exception) {
