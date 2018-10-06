@@ -6,8 +6,11 @@ import legends.exceptions.TaskIsAlreadyAnswered;
 import legends.exceptions.TeamAlreadyStarted;
 import legends.exceptions.TeamNotYetFinished;
 import legends.models.NewTask;
+import legends.models.RefreshTimer;
 import legends.models.TaskType;
 import legends.responseviews.FinalTask;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -26,11 +29,45 @@ public class FinalStageDAO {
 
 	private final JdbcTemplate jdbcTemplate;
 	private final ScheduledExecutorService scheduler;
+	private final Logger logger;
 
 	public FinalStageDAO(JdbcTemplate jdbcTemplate) {
 		this.jdbcTemplate = jdbcTemplate;
 		this.scheduler = Executors.newScheduledThreadPool(1);
-		// TODO: Rerun scheduler after server's restart
+		this.logger = LoggerFactory.getLogger(getClass().getSimpleName());
+		refreshScheduler();
+	}
+
+	private void refreshScheduler() {
+
+		// Get list of active final tasks
+		final List<RefreshTimer> refreshList = jdbcTemplate.query(
+				"SELECT team_id, task_id, start_time, duration " +
+						"FROM current_tasks ct JOIN tasks t ON task_id=t.id " +
+						"WHERE ct.type=? AND success is NULL",
+				new Object[]{TaskType.FINAL.name()},
+				new RefreshTimer.Mapper()
+		);
+
+		logger.info("Size of refreshing task list: " + refreshList.size());
+
+		// Start timers for every active task
+		for (final RefreshTimer refresh : refreshList) {
+			final int currentTime = Configuration.currentTimestamp();
+			int delay = refresh.duration - (currentTime - refresh.startTime);
+
+			if (delay < 0) delay = 0;
+			logger.debug(
+					"Start task=" + refresh.taskID + ' ' +
+					"from team=" + refresh.teamID + ' ' +
+					"with delay=" + delay
+			);
+			scheduler.schedule(
+					() -> this.rejectCurrentTask(refresh.teamID, refresh.taskID),
+					delay,
+					TimeUnit.SECONDS
+			);
+		}
 	}
 
 	@Nullable
