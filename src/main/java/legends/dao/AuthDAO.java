@@ -73,8 +73,8 @@ public class AuthDAO {
 		parameters.put("fails_count", 0);
 		parameters.put("started", false);
 		parameters.put("finished", false);
-		parameters.put("final_tasks_arr", getFinalTasksArray());
-		parameters.put("pilot_tasks_arr", getPilotTasksArray());
+		parameters.put("final_tasks_arr", getEmptySQLArray());
+		parameters.put("pilot_tasks_arr", getEmptySQLArray());
 
 		final int teamID = jdbcInsert.executeAndReturnKey(parameters).intValue();
 
