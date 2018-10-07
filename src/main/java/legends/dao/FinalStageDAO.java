@@ -27,14 +27,14 @@ import java.util.concurrent.TimeUnit;
 @Repository
 public class FinalStageDAO {
 
+	private final Logger logger = LoggerFactory.getLogger(FinalStageDAO.class);
+
 	private final JdbcTemplate jdbcTemplate;
 	private final ScheduledExecutorService scheduler;
-	private final Logger logger;
 
 	public FinalStageDAO(JdbcTemplate jdbcTemplate) {
 		this.jdbcTemplate = jdbcTemplate;
 		this.scheduler = Executors.newScheduledThreadPool(1);
-		this.logger = LoggerFactory.getLogger(FinalStageDAO.class);
 		refreshScheduler();
 	}
 
@@ -195,7 +195,7 @@ public class FinalStageDAO {
 			// But we need to make sure they take the next task.
 			final FinalTask lastTask = this.getCurrentTask(teamID);
 			if (lastTask == null) {
-				// TODO logger
+				logger.error("Invalid data in DB!");
 				throw new CriticalInternalError("Кто-то шестерит руками в БД");
 			}
 			if (lastTask.getID() == currentTaskID && !lastTask.isFinished()) {

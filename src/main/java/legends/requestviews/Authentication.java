@@ -8,6 +8,7 @@ public class Authentication {
 	@JsonProperty(required = true) private String password;
 
 	public boolean isValid() {
+		if (login == null || password == null) return false;
 		login = login.trim();
 		return !login.isEmpty() && !password.isEmpty();
 	}
@@ -31,9 +32,6 @@ public class Authentication {
 
 	@Override
 	public String toString() {
-		return "Authentication{" +
-				"login='" + login + '\'' +
-				", password='" + password + '\'' +
-				'}';
+		return "login='" + login + "', password='" + password + '\'';
 	}
 }

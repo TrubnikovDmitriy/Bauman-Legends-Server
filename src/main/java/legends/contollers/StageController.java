@@ -2,6 +2,8 @@ package legends.contollers;
 
 import legends.Configuration;
 import legends.dao.PilotStageDAO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -12,6 +14,8 @@ import javax.validation.constraints.NotNull;
 @RequestMapping(path = "/controlpanel")
 public class StageController {
 
+	private final Logger logger = LoggerFactory.getLogger(StageController.class);
+
 	private final @NotNull PilotStageDAO pilotStageDAO;
 
 	public StageController(@NotNull PilotStageDAO pilotStageDAO) {
@@ -20,6 +24,7 @@ public class StageController {
 
 	@GetMapping
 	public String simpleGet() {
+		logger.warn("Someone touch the control panel");
 		return "<h1>Панель упарвления:</h1>" +
 				"<br/>" +
 				"<h2>Запустить разогревочный этап: GET /controlpanel/start/pilot</h2>" +

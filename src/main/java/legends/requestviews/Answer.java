@@ -48,4 +48,10 @@ public class Answer {
 	public void setTaskType(TaskType taskType) {
 		this.taskType = taskType;
 	}
+
+	@Override
+	public String toString() {
+		return "teamID=" + teamID + ", taskID=" + taskID +
+				", answer='" + answer + "', taskType=" + taskType;
+	}
 }

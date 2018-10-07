@@ -84,4 +84,10 @@ public class TeamInfo {
 		}
 	}
 
+
+	@Override
+	public String toString() {
+		return "teamID=" + teamID +", teamName='" + teamName +
+				", score=" + score + "', tooltips=" + tooltips;
+	}
 }

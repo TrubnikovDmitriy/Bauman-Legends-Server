@@ -48,20 +48,22 @@ public class PlayerController {
 	@GetMapping("/team/{teamID}")
 	public ResponseEntity getTeams(@PathVariable Integer teamID) {
 		final TeamInfo teamInfo = teamDAO.getTeamForPlayer(teamID);
+		logger.info("Entrance to personal account: " + teamInfo);
 		return new ResponseEntity<>(teamInfo, HttpStatus.OK);
 	}
 
 	@GetMapping("/task/{teamID}")
 	public ResponseEntity getCurrentTask(@PathVariable Integer teamID) {
 
+		logger.info("Get current task (teamID=" + teamID + ')');
 		if (Configuration.finalStage) return getCurrentTaskFinal(teamID);
 		if (Configuration.pilotStage) return getCurrentTaskPilot(teamID);
 
 		// Если команда получила логин-пароль до того, как я запустил разогрев.
 		return new ResponseEntity<>(
 				new ErrorMessage(
-						"Легенды Бауманки начнутся уже совсем скоро!\n" +
-						"Уже в понедельник 8 октября Вы сможете получить первое задание!"
+						"Легенды Бауманки начнутся совсем скоро!\n" +
+						"Уже в понедельник 8 октября вы сможете получить первое задание!"
 				),
 				HttpStatus.BAD_REQUEST
 		);
@@ -93,7 +95,9 @@ public class PlayerController {
 	@PostMapping("/task")
 	public ResponseEntity checkAnswer(@RequestBody Answer answer) {
 
+		logger.info("Send answer: " + answer);
 		teamDAO.validateAnswer(answer);
+
 		if (Configuration.finalStage) return checkAnswerFinal(answer);
 		if (Configuration.pilotStage) return checkAnswerPilot(answer);
 
@@ -152,6 +156,7 @@ public class PlayerController {
 	@PostMapping("/next")
 	public ResponseEntity takeNextAnswer(@RequestBody Answer answer) {
 
+		logger.info("Take next task: " + answer);
 		if (Configuration.finalStage) return takeNextAnswerFinal(answer);
 		if (Configuration.pilotStage) return takeNextAnswerExtra(answer);
 
@@ -196,13 +201,17 @@ public class PlayerController {
 
 	@GetMapping("/statues/{teamID}")
 	public ResponseEntity<OpenedStatues> getOpenedStatues(@PathVariable Integer teamID) {
+		logger.info("Get statues (teamID=" + teamID + ')');
 		final List<Integer> numbers = teamDAO.getOpenedStatues(teamID);
 		return new ResponseEntity<>(new OpenedStatues(numbers), HttpStatus.OK);
 	}
 
 	@PostMapping("/statues")
 	public ResponseEntity<KeyAnswer> getOpenedStatues(@RequestBody SecretKey secretKey) {
+
+		logger.info("Send secret key: " + secretKey);
 		final KeyAnswer answer = teamDAO.checkKey(secretKey);
+
 		final HttpStatus httpStatus = answer.isAccepted() ? HttpStatus.ACCEPTED : HttpStatus.FORBIDDEN;
 		return new ResponseEntity<>(answer, httpStatus);
 	}
@@ -210,7 +219,7 @@ public class PlayerController {
 
 	@ExceptionHandler(LegendException.class)
 	public ResponseEntity<ErrorMessage> excpetionHandler(LegendException exception) {
-		logger.debug("Handle exception", exception);
+		logger.info("ExceptionHandler", exception);
 		return new ResponseEntity<>(
 				new ErrorMessage(exception.getErrorMessage()),
 				exception.getStatus()

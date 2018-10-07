@@ -28,14 +28,20 @@ public class AuthController {
 
 	@PostMapping
 	public ResponseEntity<TeamAuth> signIn(@RequestBody Authentication body) {
-		logger.info("AUTH: Login=" + body.getLogin(), ", Pass=" + body.getPassword());
+
+		logger.info("Authentication: " + body);
 		if (!body.isValid()) {
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
+
 		final TeamAuth team = authDAO.getUser(body.getLogin(), body.getPassword());
+
 		if (team != null) {
+			logger.info("Authentication success: " + team);
 			return new ResponseEntity<>(team, HttpStatus.OK);
+
 		} else {
+			logger.info("Authentication failed");
 			return new ResponseEntity<>(HttpStatus.FORBIDDEN);
 		}
 	}

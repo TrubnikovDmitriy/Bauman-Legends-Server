@@ -40,4 +40,11 @@ public class TeamAuth {
 	public void setTeamType(TeamType teamType) {
 		this.teamType = teamType;
 	}
+
+	@Override
+	public String toString() {
+		return "teamName='" + teamName +
+				"', teamID=" + teamID +
+				", teamType=" + teamType;
+	}
 }
