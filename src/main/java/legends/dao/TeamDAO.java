@@ -15,6 +15,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.constraints.NotNull;
 import java.sql.ResultSet;
@@ -157,6 +158,7 @@ public class TeamDAO {
 		);
 	}
 
+	@Transactional
 	public synchronized KeyAnswer checkKey(final SecretKey key) {
 
 		try {
@@ -167,6 +169,7 @@ public class TeamDAO {
 					new Object[]{key.getTeamID(), key.getKey()},
 					new KeyAnswer.Mapper()
 			);
+			if (answer == null) throw new CriticalInternalError(getClass().getSimpleName());
 
 			// Mark the code as 'used'
 			jdbcTemplate.update(
@@ -174,9 +177,13 @@ public class TeamDAO {
 					key.getTeamID(), key.getKey()
 			);
 
-			if (answer == null) throw new CriticalInternalError(getClass().getSimpleName());
-			answer.setAccept(true);
+			// Increase score of team
+			jdbcTemplate.update(
+					"UPDATE teams SET score=score+? WHERE id=?",
+					answer.getPoints(), key.getTeamID()
+			);
 
+			answer.setAccept(true);
 			return answer;
 
 		} catch (EmptyResultDataAccessException ignore) {

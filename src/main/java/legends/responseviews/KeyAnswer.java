@@ -20,7 +20,6 @@ public class KeyAnswer {
 	private Integer numberOfStatue;
 
 
-	@JsonIgnore
 	public void setAccept(Boolean accept) {
 		this.accept = accept;
 	}
@@ -30,6 +29,10 @@ public class KeyAnswer {
 		return accept;
 	}
 
+	@JsonIgnore
+	public Integer getPoints() {
+		return points;
+	}
 
 	public static final class Mapper implements RowMapper<KeyAnswer> {
 

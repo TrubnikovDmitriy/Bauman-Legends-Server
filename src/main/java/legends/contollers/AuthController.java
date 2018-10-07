@@ -28,7 +28,7 @@ public class AuthController {
 
 	@PostMapping
 	public ResponseEntity<TeamAuth> signIn(@RequestBody Authentication body) {
-		logger.info("AUTH!!!", body);
+		logger.info("AUTH: Login=" + body.getLogin(), ", Pass=" + body.getPassword());
 		if (!body.isValid()) {
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
