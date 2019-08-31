@@ -1,47 +1,35 @@
---
+schema.dump--
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 9.5.14
--- Dumped by pg_dump version 9.5.14
+-- Dumped from database version 10.10 (Ubuntu 10.10-0ubuntu0.18.04.1)
+-- Dumped by pg_dump version 10.10 (Ubuntu 10.10-0ubuntu0.18.04.1)
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
+SET idle_in_transaction_session_timeout = 0;
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
 SELECT pg_catalog.set_config('search_path', '', false);
 SET check_function_bodies = false;
+SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
 
-ALTER TABLE IF EXISTS ONLY public.tooltips DROP CONSTRAINT IF EXISTS tooltips_tasks_id_fk;
-ALTER TABLE IF EXISTS ONLY public.tasks DROP CONSTRAINT IF EXISTS tasks_tasks_id_fk;
-ALTER TABLE IF EXISTS ONLY public.players DROP CONSTRAINT IF EXISTS players_teams_id_fk;
-ALTER TABLE IF EXISTS ONLY public.current_tasks DROP CONSTRAINT IF EXISTS current_task_teams_id_fk;
-ALTER TABLE IF EXISTS ONLY public.current_tasks DROP CONSTRAINT IF EXISTS current_task_tasks_id_fk;
-ALTER TABLE IF EXISTS ONLY public.auth DROP CONSTRAINT IF EXISTS auth_teams_id_fk;
-DROP INDEX IF EXISTS public.team_and_task_ids_unique;
-DROP INDEX IF EXISTS public.auth_login_uindex;
-ALTER TABLE IF EXISTS ONLY public.tooltips DROP CONSTRAINT IF EXISTS tooltips_extra_id_pk;
-ALTER TABLE IF EXISTS ONLY public.teams DROP CONSTRAINT IF EXISTS teams_pkey;
-ALTER TABLE IF EXISTS ONLY public.tasks DROP CONSTRAINT IF EXISTS tasks_id_pk;
-ALTER TABLE IF EXISTS ONLY public.players DROP CONSTRAINT IF EXISTS players_id_pk;
-ALTER TABLE IF EXISTS ONLY public.current_tasks DROP CONSTRAINT IF EXISTS current_task_pkey;
-ALTER TABLE IF EXISTS ONLY public.auth DROP CONSTRAINT IF EXISTS auth_team_id_pk;
-ALTER TABLE IF EXISTS public.teams ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.tasks ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.players ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.current_tasks ALTER COLUMN id DROP DEFAULT;
-DROP TABLE IF EXISTS public.tooltips;
-DROP SEQUENCE IF EXISTS public.teams_id_seq;
-DROP TABLE IF EXISTS public.teams;
-DROP SEQUENCE IF EXISTS public.tasks_id_seq;
-DROP TABLE IF EXISTS public.tasks;
-DROP SEQUENCE IF EXISTS public.players_id_seq;
-DROP TABLE IF EXISTS public.players;
-DROP SEQUENCE IF EXISTS public.current_task_id_seq;
-DROP TABLE IF EXISTS public.current_tasks;
-DROP TABLE IF EXISTS public.auth;
+--
+-- Name: user_role; Type: TYPE; Schema: public; Owner: postgres
+--
+
+CREATE TYPE public.user_role AS ENUM (
+    'admin',
+    'moderator',
+    'player',
+    'tester'
+);
+
+
+ALTER TYPE public.user_role OWNER TO postgres;
+
 SET default_tablespace = '';
 
 SET default_with_oids = false;
@@ -53,8 +41,9 @@ SET default_with_oids = false;
 CREATE TABLE public.auth (
     team_id integer NOT NULL,
     login text NOT NULL,
-    pass text DEFAULT left(md5((random())::text), 8) NOT NULL,
-    type text DEFAULT 'PLAYER'::text NOT NULL
+    pass text DEFAULT "left"(md5((random())::text), 8) NOT NULL,
+    type text DEFAULT 'PLAYER'::text NOT NULL,
+    salt text NOT NULL
 );
 
 
@@ -140,7 +129,7 @@ ALTER SEQUENCE public.players_id_seq OWNED BY public.players.id;
 CREATE TABLE public.tasks (
     id integer NOT NULL,
     content text NOT NULL,
-    answers text DEFAULT left(md5((random())::text), 15) NOT NULL,
+    answers text DEFAULT "left"(md5((random())::text), 15) NOT NULL,
     points integer NOT NULL,
     duration integer,
     type text NOT NULL,
@@ -227,43 +216,136 @@ CREATE TABLE public.tooltips (
 ALTER TABLE public.tooltips OWNER TO trubnikov;
 
 --
--- Name: id; Type: DEFAULT; Schema: public; Owner: trubnikov
+-- Name: users; Type: TABLE; Schema: public; Owner: trubnikov
+--
+
+CREATE TABLE public.users (
+    user_id integer NOT NULL,
+    login text NOT NULL,
+    password bytea NOT NULL,
+    salt bytea NOT NULL,
+    team_id integer,
+    role public.user_role DEFAULT 'player'::public.user_role NOT NULL,
+    first_name text NOT NULL,
+    last_name text NOT NULL,
+    vk text,
+    study_group text NOT NULL
+);
+
+
+ALTER TABLE public.users OWNER TO trubnikov;
+
+--
+-- Name: users_user_id_seq; Type: SEQUENCE; Schema: public; Owner: trubnikov
+--
+
+CREATE SEQUENCE public.users_user_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.users_user_id_seq OWNER TO trubnikov;
+
+--
+-- Name: users_user_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: trubnikov
+--
+
+ALTER SEQUENCE public.users_user_id_seq OWNED BY public.users.user_id;
+
+
+--
+-- Name: current_tasks id; Type: DEFAULT; Schema: public; Owner: trubnikov
 --
 
 ALTER TABLE ONLY public.current_tasks ALTER COLUMN id SET DEFAULT nextval('public.current_task_id_seq'::regclass);
 
 
 --
--- Name: id; Type: DEFAULT; Schema: public; Owner: trubnikov
+-- Name: players id; Type: DEFAULT; Schema: public; Owner: trubnikov
 --
 
 ALTER TABLE ONLY public.players ALTER COLUMN id SET DEFAULT nextval('public.players_id_seq'::regclass);
 
 
 --
--- Name: id; Type: DEFAULT; Schema: public; Owner: trubnikov
+-- Name: tasks id; Type: DEFAULT; Schema: public; Owner: trubnikov
 --
 
 ALTER TABLE ONLY public.tasks ALTER COLUMN id SET DEFAULT nextval('public.tasks_id_seq'::regclass);
 
 
 --
--- Name: id; Type: DEFAULT; Schema: public; Owner: trubnikov
+-- Name: teams id; Type: DEFAULT; Schema: public; Owner: trubnikov
 --
 
 ALTER TABLE ONLY public.teams ALTER COLUMN id SET DEFAULT nextval('public.teams_id_seq'::regclass);
 
 
 --
+-- Name: users user_id; Type: DEFAULT; Schema: public; Owner: trubnikov
+--
+
+ALTER TABLE ONLY public.users ALTER COLUMN user_id SET DEFAULT nextval('public.users_user_id_seq'::regclass);
+
+
+--
 -- Data for Name: auth; Type: TABLE DATA; Schema: public; Owner: trubnikov
 --
 
-COPY public.auth (team_id, login, pass, type) FROM stdin;
-5team_name-5ca2707bePLAYER
-2adminadminADMIN
-7team_name-78311c9c6PLAYER
-3moderatormoderatorMODERATOR
-6playerplayerPLAYER
+COPY public.auth (team_id, login, pass, type, salt) FROM stdin;
+\.
+
+
+--
+-- Data for Name: current_tasks; Type: TABLE DATA; Schema: public; Owner: trubnikov
+--
+
+COPY public.current_tasks (id, task_id, team_id, start_time, success, type, finish_time) FROM stdin;
+\.
+
+
+--
+-- Data for Name: players; Type: TABLE DATA; Schema: public; Owner: trubnikov
+--
+
+COPY public.players (first_name, second_name, id, team_id) FROM stdin;
+\.
+
+
+--
+-- Data for Name: tasks; Type: TABLE DATA; Schema: public; Owner: trubnikov
+--
+
+COPY public.tasks (id, content, answers, points, duration, type, extra_id) FROM stdin;
+\.
+
+
+--
+-- Data for Name: teams; Type: TABLE DATA; Schema: public; Owner: trubnikov
+--
+
+COPY public.teams (id, name, score, leader_name, pilot_tasks_arr, final_tasks_arr, start_time, finish_time, fails_count, started, finished) FROM stdin;
+\.
+
+
+--
+-- Data for Name: tooltips; Type: TABLE DATA; Schema: public; Owner: trubnikov
+--
+
+COPY public.tooltips (extra_id, content, tooltip) FROM stdin;
+\.
+
+
+--
+-- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: trubnikov
+--
+
+COPY public.users (user_id, login, password, salt, team_id, role, first_name, last_name, vk, study_group) FROM stdin;
+29	trubniko	\\xfcde5c67dae267869ec4427f090c36a504060705ec0d96181141e2076acbaf9864c1203bed5fa6f0cdbc813f2a64112e3da76a466157f96577181f94af20e7f7	\\x92e6e1c40d979c87c5dad89e4e71c9be	\N	player	Дмитрий	Трубников	https://vk.com/trubnikovdv	РЛ1-112
+32	trubnikovdv	\\xeb52b02cbefeef9c258ff40a8c14cff02806b706fa52bb132f74412ba220f0c48a8647aea39a05b320054e1bd7773532331ec283a6562126edbd4743b86fa242	\\x259b37a63d6f554291069c5ce21ae94a	\N	player	Дмитрий	Трубников	https://vk.com/trubnikovdv	РЛ1-112
 \.
 
 
@@ -275,77 +357,10 @@ SELECT pg_catalog.setval('public.current_task_id_seq', 67, true);
 
 
 --
--- Data for Name: current_tasks; Type: TABLE DATA; Schema: public; Owner: trubnikov
---
-
-COPY public.current_tasks (id, task_id, team_id, start_time, success, type, finish_time) FROM stdin;
-541121515125125tPHOTO1538164838
-591421538164838fEXTRA1538164893
-601021538164893tPHOTO1538165427
-611321538165427tEXTRA1538165617
-62221538165617tPHOTO1538166720
-63421538166720fEXTRA1538167046
-66921538167047tPHOTO1538168161
-671221538168161\NEXTRA\N
-\.
-
-
---
--- Data for Name: players; Type: TABLE DATA; Schema: public; Owner: trubnikov
---
-
-COPY public.players (first_name, second_name, id, team_id) FROM stdin;
-ДианаЧигрина12
-НастяРачкова22
-КристинаПохиленко32
-ВикторияКораблева42
-ОльгаЦарёва52
-ДмитрийТрубников62
-Leader_first_nameLeader_second_name105
-Leader_first_nameLeader_second_name146
-ModeratorModerator191
-ИмяФамилия203
-ЛешкаКузнецов213
-ОтабекЭгамбердиев223
-first_name-1second#_name-195
-first_name-2-6second#_name-2-6126
-first_name-2second#_name-275
-first_name-3-6second#_name-3-6136
-first_name-3second#_name-385
-first_name-1-6second#_name-1-6116
-ЖеняКузьмин167
-АлексейЛевшин157
-ЖеняБодюль187
-ЛешаОсеков177
-\.
-
-
---
 -- Name: players_id_seq; Type: SEQUENCE SET; Schema: public; Owner: trubnikov
 --
 
 SELECT pg_catalog.setval('public.players_id_seq', 22, true);
-
-
---
--- Data for Name: tasks; Type: TABLE DATA; Schema: public; Owner: trubnikov
---
-
-COPY public.tasks (id, content, answers, points, duration, type, extra_id) FROM stdin;
-1502юanswer1050000FINAL\N
-5Пеликанanswer30100000FINAL\N
-6Древо МГТУanswer15150000FINAL\N
-7Авионикаanswer20100000FINAL\N
-8Фонтанanswer15160000FINAL\N
-14Вероятность еды на этажахanswer0\NEXTRA\N
-11Львыanswer10\NPHOTO14
-10Турникиanswer15\NPHOTO13
-9Бюсты бауманаanswer40\NPHOTO12
-12Номерки и Гардеробanswer0\NEXTRA\N
-13Посещаемостьanswer0\NEXTRA\N
-2Угол с Бауманомanswer20\NPHOTO4
-4Вопрос про этажиanswer0\NEXTRA\N
-\.
 
 
 --
@@ -356,20 +371,6 @@ SELECT pg_catalog.setval('public.tasks_id_seq', 14, true);
 
 
 --
--- Data for Name: teams; Type: TABLE DATA; Schema: public; Owner: trubnikov
---
-
-COPY public.teams (id, name, score, leader_name, pilot_tasks_arr, final_tasks_arr, start_time, finish_time, fails_count, started, finished) FROM stdin;
-2admin155Дмитрий Трубников{11,14,10,13,2,4,9,12}{5,6,7,1,8}1538080185\N0tf
-1moderators90Дмитрий Трубников{10,13,2,4,11,14,9,12}{2,35,1}1538074770\N0tf
-3Игрок0Игрок Ноунейм{9,12,2,4,10,13,11,14}{5,1,6,7,8}1531124123\N0ff
-7рл1-910Женя Бодюль{2,4,9,12,10,13,11,14}{8,5,1,6,7}1531124123\N0ff
-6ололо0Аня Смирнова{10,13,11,14,9,12,2,4}{7,6,1,5,8}1531124123\N0ff
-5Тима-10Сеня Гнедов{11,14,2,4,9,12,10,13}{6,8,1,5,7}1538133908152476120tt
-\.
-
-
---
 -- Name: teams_id_seq; Type: SEQUENCE SET; Schema: public; Owner: trubnikov
 --
 
@@ -377,19 +378,14 @@ SELECT pg_catalog.setval('public.teams_id_seq', 7, true);
 
 
 --
--- Data for Name: tooltips; Type: TABLE DATA; Schema: public; Owner: trubnikov
+-- Name: users_user_id_seq; Type: SEQUENCE SET; Schema: public; Owner: trubnikov
 --
 
-COPY public.tooltips (extra_id, content, tooltip) FROM stdin;
-4contentTooltip!
-12contentTooltip!
-13contentTooltip!
-14contentTooltip!
-\.
+SELECT pg_catalog.setval('public.users_user_id_seq', 32, true);
 
 
 --
--- Name: auth_team_id_pk; Type: CONSTRAINT; Schema: public; Owner: trubnikov
+-- Name: auth auth_team_id_pk; Type: CONSTRAINT; Schema: public; Owner: trubnikov
 --
 
 ALTER TABLE ONLY public.auth
@@ -397,7 +393,7 @@ ALTER TABLE ONLY public.auth
 
 
 --
--- Name: current_task_pkey; Type: CONSTRAINT; Schema: public; Owner: trubnikov
+-- Name: current_tasks current_task_pkey; Type: CONSTRAINT; Schema: public; Owner: trubnikov
 --
 
 ALTER TABLE ONLY public.current_tasks
@@ -405,7 +401,7 @@ ALTER TABLE ONLY public.current_tasks
 
 
 --
--- Name: players_id_pk; Type: CONSTRAINT; Schema: public; Owner: trubnikov
+-- Name: players players_id_pk; Type: CONSTRAINT; Schema: public; Owner: trubnikov
 --
 
 ALTER TABLE ONLY public.players
@@ -413,7 +409,7 @@ ALTER TABLE ONLY public.players
 
 
 --
--- Name: tasks_id_pk; Type: CONSTRAINT; Schema: public; Owner: trubnikov
+-- Name: tasks tasks_id_pk; Type: CONSTRAINT; Schema: public; Owner: trubnikov
 --
 
 ALTER TABLE ONLY public.tasks
@@ -421,7 +417,7 @@ ALTER TABLE ONLY public.tasks
 
 
 --
--- Name: teams_pkey; Type: CONSTRAINT; Schema: public; Owner: trubnikov
+-- Name: teams teams_pkey; Type: CONSTRAINT; Schema: public; Owner: trubnikov
 --
 
 ALTER TABLE ONLY public.teams
@@ -429,11 +425,19 @@ ALTER TABLE ONLY public.teams
 
 
 --
--- Name: tooltips_extra_id_pk; Type: CONSTRAINT; Schema: public; Owner: trubnikov
+-- Name: tooltips tooltips_extra_id_pk; Type: CONSTRAINT; Schema: public; Owner: trubnikov
 --
 
 ALTER TABLE ONLY public.tooltips
     ADD CONSTRAINT tooltips_extra_id_pk PRIMARY KEY (extra_id);
+
+
+--
+-- Name: users users_pk; Type: CONSTRAINT; Schema: public; Owner: trubnikov
+--
+
+ALTER TABLE ONLY public.users
+    ADD CONSTRAINT users_pk PRIMARY KEY (user_id);
 
 
 --
@@ -451,7 +455,14 @@ CREATE UNIQUE INDEX team_and_task_ids_unique ON public.current_tasks USING btree
 
 
 --
--- Name: auth_teams_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: trubnikov
+-- Name: users_login_uindex; Type: INDEX; Schema: public; Owner: trubnikov
+--
+
+CREATE UNIQUE INDEX users_login_uindex ON public.users USING btree (login);
+
+
+--
+-- Name: auth auth_teams_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: trubnikov
 --
 
 ALTER TABLE ONLY public.auth
@@ -459,7 +470,7 @@ ALTER TABLE ONLY public.auth
 
 
 --
--- Name: current_task_tasks_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: trubnikov
+-- Name: current_tasks current_task_tasks_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: trubnikov
 --
 
 ALTER TABLE ONLY public.current_tasks
@@ -467,7 +478,7 @@ ALTER TABLE ONLY public.current_tasks
 
 
 --
--- Name: current_task_teams_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: trubnikov
+-- Name: current_tasks current_task_teams_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: trubnikov
 --
 
 ALTER TABLE ONLY public.current_tasks
@@ -475,7 +486,7 @@ ALTER TABLE ONLY public.current_tasks
 
 
 --
--- Name: players_teams_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: trubnikov
+-- Name: players players_teams_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: trubnikov
 --
 
 ALTER TABLE ONLY public.players
@@ -483,7 +494,7 @@ ALTER TABLE ONLY public.players
 
 
 --
--- Name: tasks_tasks_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: trubnikov
+-- Name: tasks tasks_tasks_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: trubnikov
 --
 
 ALTER TABLE ONLY public.tasks
@@ -491,7 +502,7 @@ ALTER TABLE ONLY public.tasks
 
 
 --
--- Name: tooltips_tasks_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: trubnikov
+-- Name: tooltips tooltips_tasks_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: trubnikov
 --
 
 ALTER TABLE ONLY public.tooltips
@@ -499,7 +510,13 @@ ALTER TABLE ONLY public.tooltips
 
 
 --
--- PostgreSQL database dump complete
+-- Name: SCHEMA public; Type: ACL; Schema: -; Owner: postgres
 --
 
+GRANT ALL ON SCHEMA public TO PUBLIC;
+
+
+--
+-- PostgreSQL database dump complete
+--
 
