@@ -1,5 +1,8 @@
 package legends.models
 
+import legends.exceptions.LegendsException
+import legends.exceptions.TeamIsNotPresented
+import org.springframework.http.HttpStatus
 import org.springframework.jdbc.core.RowMapper
 import java.sql.ResultSet
 
@@ -20,7 +23,9 @@ data class UserModel(
         override fun mapRow(rs: ResultSet, rowNum: Int): UserModel? {
             return UserModel(
                     userId = rs.getLong("user_id"),
-                    teamId = rs.getLong("team_id"),
+                    teamId = rs.getLong("team_id").run {
+                        if (rs.wasNull()) null else this
+                    },
                     login = rs.getString("login"),
                     hashedPassword = rs.getBytes("password"),
                     salt = rs.getBytes("salt"),
@@ -31,5 +36,16 @@ data class UserModel(
                     vkRef = rs.getString("vk")
             )
         }
+    }
+
+    fun checkCaptain(): Long {
+        if (teamId == null) {
+            throw TeamIsNotPresented()
+        }
+        if (role != UserRole.CAPTAIN) {
+            throw LegendsException(HttpStatus.FORBIDDEN)
+            { "Действие отклонено, так как вы не являетесь капитаном команды." }
+        }
+        return teamId
     }
 }

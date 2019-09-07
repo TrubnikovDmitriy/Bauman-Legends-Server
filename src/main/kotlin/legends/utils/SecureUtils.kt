@@ -3,6 +3,7 @@ package legends.utils
 import java.security.MessageDigest
 import java.security.SecureRandom
 import java.util.*
+import kotlin.math.max
 
 class SecureUtils {
     companion object {
@@ -22,6 +23,13 @@ class SecureUtils {
         return MessageDigest.getInstance(ALGORITHM_NAME).run {
             update(salt)
             digest(password.toByteArray())
+        }
+    }
+
+    fun generateRandomString(): String {
+        return ByteArray(SALT_LENGTH).let {
+            random.nextBytes(it)
+            UUID.nameUUIDFromBytes(it).toString().substring(1..6)
         }
     }
 }

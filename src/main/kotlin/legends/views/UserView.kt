@@ -25,3 +25,5 @@ data class UserView(
             vkRef = user.vkRef
     )
 }
+
+fun List<UserModel>.toView(): List<UserView>  = map { UserView(it) }

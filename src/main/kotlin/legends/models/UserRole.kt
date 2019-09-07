@@ -4,6 +4,7 @@ enum class UserRole {
     ADMIN,
     MODERATOR,
     PLAYER,
+    CAPTAIN,
     TESTER;
 
     companion object  {
@@ -12,6 +13,7 @@ enum class UserRole {
                 ADMIN.name -> ADMIN
                 MODERATOR.name -> MODERATOR
                 PLAYER.name -> PLAYER
+                CAPTAIN.name -> CAPTAIN
                 TESTER.name -> TESTER
                 else -> PLAYER
             }

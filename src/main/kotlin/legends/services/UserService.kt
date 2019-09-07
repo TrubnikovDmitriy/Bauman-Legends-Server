@@ -60,6 +60,10 @@ class UserService(private val userDao: UserDao) {
     }
 
     fun deleteUser(userId: Long) {
+        val user = userDao.getUserOrThrow(userId)
+        if (user.role == UserRole.CAPTAIN) {
+            throw BadRequestException { "Вы не можете удалить аккаунт, так как являетесь капитаном команды №${user.teamId}" }
+        }
         userDao.deleteUser(userId)
     }
 }
