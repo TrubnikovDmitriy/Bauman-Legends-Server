@@ -4,6 +4,7 @@ import legends.dao.TeamDao
 import legends.dao.UserDao
 import legends.dto.TeamJoin
 import legends.dto.TeamSignUp
+import legends.exceptions.BadRequestException
 import legends.exceptions.LegendsException
 import legends.exceptions.TeamIsNotPresented
 import legends.models.TeamModel
@@ -30,8 +31,7 @@ class TeamService(
 
         val userData = userDao.getUserOrThrow(userId)
         if (userData.teamId != null) {
-            throw LegendsException(HttpStatus.BAD_REQUEST)
-            { "Вы уже состоите в команде №${userData.teamId}." }
+            throw BadRequestException { "Вы уже состоите в команде №${userData.teamId}." }
         }
         if (userData.role != UserRole.PLAYER) {
             throw BadRequestException { "Чтобы создать команду, вы должны быть обычным участником." }
@@ -50,18 +50,15 @@ class TeamService(
 
         val user = userDao.getUserOrThrow(userId)
         if (user.teamId != null) {
-            throw LegendsException(HttpStatus.BAD_REQUEST)
-            { "Вы уже состоите в команде №${join.teamId}." }
+            throw BadRequestException { "Вы уже состоите в команде №${join.teamId}." }
         }
 
         val team = teamDao.getTeamOrThrow(join.teamId)
         if (team.size >= MAX_TEAM_SIZE) {
-            throw LegendsException(HttpStatus.BAD_REQUEST)
-            { "Макисмально число участников в команде - $MAX_TEAM_SIZE" }
+            throw BadRequestException { "Макисмально число участников в команде [$MAX_TEAM_SIZE]" }
         }
         if (team.inviteCode != join.inviteCode) {
-            throw LegendsException(HttpStatus.BAD_REQUEST)
-            { "Неверный пригласительный код" }
+            throw BadRequestException { "Неверный пригласительный код" }
         }
 
         userDao.setTeamId(userId = userId, teamId = join.teamId)

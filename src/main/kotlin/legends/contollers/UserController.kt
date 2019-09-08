@@ -80,7 +80,7 @@ class UserController(private val userService: UserService) {
 
     @ExceptionHandler(LegendsException::class)
     fun exceptionHandler(exception: LegendsException): ResponseEntity<ErrorView> {
-        logger.warn("UserExceptionHandler", exception.errorMessage)
+        logger.warn("UserExceptionHandler ${exception.errorMessage()}")
         return exception.toResponse()
     }
 }

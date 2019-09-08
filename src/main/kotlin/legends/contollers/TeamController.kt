@@ -85,7 +85,7 @@ class TeamController(private val teamService: TeamService) {
 
     @ExceptionHandler(LegendsException::class)
     fun exceptionHandler(exception: LegendsException): ResponseEntity<ErrorView> {
-        logger.warn("TeamExceptionHandler", exception.errorMessage)
+        logger.warn("TeamExceptionHandler ${exception.errorMessage()}")
         return exception.toResponse()
     }
 }

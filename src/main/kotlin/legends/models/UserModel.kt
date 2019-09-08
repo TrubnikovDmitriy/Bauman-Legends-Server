@@ -23,9 +23,7 @@ data class UserModel(
         override fun mapRow(rs: ResultSet, rowNum: Int): UserModel? {
             return UserModel(
                     userId = rs.getLong("user_id"),
-                    teamId = rs.getLong("team_id").run {
-                        if (rs.wasNull()) null else this
-                    },
+                    teamId = rs.getLong("team_id").takeUnless { rs.wasNull() },
                     login = rs.getString("login"),
                     hashedPassword = rs.getBytes("password"),
                     salt = rs.getBytes("salt"),
@@ -47,5 +45,12 @@ data class UserModel(
             { "Действие отклонено, так как вы не являетесь капитаном команды." }
         }
         return teamId
+    }
+
+    fun checkModerator() {
+        if (role != UserRole.MODERATOR && role != UserRole.ADMIN) {
+            throw LegendsException(HttpStatus.FORBIDDEN)
+            { "Действие отклонено, так как вы не являетесь модератором." }
+        }
     }
 }
