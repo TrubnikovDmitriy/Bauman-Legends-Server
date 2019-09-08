@@ -1,6 +1,6 @@
 package legends.models;
 
-public enum TaskType {
+public enum TaskTypeOld {
 	PHOTO,
 	EXTRA,
 	FINAL

@@ -1,13 +1,11 @@
 package legends.contollers;
 
 import legends.Configuration;
-import legends.dao.AuthDAO;
 import legends.dao.FinalStageDAO;
 import legends.dao.PilotStageDAO;
 import legends.dao.TeamDAO;
 import legends.exceptions.LegendException;
-import legends.requestviews.FullTeam;
-import legends.responseviews.ErrorMessage;
+import legends.views.ErrorView;
 import legends.responseviews.PhotoAnswer;
 import legends.responseviews.Table;
 import legends.responseviews.TeamInfo;
@@ -26,28 +24,16 @@ public class ModeratorController {
 
 	private final Logger logger = LoggerFactory.getLogger(ModeratorController.class);
 
-	private final @NotNull AuthDAO authDAO;
 	private final @NotNull TeamDAO teamDAO;
 	private final @NotNull PilotStageDAO pilotStageDAO;
 	private final @NotNull FinalStageDAO finalStageDAO;
 
-	public ModeratorController(@NotNull AuthDAO authDAO,
-	                           @NotNull TeamDAO teamDAO,
+	public ModeratorController(@NotNull TeamDAO teamDAO,
 	                           @NotNull PilotStageDAO pilotStageDAO,
 	                           @NotNull FinalStageDAO finalStageDAO) {
-		this.authDAO = authDAO;
 		this.teamDAO = teamDAO;
 		this.pilotStageDAO = pilotStageDAO;
 		this.finalStageDAO = finalStageDAO;
-	}
-
-	@PostMapping("/team")
-	public ResponseEntity signUpTeam(@RequestBody FullTeam team) {
-		if (!team.isValid()) {
-			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-		}
-		authDAO.signUpTeam(team);
-		return new ResponseEntity(HttpStatus.CREATED);
 	}
 
 	@GetMapping("/team")
@@ -88,7 +74,7 @@ public class ModeratorController {
 		logger.info("Trying to start a team #" + teamID);
 		if (!Configuration.finalStage) {
 			return new ResponseEntity<>(
-					new ErrorMessage("Финальный этап еще не начинался. " +
+					new ErrorView("Финальный этап еще не начинался. " +
 							"Если же вы уверены, что сейчас 12 октября, " +
 							"срочно напишите Трубникову 'vk.com/trubnikovdv'."),
 					HttpStatus.BAD_REQUEST
@@ -106,7 +92,7 @@ public class ModeratorController {
 		logger.info("Trying to stop a team #" + teamID);
 		if (!Configuration.finalStage) {
 			return new ResponseEntity<>(
-					new ErrorMessage("Финальный этап еще не начинался. " +
+					new ErrorView("Финальный этап еще не начинался. " +
 							"Если же вы уверены, что сейчас 12 октября, " +
 							"срочно напишите Трубникову 'vk.com/trubnikovdv'."),
 					HttpStatus.BAD_REQUEST
@@ -120,10 +106,10 @@ public class ModeratorController {
 
 
 	@ExceptionHandler(LegendException.class)
-	public ResponseEntity<ErrorMessage> excpetionHandler(LegendException exception) {
+	public ResponseEntity<ErrorView> excpetionHandler(LegendException exception) {
 		logger.info("ExceptionHandler", exception);
 		return new ResponseEntity<>(
-				new ErrorMessage(exception.getErrorMessage()),
+				new ErrorView(exception.getErrorMessage()),
 				exception.getStatus()
 		);
 	}

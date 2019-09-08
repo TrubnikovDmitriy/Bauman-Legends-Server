@@ -42,8 +42,8 @@ public class TeamDAO {
 							"  id, name, score, leader_name, final_tasks_arr, " +
 							"  start_time, finish_time, finished, started, fails_count, " +
 							"  (SELECT COUNT(ct.task_id) FROM current_tasks AS ct WHERE ct.team_id=tms.id AND ct.type=?) AS task_count " +
-							"FROM teams AS tms JOIN auth a ON tms.id=a.team_id WHERE type=?",
-					new Object[] { TaskType.FINAL.name(), TeamType.PLAYER.name() },
+							"FROM old_teams AS tms JOIN auth a ON tms.id=a.team_id WHERE type=?",
+					new Object[] { TaskTypeOld.FINAL.name(), TeamType.PLAYER.name() },
 					new TeamForTable.Mapper()
 			);
 		} else {
@@ -52,9 +52,9 @@ public class TeamDAO {
 							"  id, name, score, leader_name, final_tasks_arr, " +
 							"  start_time, finish_time, finished, started, fails_count, " +
 							"  (SELECT COUNT(ct.task_id) FROM current_tasks AS ct WHERE ct.team_id=tms.id AND ct.type=?) AS task_count " +
-							"FROM teams AS tms JOIN auth a ON tms.id=a.team_id " +
+							"FROM old_teams AS tms JOIN auth a ON tms.id=a.team_id " +
 							"WHERE type=? AND started=TRUE AND finished=FALSE",
-					new Object[] { TaskType.FINAL.name(), TeamType.PLAYER.name() },
+					new Object[] { TaskTypeOld.FINAL.name(), TeamType.PLAYER.name() },
 					new TeamForTable.Mapper()
 			);
 		}
@@ -70,17 +70,17 @@ public class TeamDAO {
 
 			final List<Tooltip> tooltips = jdbcTemplate.query(
 					"SELECT number, tooltip FROM current_tasks ctsk " +
-							"  JOIN tasks tsk ON ctsk.task_id = tsk.id " +
+							"  JOIN old_tasks tsk ON ctsk.task_id = tsk.id " +
 							"  JOIN statues st ON tsk.statue_number = st.number " +
 							"WHERE ctsk.team_id=? AND ctsk.type=? AND ctsk.success IS TRUE " +
 							"ORDER BY number;",
-					new Object[]{teamID, TaskType.EXTRA.name()},
+					new Object[]{teamID, TaskTypeOld.EXTRA.name()},
 					(rs, i) -> new Tooltip(rs.getInt(1), rs.getString(2))
 			);
 
 			return jdbcTemplate.queryForObject(
 					"SELECT t.id id, name, leader_name, score, start_time, " +
-							"a.login login, a.pass pass FROM teams AS t " +
+							"a.login login, a.pass pass FROM old_teams AS t " +
 							"JOIN auth AS a ON t.id = a.team_id WHERE t.id=?",
 					new Object[]{teamID},
 					new TeamInfo.Mapper(members, tooltips)
@@ -102,14 +102,14 @@ public class TeamDAO {
 					"SELECT" +
 							"  tsk.id task_id, tms.id team_id, cur.start_time, " +
 							"  cur.finish_time, success, duration, content " +
-							"FROM teams tms " +
-							"  JOIN tasks tsk ON tsk.id=ANY(tms.final_tasks_arr::int[]) " +
+							"FROM old_teams tms " +
+							"  JOIN old_tasks tsk ON tsk.id=ANY(tms.final_tasks_arr::int[]) " +
 							"  FULL JOIN current_tasks cur ON tms.id=cur.team_id AND tsk.id = cur.task_id;",
 					new HashMapper(map)
 			);
 			return jdbcTemplate.query(
-					"SELECT teams.id, name, COUNT(players.id) AS players_count, final_tasks_arr, fails_count, start_time " +
-							"FROM teams JOIN players ON teams.id=players.team_id GROUP BY teams.id",
+					"SELECT old_teams.id, name, COUNT(players.id) AS players_count, final_tasks_arr, fails_count, start_time " +
+							"FROM old_teams JOIN players ON old_teams.id=players.team_id GROUP BY old_teams.id",
 					new Router.Mapper(map)
 			);
 		} else {
@@ -117,16 +117,16 @@ public class TeamDAO {
 					"SELECT" +
 							"  tsk.id task_id, tms.id team_id, cur.start_time, " +
 							"  cur.finish_time, success, duration, content " +
-							"FROM teams tms " +
-							"  JOIN tasks tsk ON tsk.id=ANY(tms.final_tasks_arr::int[]) " +
+							"FROM old_teams tms " +
+							"  JOIN old_tasks tsk ON tsk.id=ANY(tms.final_tasks_arr::int[]) " +
 							"  FULL JOIN current_tasks cur ON tms.id=cur.team_id AND tsk.id = cur.task_id " +
 							"WHERE tms.started=TRUE AND tms.finished=FALSE",
 					new HashMapper(map)
 			);
 			return jdbcTemplate.query(
-					"SELECT teams.id, name, COUNT(players.id) AS players_count, final_tasks_arr, fails_count, start_time " +
-							"FROM teams JOIN players ON teams.id=players.team_id " +
-							"WHERE started=TRUE and finished=FALSE GROUP BY teams.id",
+					"SELECT old_teams.id, name, COUNT(players.id) AS players_count, final_tasks_arr, fails_count, start_time " +
+							"FROM old_teams JOIN players ON old_teams.id=players.team_id " +
+							"WHERE started=TRUE and finished=FALSE GROUP BY old_teams.id",
 					new Router.Mapper(map)
 			);
 		}
@@ -140,7 +140,7 @@ public class TeamDAO {
 					new Object[] {
 							answer.getTeamID(),
 							answer.getTaskID(),
-							answer.getTaskType().name()
+							answer.getTaskTypeOld().name()
 					},
 					Integer.class
 			);
@@ -179,7 +179,7 @@ public class TeamDAO {
 
 			// Increase score of team
 			jdbcTemplate.update(
-					"UPDATE teams SET score=score+? WHERE id=?",
+					"UPDATE old_teams SET score=score+? WHERE id=?",
 					answer.getPoints(), key.getTeamID()
 			);
 

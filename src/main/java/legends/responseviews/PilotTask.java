@@ -2,7 +2,7 @@ package legends.responseviews;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import legends.models.TaskType;
+import legends.models.TaskTypeOld;
 import org.springframework.jdbc.core.RowMapper;
 
 import java.sql.ResultSet;
@@ -15,7 +15,7 @@ public class PilotTask {
 	private Integer id;
 
 	@JsonProperty("task_type")
-	private TaskType type;
+	private TaskTypeOld type;
 
 	@JsonProperty("points")
 	private Integer points;
@@ -40,7 +40,7 @@ public class PilotTask {
 
 			task.id = rs.getInt("task_id");
 			task.points = rs.getInt("points");
-			task.type = TaskType.valueOf(rs.getString("type"));
+			task.type = TaskTypeOld.valueOf(rs.getString("type"));
 			rs.getBoolean("success");
 			task.isAnswered = !rs.wasNull();
 			task.lastTaskID = rs.getInt("last_task_id");

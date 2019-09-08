@@ -5,7 +5,7 @@ import legends.exceptions.CriticalInternalError;
 import legends.exceptions.PhotoKeyDoesNotExist;
 import legends.exceptions.TaskIsAlreadyAnswered;
 import legends.exceptions.TeamDoesNotExist;
-import legends.models.TaskType;
+import legends.models.TaskTypeOld;
 import legends.responseviews.PhotoAnswer;
 import legends.responseviews.PilotTask;
 import legends.responseviews.Result;
@@ -37,7 +37,7 @@ public class PilotStageDAO {
 					"SELECT task_id AS id, ts.answers AS key, ts.content AS answer " +
 							"FROM current_tasks ct JOIN tasks ts ON task_id=ts.id " +
 							"WHERE team_id=? AND success IS NULL AND ct.type=?",
-					new Object[] { teamID, TaskType.PHOTO.name() },
+					new Object[] { teamID, TaskTypeOld.PHOTO.name() },
 					new PhotoAnswer.Mapper()
 			);
 
@@ -60,7 +60,7 @@ public class PilotStageDAO {
 							"(SELECT COUNT(id) FROM players WHERE team_id=? GROUP BY team_id) AS players_count, " +
 							"(SELECT COUNT(id) FROM current_tasks WHERE type='PHOTO' AND success=TRUE AND team_id=? GROUP BY team_id) AS photo_count, " +
 							"(SELECT COUNT(id) FROM current_tasks WHERE type='EXTRA' AND success=TRUE AND team_id=? GROUP BY team_id) AS extra_count " +
-							"FROM teams WHERE id=?;",
+							"FROM old_teams WHERE id=?;",
 					new Object[]{teamID, teamID, teamID, teamID},
 					new StartingTeam.Mapper()
 			);
@@ -74,16 +74,16 @@ public class PilotStageDAO {
 		jdbcTemplate.update("DELETE FROM current_tasks");
 		jdbcTemplate.update(
 				"INSERT INTO current_tasks (team_id, task_id, start_time, type) " +
-				"SELECT id, pilot_tasks_arr[1], ?, 'PHOTO' FROM teams",
+				"SELECT id, pilot_tasks_arr[1], ?, 'PHOTO' FROM old_teams",
 				Configuration.currentTimestamp()
 		);
-		jdbcTemplate.update("UPDATE teams SET (started, finished)=(FALSE, FALSE)");
+		jdbcTemplate.update("UPDATE old_teams SET (started, finished)=(FALSE, FALSE)");
 	}
 
 	public synchronized void stopPilotStage() {
 		jdbcTemplate.update(
 				"UPDATE current_tasks SET success=FALSE WHERE success IS NULL AND (type=? OR type=?)",
-				TaskType.PHOTO.name(), TaskType.EXTRA.name()
+				TaskTypeOld.PHOTO.name(), TaskTypeOld.EXTRA.name()
 		);
 	}
 
@@ -94,11 +94,11 @@ public class PilotStageDAO {
 					"SELECT task_id, ct.type, points, success, " +
 							"pilot_tasks_arr[array_length(pilot_tasks_arr, 1)] AS last_task_id " +
 							"FROM current_tasks ct " +
-							"  JOIN tasks ts ON ts.id=ct.task_id " +
-							"  JOIN teams tm ON tm.id=ct.team_id " +
+							"  JOIN old_tasks ts ON ts.id=ct.task_id " +
+							"  JOIN old_teams tm ON tm.id=ct.team_id " +
 							"WHERE team_id=? AND (ct.type=? OR ct.type=?) " +
 							"ORDER BY ct.id DESC LIMIT 1",
-					new Object[] { teamID, TaskType.PHOTO.name(), TaskType.EXTRA.name() },
+					new Object[] { teamID, TaskTypeOld.PHOTO.name(), TaskTypeOld.EXTRA.name() },
 					new PilotTask.Mapper()
 			);
 
@@ -116,10 +116,10 @@ public class PilotStageDAO {
 
 	public Result checkAnswer(final Integer taskID,
 	                          final String playerAnswer,
-	                          final TaskType taskType) {
+	                          final TaskTypeOld taskType) {
 
 		final String correctAnswers = jdbcTemplate.queryForObject(
-				"SELECT answers FROM tasks WHERE id=?",
+				"SELECT answers FROM old_tasks WHERE id=?",
 				new Object[] { taskID },
 				String.class
 		);
@@ -138,9 +138,9 @@ public class PilotStageDAO {
 
 		String tooltip = null;
 		// Extra tasks should return tooltips
-		if (taskType == TaskType.EXTRA) {
+		if (taskType == TaskTypeOld.EXTRA) {
 			tooltip = jdbcTemplate.queryForObject(
-					"SELECT tooltip FROM tasks JOIN statues ON statue_number=number WHERE id=?",
+					"SELECT tooltip FROM old_tasks JOIN statues ON statue_number=number WHERE id=?",
 					new Object[] { taskID },
 					String.class
 			);
@@ -160,7 +160,7 @@ public class PilotStageDAO {
 	                          final Integer currentTaskID) {
 		// Take array of team's tasks
 		Integer[] tasksArrs = jdbcTemplate.queryForObject(
-				"SELECT pilot_tasks_arr FROM teams WHERE id=?",
+				"SELECT pilot_tasks_arr FROM old_teams WHERE id=?",
 				new Object[] { teamID },
 				(rs, i) -> (Integer[]) rs.getArray("pilot_tasks_arr").getArray()
 		);
@@ -176,8 +176,8 @@ public class PilotStageDAO {
 		);
 
 		// Even number - PHOTO, odd number - EXTRA
-		final TaskType taskType = (currentTaskIndex + 1) % 2 == 0 ?
-				TaskType.EXTRA : TaskType.PHOTO;
+		final TaskTypeOld taskType = (currentTaskIndex + 1) % 2 == 0 ?
+				TaskTypeOld.EXTRA : TaskTypeOld.PHOTO;
 
 		// If not all tasks are completed
 		if (currentTaskIndex < pilotTasks.size()) {
@@ -195,19 +195,19 @@ public class PilotStageDAO {
 				success, Configuration.currentTimestamp(), teamID, currentTaskID
 		);
 		jdbcTemplate.update(
-				"UPDATE teams tms SET score=score+(SELECT points FROM tasks tsk WHERE tsk.id=?) WHERE tms.id=?",
+				"UPDATE old_teams tms SET score=score+(SELECT points FROM tasks tsk WHERE tsk.id=?) WHERE tms.id=?",
 				currentTaskID, teamID
 		);
 	}
 
 	private synchronized void insertNewCurrentTask(final Integer teamID,
 	                                               final Integer taskIndex,
-	                                               final TaskType type) {
+	                                               final TaskTypeOld type) {
 		try {
 			// Indexing in the database begins with ONE!
 			jdbcTemplate.update(
 					"INSERT INTO current_tasks(task_id, team_id, start_time, success, type, finish_time) " +
-							"VALUES ((SELECT t.pilot_tasks_arr[?] FROM teams t WHERE t.id=?), ?, ?, NULL, ?, NULL)",
+							"VALUES ((SELECT t.pilot_tasks_arr[?] FROM old_teams t WHERE t.id=?), ?, ?, NULL, ?, NULL)",
 					taskIndex, teamID, teamID, Configuration.currentTimestamp(), type.name()
 			);
 

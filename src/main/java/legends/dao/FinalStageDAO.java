@@ -7,7 +7,7 @@ import legends.exceptions.TeamAlreadyStarted;
 import legends.exceptions.TeamNotYetFinished;
 import legends.models.NewTask;
 import legends.models.RefreshTimer;
-import legends.models.TaskType;
+import legends.models.TaskTypeOld;
 import legends.responseviews.FinalTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,9 +43,9 @@ public class FinalStageDAO {
 		// Get list of active final tasks
 		final List<RefreshTimer> refreshList = jdbcTemplate.query(
 				"SELECT team_id, task_id, start_time, duration " +
-						"FROM current_tasks ct JOIN tasks t ON task_id=t.id " +
+						"FROM current_tasks ct JOIN old_tasks t ON task_id=t.id " +
 						"WHERE ct.type=? AND success is NULL",
-				new Object[]{TaskType.FINAL.name()},
+				new Object[]{TaskTypeOld.FINAL.name()},
 				new RefreshTimer.Mapper()
 		);
 
@@ -78,11 +78,11 @@ public class FinalStageDAO {
 					"SELECT task_id, ct.type, ct.start_time, points, duration, success, " +
 							"  final_tasks_arr[array_length(final_tasks_arr, 1)] AS last_task_id " +
 							"FROM current_tasks ct " +
-							"  JOIN tasks ts ON ts.id=ct.task_id " +
-							"  JOIN teams tm ON tm.id=ct.team_id " +
+							"  JOIN old_tasks ts ON ts.id=ct.task_id " +
+							"  JOIN old_teams tm ON tm.id=ct.team_id " +
 							"WHERE team_id=? AND ct.type=? " +
 							"ORDER BY ct.id DESC LIMIT 1",
-					new Object[] { teamID, TaskType.FINAL.name() },
+					new Object[] { teamID, TaskTypeOld.FINAL.name() },
 					new FinalTask.Mapper()
 			);
 
@@ -100,7 +100,7 @@ public class FinalStageDAO {
 	                           final String playerAnswer) {
 
 		final String correctAnswers = jdbcTemplate.queryForObject(
-				"SELECT LOWER(answers) FROM tasks WHERE id=?",
+				"SELECT LOWER(answers) FROM old_tasks WHERE id=?",
 				new Object[] { taskID },
 				String.class
 		);
@@ -121,7 +121,7 @@ public class FinalStageDAO {
 		try {
 			insertNewCurrentTask(teamID, 1);
 			jdbcTemplate.update(
-					"UPDATE teams SET start_time=?, started=TRUE WHERE id=?",
+					"UPDATE old_teams SET start_time=?, started=TRUE WHERE id=?",
 					Configuration.currentTimestamp(), teamID
 			);
 		} catch (TaskIsAlreadyAnswered ignore) {
@@ -138,7 +138,7 @@ public class FinalStageDAO {
 		}
 
 		jdbcTemplate.update(
-				"UPDATE teams SET finish_time=?, finished=TRUE " +
+				"UPDATE old_teams SET finish_time=?, finished=TRUE " +
 						"WHERE id=? AND started=TRUE AND finished=FALSE",
 				Configuration.currentTimestamp(), teamID
 		);
@@ -167,8 +167,8 @@ public class FinalStageDAO {
 
 			// Increase score of team
 			jdbcTemplate.update(
-					"UPDATE teams tms SET " +
-							"score=score+(SELECT points FROM tasks tsk WHERE tsk.id=?) " +
+					"UPDATE old_teams tms SET " +
+							"score=score+(SELECT points FROM old_tasks tsk WHERE tsk.id=?) " +
 							"WHERE tms.id=?",
 					currentTaskID, teamID
 			);
@@ -213,7 +213,7 @@ public class FinalStageDAO {
 
 		// Increment the fails counter for team
 		jdbcTemplate.update(
-				"UPDATE teams SET fails_count=fails_count+1 WHERE id=?",
+				"UPDATE old_teams SET fails_count=fails_count+1 WHERE id=?",
 				teamID
 		);
 
@@ -238,7 +238,7 @@ public class FinalStageDAO {
 	                                      final Integer currentTaskID) {
 		// Take array of team's tasks
 		Integer[] tasksArrs = jdbcTemplate.queryForObject(
-				"SELECT final_tasks_arr FROM teams WHERE id=?",
+				"SELECT final_tasks_arr FROM old_teams WHERE id=?",
 				new Object[] { teamID },
 				(rs, i) -> (Integer[]) rs.getArray("final_tasks_arr").getArray()
 		);
@@ -267,8 +267,8 @@ public class FinalStageDAO {
 		try {
 			// Take info about new task (ID and duration)
 			newTask = jdbcTemplate.queryForObject(
-					"SELECT id, duration FROM tasks " +
-							"WHERE id=(SELECT t.final_tasks_arr[?] FROM teams t WHERE t.id=?)",
+					"SELECT id, duration FROM old_tasks " +
+							"WHERE id=(SELECT t.final_tasks_arr[?] FROM old_teams t WHERE t.id=?)",
 					new Object[] { taskIndex, teamID },
 					(rs, i) -> new NewTask(
 							teamID,
@@ -286,7 +286,7 @@ public class FinalStageDAO {
 			jdbcTemplate.update(
 					"INSERT INTO current_tasks(task_id, team_id, start_time, success, type, finish_time) " +
 							"VALUES (?, ?, ?, NULL, ?, NULL)",
-					newTask.taskID, teamID, Configuration.currentTimestamp(), TaskType.FINAL.name()
+					newTask.taskID, teamID, Configuration.currentTimestamp(), TaskTypeOld.FINAL.name()
 			);
 
 		} catch (DuplicateKeyException ignore) {

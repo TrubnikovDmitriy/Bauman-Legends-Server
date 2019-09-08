@@ -5,10 +5,11 @@ import legends.dao.FinalStageDAO;
 import legends.dao.PilotStageDAO;
 import legends.dao.TeamDAO;
 import legends.exceptions.LegendException;
-import legends.models.TaskType;
+import legends.models.TaskTypeOld;
 import legends.requestviews.Answer;
 import legends.requestviews.SecretKey;
 import legends.responseviews.*;
+import legends.views.ErrorView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -61,7 +62,7 @@ public class PlayerController {
 
 		// Если команда получила логин-пароль до того, как я запустил разогрев.
 		return new ResponseEntity<>(
-				new ErrorMessage(
+				new ErrorView(
 						"Легенды Бауманки начнутся совсем скоро!\n" +
 						"Уже в понедельник 8 октября вы сможете получить первое задание!"
 				),
@@ -74,7 +75,7 @@ public class PlayerController {
 
 		if (currentTask == null) {
 			return new ResponseEntity<>(
-					new ErrorMessage(
+					new ErrorView(
 							"Ваша команада еще не начала прохождение финального этапа. " +
 							"Чтобы приступить к первому заданию, приходите в назначенное Вам время к стойке регистрации. " +
 							"Регистрация будет проходить в пятницу 12 октября в Главном Здании на 1ом этаже возле входа со стороны Яузы."
@@ -102,14 +103,14 @@ public class PlayerController {
 		if (Configuration.pilotStage) return checkAnswerPilot(answer);
 
 		return new ResponseEntity<>(
-				new ErrorMessage("Ни один из этапов Легенд еще не запущен"),
+				new ErrorView("Ни один из этапов Легенд еще не запущен"),
 				HttpStatus.BAD_REQUEST
 		);
 	}
 	private ResponseEntity checkAnswerFinal(final Answer answer) {
-		if (answer.getTaskType() != TaskType.FINAL) {
+		if (answer.getTaskTypeOld() != TaskTypeOld.FINAL) {
 			return new ResponseEntity<>(
-					new ErrorMessage("Разогревочный этап уже завершён."),
+					new ErrorView("Разогревочный этап уже завершён."),
 					HttpStatus.BAD_REQUEST
 			);
 		}
@@ -125,14 +126,14 @@ public class PlayerController {
 		}
 
 		return new ResponseEntity<>(
-				new Result(isCorrect, TaskType.FINAL, null),
+				new Result(isCorrect, TaskTypeOld.FINAL, null),
 				HttpStatus.ACCEPTED
 		);
 	}
 	private ResponseEntity checkAnswerPilot(final Answer answer) {
-		if (answer.getTaskType() == TaskType.FINAL) {
+		if (answer.getTaskTypeOld() == TaskTypeOld.FINAL) {
 			return new ResponseEntity<>(
-					new ErrorMessage("Финальный этап начнёт в пятницу 12 октября."),
+					new ErrorView("Финальный этап начнёт в пятницу 12 октября."),
 					HttpStatus.BAD_REQUEST
 			);
 		}
@@ -140,7 +141,7 @@ public class PlayerController {
 		final Result result = pilotStageDAO.checkAnswer(
 				answer.getTaskID(),
 				answer.getAnswer(),
-				answer.getTaskType()
+				answer.getTaskTypeOld()
 		);
 
 		if (result.isCorrect()) {
@@ -161,7 +162,7 @@ public class PlayerController {
 		if (Configuration.pilotStage) return takeNextAnswerExtra(answer);
 
 		return new ResponseEntity<>(
-				new ErrorMessage("Ни один из этапов Легенд еще не запущен"),
+				new ErrorView("Ни один из этапов Легенд еще не запущен"),
 				HttpStatus.BAD_REQUEST
 		);
 	}
@@ -174,7 +175,7 @@ public class PlayerController {
 
 		if (!isAnswered) {
 			return new ResponseEntity<>(
-					new ErrorMessage("Сначала ответьте на текущий вопрос"),
+					new ErrorView("Сначала ответьте на текущий вопрос"),
 					HttpStatus.FORBIDDEN
 			);
 		}
@@ -184,9 +185,9 @@ public class PlayerController {
 	}
 	private ResponseEntity takeNextAnswerExtra(final Answer answer) {
 
-		if (answer.getTaskType() != TaskType.EXTRA) {
+		if (answer.getTaskTypeOld() != TaskTypeOld.EXTRA) {
 			return new ResponseEntity<>(
-					new ErrorMessage("Пропускать можно только дополнительные задания"),
+					new ErrorView("Пропускать можно только дополнительные задания"),
 					HttpStatus.FORBIDDEN
 			);
 		}
@@ -218,10 +219,10 @@ public class PlayerController {
 
 
 	@ExceptionHandler(LegendException.class)
-	public ResponseEntity<ErrorMessage> excpetionHandler(LegendException exception) {
+	public ResponseEntity<ErrorView> excpetionHandler(LegendException exception) {
 		logger.info("ExceptionHandler", exception);
 		return new ResponseEntity<>(
-				new ErrorMessage(exception.getErrorMessage()),
+				new ErrorView(exception.getErrorMessage()),
 				exception.getStatus()
 		);
 	}

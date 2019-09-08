@@ -1,7 +1,7 @@
 package legends.requestviews;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import legends.models.TaskType;
+import legends.models.TaskTypeOld;
 
 public class Answer {
 
@@ -15,7 +15,7 @@ public class Answer {
 	private String answer;
 
 	@JsonProperty(value = "task_type", required = true)
-	private TaskType taskType;
+	private TaskTypeOld taskType;
 
 	public Integer getTeamID() {
 		return teamID;
@@ -41,11 +41,11 @@ public class Answer {
 		this.taskID = taskID;
 	}
 
-	public TaskType getTaskType() {
+	public TaskTypeOld getTaskTypeOld() {
 		return taskType;
 	}
 
-	public void setTaskType(TaskType taskType) {
+	public void setTaskTypeOld(TaskTypeOld taskType) {
 		this.taskType = taskType;
 	}
 

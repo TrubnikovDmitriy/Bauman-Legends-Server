@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.*
 import javax.servlet.http.HttpSession
 
 @RestController
-@CrossOrigin("*", allowCredentials = "true")
 @RequestMapping("/user")
 class UserController(private val userService: UserService) {
 
