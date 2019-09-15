@@ -3,11 +3,16 @@ package legends.models
 import org.springframework.jdbc.core.RowMapper
 import java.sql.ResultSet
 
-data class TaskModel(
+data class QuestModel(
+        // Original result
+        val teamId: Long,
         val taskId: Long,
-        val taskName: String,
+        val startTime: Long, // seconds
+        val finishTime: Long?, // seconds
+        val answer: String?,
+        val status: TaskStatus,
+        // Join with task
         val html: String,
-        val imagePath: String?,
         val taskType: TaskType,
         val duration: Long?, // seconds
         val points: Int,
@@ -16,18 +21,21 @@ data class TaskModel(
         val skipPossible: Boolean
 ) {
     @Suppress("UNCHECKED_CAST")
-    class Mapper : RowMapper<TaskModel> {
-        override fun mapRow(rs: ResultSet, rowNum: Int): TaskModel? {
-            return TaskModel(
+    class Mapper : RowMapper<QuestModel> {
+        override fun mapRow(rs: ResultSet, rowNum: Int): QuestModel? {
+            return QuestModel(
+                    teamId = rs.getLong("team_id"),
                     taskId = rs.getLong("task_id"),
-                    taskName = rs.getString("task_name"),
+                    startTime = rs.getLong("start_time"),
+                    finishTime = rs.getLong("finish_time").takeUnless { rs.wasNull() },
+                    status = TaskStatus.valueOfSafety(rs.getString("status")),
                     html = rs.getString("html"),
-                    imagePath = rs.getString("img_path").takeUnless { rs.wasNull() },
                     taskType = TaskType.valueOfSafety(rs.getString("task_type")),
                     duration = rs.getLong("duration").takeUnless { rs.wasNull() },
                     points = rs.getInt("points"),
-                    answers = (rs.getArray("answers").array as Array<String>).asList(),
                     skipPossible = rs.getBoolean("skip_possible"),
+                    answer = rs.getString("answer").takeUnless { rs.wasNull() },
+                    answers = (rs.getArray("answers").array as Array<String>).asList(),
                     capacity = rs.getInt("capacity")
             )
         }

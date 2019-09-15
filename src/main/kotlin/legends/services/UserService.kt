@@ -4,14 +4,11 @@ import legends.dao.UserDao
 import legends.dto.UserSignIn
 import legends.dto.UserSignUp
 import legends.exceptions.BadRequestException
-import legends.exceptions.LegendsException
 import legends.models.UserModel
 import legends.models.UserRole
 import legends.utils.SecureUtils
-import legends.utils.ValidationUtils
 import legends.utils.ValidationUtils.INVALID_ID
 import legends.utils.ValidationUtils.validateAndGetReason
-import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 
 @Service
@@ -28,18 +25,7 @@ class UserService(private val userDao: UserDao) {
         val salt = secureUtils.generateSalt()
         val hash = secureUtils.getHash(dto.password, salt)
 
-        val user = UserModel(
-                userId = INVALID_ID,
-                login = dto.login,
-                role = UserRole.PLAYER,
-                teamId = null,
-                firstName = dto.firstName,
-                lastName = dto.lastName,
-                group = dto.group.toUpperCase(),
-                vkRef = dto.vkRef,
-                hashedPassword = hash,
-                salt = salt
-        )
+        val user = dto.convert(userId = INVALID_ID, hash = hash, salt = salt)
         val userId = userDao.insertUser(user)
 
         return user.copy(userId = userId)

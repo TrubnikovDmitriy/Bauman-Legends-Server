@@ -16,19 +16,34 @@ SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
 
+
+ALTER DATABASE legends_of_bmstu OWNER TO trubnikov;
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET idle_in_transaction_session_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SELECT pg_catalog.set_config('search_path', '', false);
+SET check_function_bodies = false;
+SET xmloption = content;
+SET client_min_messages = warning;
+SET row_security = off;
+
+
 --
--- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: 
+-- Name: task_status; Type: TYPE; Schema: public; Owner: trubnikov
 --
 
-CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
+CREATE TYPE public.task_status AS ENUM (
+    'running',
+    'success',
+    'fail',
+    'skip'
+);
 
 
---
--- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner: 
---
-
-COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
-
+ALTER TYPE public.task_status OWNER TO trubnikov;
 
 --
 -- Name: task_type; Type: TYPE; Schema: public; Owner: trubnikov
@@ -190,15 +205,31 @@ ALTER SEQUENCE public.players_id_seq OWNED BY public.players.id;
 
 
 --
+-- Name: results; Type: TABLE; Schema: public; Owner: trubnikov
+--
+
+CREATE TABLE public.results (
+    team_id bigint NOT NULL,
+    task_id bigint NOT NULL,
+    start_time bigint NOT NULL,
+    finish_time bigint,
+    status public.task_status DEFAULT 'running'::public.task_status NOT NULL,
+    answer text
+);
+
+
+ALTER TABLE public.results OWNER TO trubnikov;
+
+--
 -- Name: tasks; Type: TABLE; Schema: public; Owner: trubnikov
 --
 
 CREATE TABLE public.tasks (
-    task_id integer NOT NULL,
+    task_id bigint NOT NULL,
     html text NOT NULL,
     img_path text,
     task_type public.task_type NOT NULL,
-    duration integer,
+    duration bigint,
     points integer NOT NULL,
     answers text[] NOT NULL,
     skip_possible boolean DEFAULT false NOT NULL,
@@ -257,7 +288,7 @@ ALTER SEQUENCE public.tasks_task_id_seq OWNED BY public.tasks.task_id;
 --
 
 CREATE TABLE public.teams (
-    team_id integer NOT NULL,
+    team_id bigint NOT NULL,
     team_name text NOT NULL,
     leader_id integer NOT NULL,
     score integer DEFAULT 0 NOT NULL,
@@ -328,7 +359,7 @@ ALTER TABLE public.tooltips OWNER TO trubnikov;
 --
 
 CREATE TABLE public.users (
-    user_id integer NOT NULL,
+    user_id bigint NOT NULL,
     login text NOT NULL,
     password bytea NOT NULL,
     salt bytea NOT NULL,
@@ -429,12 +460,20 @@ ALTER TABLE ONLY public.current_tasks
     ADD CONSTRAINT current_task_pkey PRIMARY KEY (id);
 
 
-
+--
 -- Name: players players_id_pk; Type: CONSTRAINT; Schema: public; Owner: trubnikov
 --
 
 ALTER TABLE ONLY public.players
     ADD CONSTRAINT players_id_pk PRIMARY KEY (id);
+
+
+--
+-- Name: results results_pk; Type: CONSTRAINT; Schema: public; Owner: trubnikov
+--
+
+ALTER TABLE ONLY public.results
+    ADD CONSTRAINT results_pk PRIMARY KEY (team_id, task_id);
 
 
 --
@@ -514,6 +553,13 @@ CREATE UNIQUE INDEX team_and_task_ids_unique ON public.current_tasks USING btree
 
 
 --
+-- Name: teams_leader_id_uindex; Type: INDEX; Schema: public; Owner: trubnikov
+--
+
+CREATE UNIQUE INDEX teams_leader_id_uindex ON public.teams USING btree (leader_id);
+
+
+--
 -- Name: teams_team_name_uindex; Type: INDEX; Schema: public; Owner: trubnikov
 --
 
@@ -567,6 +613,22 @@ ALTER TABLE ONLY public.players
 
 
 --
+-- Name: results results_tasks_task_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: trubnikov
+--
+
+ALTER TABLE ONLY public.results
+    ADD CONSTRAINT results_tasks_task_id_fk FOREIGN KEY (task_id) REFERENCES public.tasks(task_id) ON UPDATE RESTRICT ON DELETE RESTRICT;
+
+
+--
+-- Name: results results_teams_team_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: trubnikov
+--
+
+ALTER TABLE ONLY public.results
+    ADD CONSTRAINT results_teams_team_id_fk FOREIGN KEY (team_id) REFERENCES public.teams(team_id) ON UPDATE RESTRICT ON DELETE RESTRICT;
+
+
+--
 -- Name: old_tasks tasks_tasks_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: trubnikov
 --
 
@@ -596,6 +658,13 @@ ALTER TABLE ONLY public.tooltips
 
 ALTER TABLE ONLY public.users
     ADD CONSTRAINT users_teams_team_id_fk FOREIGN KEY (team_id) REFERENCES public.teams(team_id) ON UPDATE CASCADE ON DELETE SET NULL;
+
+
+--
+-- Name: SCHEMA public; Type: ACL; Schema: -; Owner: postgres
+--
+
+GRANT ALL ON SCHEMA public TO PUBLIC;
 
 
 --

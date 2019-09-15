@@ -9,7 +9,7 @@ data class TaskView (
         @JsonProperty("task_name") val taskName: String,
         @JsonProperty("html") val html: String,
         @JsonProperty("task_type") val taskType: TaskType,
-        @JsonProperty("duration") val duration: Int?,
+        @JsonProperty("duration") val duration: Long?,
         @JsonProperty("points") val points: Int,
         @JsonProperty("answers") val answers: List<String>,
         @JsonProperty("capacity") val capacity: Int,
@@ -20,7 +20,7 @@ data class TaskView (
             taskName = task.taskName,
             html = task.html,
             taskType = task.taskType,
-            duration = task.duration,
+            duration = task.duration?.let { it / 60 }, // sec -> min
             points = task.points,
             answers = task.answers,
             skip = task.skipPossible,

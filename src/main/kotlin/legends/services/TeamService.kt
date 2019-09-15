@@ -57,7 +57,7 @@ class TeamService(
         if (team.size >= MAX_TEAM_SIZE) {
             throw BadRequestException { "Макисмально число участников в команде [$MAX_TEAM_SIZE]" }
         }
-        if (team.inviteCode != join.inviteCode) {
+        if (!team.inviteCode.equals(join.inviteCode, ignoreCase = true)) {
             throw BadRequestException { "Неверный пригласительный код" }
         }
 
@@ -85,9 +85,7 @@ class TeamService(
     }
 
     fun getTeamByUserId(userId: Long): TeamModel? {
-        val user = userDao.getUserOrThrow(userId)
-        val teamId = user.teamId ?: return null
-        return teamDao.getTeamById(teamId)
+        return teamDao.getTeamByUser(userId)
     }
 
     fun getTeammates(userId: Long): List<UserModel> {
@@ -98,6 +96,27 @@ class TeamService(
 
     fun getAllTeams(): List<TeamModel> {
         return teamDao.getAllTeams()
+    }
+
+    @Synchronized
+    @Transactional
+    fun changePartyLeader(oldCaptainId: Long, newCaptainId: Long): TeamModel {
+        val oldCaptain = userDao.getUserOrThrow(oldCaptainId)
+        val newCaptain = userDao.getUserOrThrow(newCaptainId)
+
+        val teamId = oldCaptain.checkCaptain()
+        if (newCaptain.teamId != teamId) {
+            throw BadRequestException { "Нельзя назначить капитаном члена другой команды." }
+        }
+        if (newCaptain.role != UserRole.PLAYER) {
+            throw BadRequestException { "Новый капитан должен быть обычным игроком." }
+        }
+
+        userDao.setRole(oldCaptainId, UserRole.PLAYER)
+        userDao.setRole(newCaptainId, UserRole.CAPTAIN)
+        teamDao.setTeamLeader(captainId = newCaptainId, teamId = teamId)
+
+        return teamDao.getTeamOrThrow(teamId)
     }
 
     @Transactional

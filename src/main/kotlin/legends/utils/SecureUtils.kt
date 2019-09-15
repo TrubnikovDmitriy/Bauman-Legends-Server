@@ -3,7 +3,6 @@ package legends.utils
 import java.security.MessageDigest
 import java.security.SecureRandom
 import java.util.*
-import kotlin.math.max
 
 class SecureUtils {
     companion object {
