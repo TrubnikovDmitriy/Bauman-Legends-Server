@@ -47,7 +47,7 @@ class TeamDao(dataSource: DataSource) {
             )
         } catch(e: DuplicateKeyException) {
             throw  LegendsException(HttpStatus.BAD_REQUEST)
-            { "Команда с таким названием [$teamName] уже существует." }
+            { "Команда с названием \"$teamName\" уже существует." }
         }
     }
 
@@ -71,6 +71,31 @@ class TeamDao(dataSource: DataSource) {
         }
     }
 
+    fun getTeamByUser(userId: Long): TeamModel? {
+        return try {
+            jdbcTemplate.queryForObject(
+                    """SELECT t.team_id, t.team_name, t.leader_id, t.score, t.invite_code, COUNT(u.user_id) AS size 
+                        FROM users me 
+                         JOIN teams t ON me.team_id = t.team_id 
+                         LEFT JOIN users u ON t.team_id=u.team_id 
+                        WHERE me.user_id=? 
+                        GROUP BY t.team_id;""",
+                    arrayOf(userId),
+                    TeamModel.Mapper()
+            )
+        } catch (e: EmptyResultDataAccessException) {
+            null
+        }
+    }
+
+    fun increaseScore(teamId: Long, score: Int) {
+        jdbcTemplate.update("UPDATE teams SET score=score+? WHERE team_id=?", score, teamId)
+    }
+
+    fun decreaseScore(teamId: Long, score: Int) {
+        jdbcTemplate.update("UPDATE teams SET score=score-? WHERE team_id=?", score, teamId)
+    }
+
     fun getAllTeams(): List<TeamModel> {
         return jdbcTemplate.query(
                 """SELECT t.team_id, t.team_name, t.leader_id, t.score, t.invite_code, COUNT(u.user_id) AS size 
@@ -79,5 +104,9 @@ class TeamDao(dataSource: DataSource) {
                         GROUP BY t.team_id;""",
                 TeamModel.Mapper()
         )
+    }
+
+    fun setTeamLeader(captainId: Long, teamId: Long) {
+        jdbcTemplate.update("UPDATE teams SET leader_id=? WHERE team_id=?", captainId, teamId)
     }
 }

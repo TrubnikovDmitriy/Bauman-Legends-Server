@@ -37,7 +37,7 @@ object SqlUtils {
         if (value != null) {
             ps.setLong(position, value)
         } else {
-            ps.setNull(position, Types.NUMERIC)
+            ps.setNull(position, Types.BIGINT)
         }
     }
 

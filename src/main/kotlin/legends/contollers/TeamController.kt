@@ -82,6 +82,15 @@ class TeamController(private val teamService: TeamService) {
         return ResponseEntity(HttpStatus.OK)
     }
 
+    @GetMapping("/change")
+    fun changeCaptain(
+            @RequestParam(required = true, value = "new_captain") newCaptainId: Long,
+            httpSession: HttpSession
+    ): ResponseEntity<TeamView> {
+        val oldCaptainId = httpSession.getUserIdOrThrow()
+        val teamData = teamService.changePartyLeader(oldCaptainId, newCaptainId)
+        return ResponseEntity(TeamView(oldCaptainId, teamData), HttpStatus.OK)
+    }
 
     @ExceptionHandler(LegendsException::class)
     fun exceptionHandler(exception: LegendsException): ResponseEntity<ErrorView> {

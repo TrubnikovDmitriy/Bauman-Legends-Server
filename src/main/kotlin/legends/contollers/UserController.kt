@@ -4,11 +4,11 @@ import legends.dto.UserSignIn
 import legends.dto.UserSignUp
 import legends.exceptions.LegendsException
 import legends.models.UserModel
-import legends.views.ErrorView
 import legends.services.UserService
 import legends.utils.getUserId
 import legends.utils.getUserIdOrThrow
 import legends.utils.setUserId
+import legends.views.ErrorView
 import legends.views.UserView
 import legends.views.toResponse
 import org.slf4j.LoggerFactory

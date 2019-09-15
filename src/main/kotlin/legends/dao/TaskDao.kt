@@ -4,7 +4,6 @@ import legends.exceptions.BadRequestException
 import legends.exceptions.TaskIsNotExists
 import legends.models.TaskModel
 import legends.models.TaskType
-import legends.models.UserModel
 import legends.utils.SqlUtils.convertToSqlArray
 import legends.utils.SqlUtils.setNullable
 import org.slf4j.LoggerFactory
@@ -75,7 +74,7 @@ class TaskDao(private val dataSource: DataSource) {
         try {
             jdbcTemplate.update(insertStatement, keyHolder)
         } catch (e: DuplicateKeyException) {
-            throw BadRequestException { "Задание с названием [${task.taskName}] уже существует." }
+            throw BadRequestException { "Задание с названием \"${task.taskName}\" уже существует." }
         }
 
         return requireNotNull(keyHolder.key).toLong()
@@ -99,11 +98,11 @@ class TaskDao(private val dataSource: DataSource) {
 
             if (affectedRows != 1) {
                 logger.error("Fail to update task, task=[$task], affectedRows=[$affectedRows]")
-                throw BadRequestException { "Не удалось обновить задание [${task.taskName}] под номером [${task.taskId}]." }
+                throw BadRequestException { "Не удалось обновить задание \"${task.taskName}\" под номером [${task.taskId}]." }
             }
 
         } catch (e: DuplicateKeyException) {
-            throw BadRequestException { "Задание с названием [${task.taskName}] уже существует." }
+            throw BadRequestException { "Задание с названием \"${task.taskName}\" уже существует." }
         }
     }
 

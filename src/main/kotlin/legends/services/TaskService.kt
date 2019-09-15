@@ -7,7 +7,6 @@ import legends.exceptions.BadRequestException
 import legends.exceptions.LegendsException
 import legends.models.ImageModel
 import legends.models.TaskModel
-import legends.models.TaskType
 import legends.utils.ValidationUtils.INVALID_ID
 import legends.utils.ValidationUtils.validateAndGetReason
 import org.slf4j.LoggerFactory
@@ -40,7 +39,8 @@ class TaskService(
 
         if (!IMAGE_PATTERN.matches(contentType)) {
             logger.warn("Content type doesn't match: [$contentType]")
-            throw BadRequestException { "На сервер разрешено загружать только изображения форматов .jpg и .png" }
+            throw LegendsException(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
+            { "На сервер разрешено загружать только изображения форматов .jpg и .png" }
         }
 
         val imageName = fullPath.split('/').last()
@@ -61,20 +61,9 @@ class TaskService(
             throw BadRequestException { reason }
         }
 
-        val task = TaskModel(
-                taskId = INVALID_ID,
-                taskName = dto.taskName.trim(),
-                html = dto.html,
-                imagePath = dto.imagePath,
-                taskType = dto.taskType,
-                duration = dto.duration,
-                points = dto.points,
-                answers = dto.answers.map { it.trim() },
-                capacity = dto.capacity,
-                skipPossible = (dto.taskType == TaskType.LOGIC)
-        )
-
+        val task = dto.convert(taskId = INVALID_ID)
         val taskId = taskDao.insertTask(task)
+
         return task.copy(taskId = taskId)
     }
 
@@ -89,20 +78,9 @@ class TaskService(
             throw BadRequestException { "Отсутсвует номер обновляемого задания [${updated.taskName}]" }
         }
 
-        val task = TaskModel(
-                taskId = updated.taskId,
-                taskName = updated.taskName,
-                html = updated.html,
-                imagePath = updated.imagePath,
-                taskType = updated.taskType,
-                duration = updated.duration,
-                points = updated.points,
-                answers = updated.answers,
-                capacity = updated.capacity,
-                skipPossible = (updated.taskType == TaskType.LOGIC)
-        )
-
+        val task = updated.convert(taskId = updated.taskId)
         taskDao.updateTask(task)
+
         return task
     }
 
