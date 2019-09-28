@@ -48,8 +48,8 @@ class UserController(private val userService: UserService) {
 
     @GetMapping("/info")
     fun getInfo(httpSession: HttpSession): ResponseEntity<UserView> {
-        val userModel: UserModel? = httpSession.getUserId().let {
-            userService.findUserById(it ?: return@let null)
+        val userModel: UserModel? = httpSession.getUserId()?.let {
+            userService.findUserById(it)
         }
         return if (userModel != null) {
             ResponseEntity(UserView(userModel), HttpStatus.OK)

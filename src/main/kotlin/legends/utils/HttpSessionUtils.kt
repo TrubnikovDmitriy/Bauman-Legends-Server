@@ -2,6 +2,7 @@ package legends.utils
 
 import legends.exceptions.LegendsException
 import org.springframework.http.HttpStatus
+import java.util.concurrent.TimeUnit
 import javax.servlet.http.HttpSession
 
 private const val ATTR_USER_ID = "ATTR_USER_ID"
@@ -18,5 +19,7 @@ fun HttpSession.getUserIdOrThrow(): Long {
 fun HttpSession.getUserId(): Long? =
         getAttribute(ATTR_USER_ID) as Long?
 
-fun HttpSession.setUserId(userId: Long?): Unit =
-        setAttribute(ATTR_USER_ID, userId)
+fun HttpSession.setUserId(userId: Long?) {
+    setAttribute(ATTR_USER_ID, userId)
+    maxInactiveInterval = TimeUnit.HOURS.toSeconds(4).toInt()
+}
