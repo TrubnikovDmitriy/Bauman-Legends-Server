@@ -2,13 +2,10 @@ package legends.contollers
 
 import legends.dto.AnswerDto
 import legends.dto.GameStateUpdate
-import legends.exceptions.LegendsException
 import legends.logic.GameState
 import legends.services.game.GameService
 import legends.utils.getUserIdOrThrow
-import legends.views.ErrorView
 import legends.views.TeamStateView
-import legends.views.toResponse
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -66,12 +63,5 @@ class GameController(private val gameService: GameService) {
         val userId = httpSession.getUserIdOrThrow()
         gameService.skipTask(userId)
         return ResponseEntity(HttpStatus.OK)
-    }
-
-
-    @ExceptionHandler(LegendsException::class)
-    fun exceptionHandler(exception: LegendsException): ResponseEntity<ErrorView> {
-        logger.warn("GameExceptionHandler ${exception.errorMessage()}")
-        return exception.toResponse()
     }
 }

@@ -2,15 +2,12 @@ package legends.contollers
 
 import legends.dto.UserSignIn
 import legends.dto.UserSignUp
-import legends.exceptions.LegendsException
 import legends.models.UserModel
 import legends.services.UserService
 import legends.utils.getUserId
 import legends.utils.getUserIdOrThrow
 import legends.utils.setUserId
-import legends.views.ErrorView
 import legends.views.UserView
-import legends.views.toResponse
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -75,12 +72,5 @@ class UserController(private val userService: UserService) {
         httpSession.invalidate()
 
         return ResponseEntity(HttpStatus.OK)
-    }
-
-
-    @ExceptionHandler(LegendsException::class)
-    fun exceptionHandler(exception: LegendsException): ResponseEntity<ErrorView> {
-        logger.warn("UserExceptionHandler ${exception.errorMessage()}")
-        return exception.toResponse()
     }
 }
