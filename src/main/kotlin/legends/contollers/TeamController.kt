@@ -2,11 +2,13 @@ package legends.contollers
 
 import legends.dto.TeamJoin
 import legends.dto.TeamSignUp
-import legends.exceptions.LegendsException
 import legends.exceptions.TeamIsNotPresented
 import legends.services.TeamService
 import legends.utils.getUserIdOrThrow
-import legends.views.*
+import legends.views.TeamView
+import legends.views.UserView
+import legends.views.toResponse
+import legends.views.toView
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -90,11 +92,5 @@ class TeamController(private val teamService: TeamService) {
         val oldCaptainId = httpSession.getUserIdOrThrow()
         val teamData = teamService.changePartyLeader(oldCaptainId, newCaptainId)
         return ResponseEntity(TeamView(oldCaptainId, teamData), HttpStatus.OK)
-    }
-
-    @ExceptionHandler(LegendsException::class)
-    fun exceptionHandler(exception: LegendsException): ResponseEntity<ErrorView> {
-        logger.warn("TeamExceptionHandler ${exception.errorMessage()}")
-        return exception.toResponse()
     }
 }

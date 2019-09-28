@@ -1,12 +1,9 @@
 package legends.contollers
 
 import legends.dto.TaskDto
-import legends.exceptions.LegendsException
 import legends.services.TaskService
 import legends.utils.getUserIdOrThrow
-import legends.views.ErrorView
 import legends.views.TaskView
-import legends.views.toResponse
 import legends.views.toView
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -82,11 +79,5 @@ class TaskController(private val taskService: TaskService) {
         val userId = httpSession.getUserIdOrThrow()
         taskService.deleteTask(userId, taskId)
         return ResponseEntity(HttpStatus.OK)
-    }
-
-    @ExceptionHandler(LegendsException::class)
-    fun exceptionHandler(exception: LegendsException): ResponseEntity<ErrorView> {
-        logger.warn("TaskExceptionHandler ${exception.errorMessage()}")
-        return exception.toResponse()
     }
 }
