@@ -51,6 +51,15 @@ class TeamDao(dataSource: DataSource) {
         }
     }
 
+    fun updateTeamName(teamId: Long, teamName: String) {
+        try {
+            jdbcTemplate.update("UPDATE teams SET team_name=? WHERE team_id=?", teamName, teamId)
+        } catch(e: DuplicateKeyException) {
+            throw  LegendsException(HttpStatus.BAD_REQUEST)
+            { "Команда с названием \"$teamName\" уже существует." }
+        }
+    }
+
     fun getTeamOrThrow(teamId: Long): TeamModel {
         return getTeamById(teamId) ?: throw TeamNotExists(teamId)
     }

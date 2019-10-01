@@ -1,6 +1,7 @@
 package legends.utils
 
 import legends.dto.TaskDto
+import legends.dto.TeamSignUp
 import legends.dto.UserSignUp
 import legends.models.TaskType.LOGIC
 import legends.models.TaskType.PHOTO
@@ -67,5 +68,15 @@ object ValidationUtils {
             }
             return null
         }
+    }
+
+    /**
+     * @return `null` in case of success validation
+     */
+    fun validateNewTeam(dto: TeamSignUp): String? {
+        if (dto.teamName.trim().length < 2) {
+            return "Слишком короткое задание."
+        }
+        return null
     }
 }

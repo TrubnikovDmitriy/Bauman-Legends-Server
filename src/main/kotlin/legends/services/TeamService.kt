@@ -10,6 +10,7 @@ import legends.exceptions.TeamIsNotPresented
 import legends.models.TeamModel
 import legends.models.UserModel
 import legends.models.UserRole
+import legends.utils.ValidationUtils
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -36,12 +37,31 @@ class TeamService(
         if (userData.role != UserRole.PLAYER) {
             throw BadRequestException { "Чтобы создать команду, вы должны быть обычным участником." }
         }
+        val reason = ValidationUtils.validateNewTeam(teamSignUp)
+        if (reason != null) {
+            throw BadRequestException { reason }
+        }
 
-        val team = teamDao.createTeam(userId, teamSignUp.teamName)
+        val team = teamDao.createTeam(userId, teamSignUp.teamName.trim())
         userDao.setTeamId(userId, team.teamId)
         userDao.setRole(userId, UserRole.CAPTAIN)
 
         return team
+    }
+
+    @Synchronized
+    @Transactional
+    fun updateTeamName(userId: Long, teamName: TeamSignUp): TeamModel {
+        val teamId = userDao.getUserOrThrow(userId).checkCaptain()
+
+        val reason = ValidationUtils.validateNewTeam(teamName)
+        if (reason != null) {
+            throw BadRequestException { reason }
+        }
+
+        teamDao.updateTeamName(teamId, teamName.teamName.trim())
+
+        return teamDao.getTeamOrThrow(teamId)
     }
 
     @Synchronized

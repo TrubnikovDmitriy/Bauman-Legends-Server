@@ -32,6 +32,17 @@ class TeamController(private val teamService: TeamService) {
         return ResponseEntity(teamView, HttpStatus.CREATED)
     }
 
+    @PostMapping("/update")
+    fun updateTeam(
+            @RequestBody team: TeamSignUp,
+            httpSession: HttpSession
+    ): ResponseEntity<TeamView> {
+        val userId = httpSession.getUserIdOrThrow()
+        val teamData = teamService.updateTeamName(userId, team)
+        val teamView = TeamView(userId, teamData)
+        return ResponseEntity(teamView, HttpStatus.OK)
+    }
+
     @GetMapping("/info")
     fun getTeam(httpSession: HttpSession): ResponseEntity<*> {
         val userId = httpSession.getUserIdOrThrow()
