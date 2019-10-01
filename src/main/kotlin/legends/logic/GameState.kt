@@ -9,7 +9,7 @@ import org.springframework.http.HttpStatus
 
 object GameState {
 
-    @Volatile var status: GameStatus = GameStatus.PILOT
+    @Volatile var status: GameStatus = GameStatus.REGISTRATION
         private set
 
     fun updateStatus(admin: UserModel, gameStatus: GameStatus) {

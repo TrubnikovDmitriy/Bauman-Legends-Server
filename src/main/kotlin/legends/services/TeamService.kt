@@ -7,6 +7,8 @@ import legends.dto.TeamSignUp
 import legends.exceptions.BadRequestException
 import legends.exceptions.LegendsException
 import legends.exceptions.TeamIsNotPresented
+import legends.logic.GameState
+import legends.models.GameStatus
 import legends.models.TeamModel
 import legends.models.UserModel
 import legends.models.UserRole
@@ -52,6 +54,10 @@ class TeamService(
     @Synchronized
     @Transactional
     fun updateTeamName(userId: Long, teamName: TeamSignUp): TeamModel {
+        if (GameState.status != GameStatus.REGISTRATION) {
+            throw BadRequestException { "Навзание команды разрешено менять только на этапе регистрации." }
+        }
+
         val teamId = userDao.getUserOrThrow(userId).checkCaptain()
 
         val reason = ValidationUtils.validateNewTeam(teamName)
@@ -151,6 +157,12 @@ class TeamService(
     }
 
     fun selfKickCaptain(captainId: Long) {
+
+        if (GameState.status != GameStatus.REGISTRATION) {
+            throw LegendsException(HttpStatus.BAD_REQUEST)
+            { "Во время игровых этапов капитан не может покинуть команду." }
+        }
+
         val teamId = userDao.getUserOrThrow(captainId).checkCaptain()
         val team = teamDao.getTeamOrThrow(teamId)
 
