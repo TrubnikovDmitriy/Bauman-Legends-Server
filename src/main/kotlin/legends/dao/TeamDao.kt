@@ -118,4 +118,11 @@ class TeamDao(dataSource: DataSource) {
     fun setTeamLeader(captainId: Long, teamId: Long) {
         jdbcTemplate.update("UPDATE teams SET leader_id=? WHERE team_id=?", captainId, teamId)
     }
+
+    fun deleteTeam(teamId: Long) {
+        val affectedRow = jdbcTemplate.update("DELETE FROM teams WHERE team_id=?", teamId)
+        if (affectedRow != 1) {
+            logger.error("Fail to delete team with team_id=[$teamId]")
+        }
+    }
 }

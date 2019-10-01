@@ -143,10 +143,24 @@ class TeamService(
     fun selfKick(userId: Long) {
         val user = userDao.getUserOrThrow(userId)
         if (user.role == UserRole.CAPTAIN) {
-            throw LegendsException(HttpStatus.FORBIDDEN)
-            { "Вы не можете выйти из команды, так как являетесь капитаном команды." }
+            selfKickCaptain(user.userId)
+            return
         }
         userDao.setTeamId(user.userId, null)
         userDao.setRole(user.userId, UserRole.PLAYER)
+    }
+
+    fun selfKickCaptain(captainId: Long) {
+        val teamId = userDao.getUserOrThrow(captainId).checkCaptain()
+        val team = teamDao.getTeamOrThrow(teamId)
+
+        if (team.size != 1) {
+            throw LegendsException(HttpStatus.BAD_REQUEST)
+            { "Вы не можете выйти из команды, пока в ней находятся другие участники." }
+        }
+
+        userDao.setTeamId(captainId, null)
+        userDao.setRole(captainId, UserRole.PLAYER)
+        teamDao.deleteTeam(teamId)
     }
 }
