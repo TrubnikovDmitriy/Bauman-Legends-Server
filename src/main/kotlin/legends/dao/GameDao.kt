@@ -83,24 +83,6 @@ class GameDao(dataSource: DataSource) {
         return getQuest(teamId, taskId) ?: throw QuestIsNotExists()
     }
 
-    fun getResultsForTeam(teamId: Long, status: QuestStatus): List<QuestModel> {
-        return jdbcTemplate.query(
-                "SELECT * FROM results WHERE team_id=? AND status=LOWER(?)::task_status",
-                arrayOf(teamId),
-                QuestModel.Mapper()
-        )
-    }
-
-    fun getResultsForTeam(teamId: Long): List<QuestModel> {
-        return jdbcTemplate.query(
-                """SELECT * FROM results r 
-                    JOIN tasks t ON r.task_id=t.task_id
-                    WHERE team_id=?""",
-                arrayOf(teamId),
-                QuestModel.Mapper()
-        )
-    }
-
     fun getCurrentQuestForTeam(teamId: Long): QuestModel? {
         return try {
             jdbcTemplate.queryForObject(
@@ -283,6 +265,29 @@ class GameDao(dataSource: DataSource) {
             )
         } catch (e: EmptyResultDataAccessException) {
             null
+        }
+    }
+
+    fun getLastTaskForTeam(teamId: Long): TaskModel? {
+        try {
+            return jdbcTemplate.queryForObject(
+                    """
+                    SELECT t.* FROM tasks t
+                        JOIN results r ON t.task_id=r.task_id
+                    WHERE r.team_id=? AND r.status='running'
+                    """,
+                    arrayOf(teamId),
+                    TaskModel.Mapper()
+            )
+
+        } catch (e: EmptyResultDataAccessException) {
+            return null
+
+        } catch (e: IncorrectResultSizeDataAccessException) {
+            logger.error("Team [$teamId] has more than 1 running task", e)
+            throw BadRequestException {
+                "Ваша команда не может проходить задания дальше. Срочно напишите Трубникову: vk.com/trubnikovdv"
+            }
         }
     }
 }

@@ -6,8 +6,8 @@ import legends.dao.UserDao
 import legends.dto.AnswerDto
 import legends.exceptions.BadRequestException
 import legends.logic.QuestTimer
-import legends.models.TaskState
 import legends.models.QuestStatus
+import legends.models.TaskState
 import legends.models.TaskType
 import legends.models.TeamState
 import legends.services.TeamService.Companion.MAX_TEAM_SIZE
@@ -15,7 +15,7 @@ import legends.services.TeamService.Companion.MIN_TEAM_SIZE
 import legends.utils.validateRunningStatus
 import org.springframework.transaction.annotation.Transactional
 
-class GameServiceFinal(
+open class GameServiceFinal(
         private val gameDao: GameDao,
         private val userDao: UserDao,
         private val teamDao: TeamDao,
@@ -67,11 +67,9 @@ class GameServiceFinal(
     @Transactional
     override fun tryAnswer(userId: Long, dto: AnswerDto): Boolean {
         val answer = dto.convert()
-
         val user = userDao.getUserOrThrow(userId)
-        if (user.teamId != answer.teamId) {
-            throw BadRequestException { "Вы не состоите в команде №${answer.teamId}" }
-        }
+
+        user.checkTeam(answer.teamId)
 
         val quest = gameDao.getQuest(
                 teamId = answer.teamId,

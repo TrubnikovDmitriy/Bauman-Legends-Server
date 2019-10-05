@@ -10,11 +10,12 @@ import legends.exceptions.QuestIsNotExists
 import legends.models.*
 import legends.services.TeamService.Companion.MAX_TEAM_SIZE
 import legends.services.TeamService.Companion.MIN_TEAM_SIZE
+import legends.utils.GameHelperUtils.convertPhotoQuestAnswer
 import legends.utils.validateRunningStatus
 import org.springframework.http.HttpStatus
 import org.springframework.transaction.annotation.Transactional
 
-class GameServicePilot(
+open class GameServicePilot(
         private val gameDao: GameDao,
         private val userDao: UserDao,
         private val teamDao: TeamDao
@@ -72,18 +73,16 @@ class GameServicePilot(
     @Transactional
     override fun tryAnswer(userId: Long, dto: AnswerDto): Boolean {
         val answer = dto.convert()
-
         val user = userDao.getUserOrThrow(userId)
-        if (user.teamId != answer.teamId) {
-            throw BadRequestException { "Вы не состоите в команде №${answer.teamId}" }
-        }
+
+        user.checkTeam(answer.teamId)
 
         val quest = gameDao.getQuest(
                 teamId = answer.teamId,
                 taskId = answer.taskId
         ).validateRunningStatus()
 
-        quest.answers.find {
+        convertAnswers(quest).find {
             answer.answer.equals(it, ignoreCase = true)
         } ?: return false
 
@@ -111,6 +110,18 @@ class GameServicePilot(
                 taskId = task.taskId,
                 status = QuestStatus.SKIP
         )
+    }
+
+    private fun convertAnswers(questModel: QuestModel): List<String> {
+        if (questModel.taskType != TaskType.PHOTO) {
+            return questModel.answers
+        }
+
+        val photoAnswer = convertPhotoQuestAnswer(
+                answers = questModel.answers,
+                teamId = questModel.teamId
+        )
+        return listOf(photoAnswer)
     }
 
     private fun selectTask(

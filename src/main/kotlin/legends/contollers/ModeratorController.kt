@@ -4,10 +4,7 @@ import legends.logic.GameState
 import legends.models.TaskType
 import legends.services.ModeratorService
 import legends.utils.getUserIdOrThrow
-import legends.views.TaskStateView
-import legends.views.TraceView
-import legends.views.toTraceView
-import legends.views.toView
+import legends.views.*
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -42,6 +39,16 @@ class ModeratorController(private val moderatorService: ModeratorService) {
         val userId = httpSession.getUserIdOrThrow()
         val taskStates = moderatorService.getTaskStates(userId, taskType)
         return ResponseEntity(taskStates.toView(), HttpStatus.OK)
+    }
+
+    @GetMapping("/quest")
+    fun getTraces(
+            httpSession: HttpSession,
+            @RequestParam("team_id") teamId: Long
+    ): ResponseEntity<TaskView> {
+        val userId = httpSession.getUserIdOrThrow()
+        val task = moderatorService.getTaskForTeam(userId, teamId)
+        return ResponseEntity(TaskView(task), HttpStatus.OK)
     }
 
     // TODO: add QuestStatus in TeamModel

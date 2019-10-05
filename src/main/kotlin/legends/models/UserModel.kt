@@ -1,5 +1,6 @@
 package legends.models
 
+import legends.exceptions.BadRequestException
 import legends.exceptions.LegendsException
 import legends.exceptions.TeamIsNotPresented
 import org.springframework.http.HttpStatus
@@ -33,6 +34,12 @@ data class UserModel(
                     group = rs.getString("study_group").toUpperCase(),
                     vkRef = rs.getString("vk")
             )
+        }
+    }
+
+    fun checkTeam(checkedTeamId: Long) {
+        if (teamId != checkedTeamId) {
+            throw BadRequestException { "Вы не состоите в команде №${checkedTeamId}" }
         }
     }
 
