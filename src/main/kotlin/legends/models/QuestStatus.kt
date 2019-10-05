@@ -1,13 +1,13 @@
 package legends.models
 
-enum class TaskStatus {
+enum class QuestStatus {
     RUNNING,
     SUCCESS,
     FAIL,
     SKIP;
 
     companion object  {
-        fun valueOfSafety(value: String): TaskStatus {
+        fun valueOfSafety(value: String): QuestStatus {
             return when(value.toUpperCase()) {
                 RUNNING.name -> RUNNING
                 SUCCESS.name -> SUCCESS

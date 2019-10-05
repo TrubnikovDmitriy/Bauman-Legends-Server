@@ -4,7 +4,7 @@ import legends.dao.GameDao
 import legends.exceptions.BadRequestException
 import legends.models.GameStatus
 import legends.models.QuestModel
-import legends.models.TaskStatus
+import legends.models.QuestStatus
 import legends.models.TaskType
 import legends.utils.TimeUtils
 import org.slf4j.LoggerFactory
@@ -73,7 +73,7 @@ class QuestTimer(private val gameDao: GameDao) {
             gameDao.finishTask(
                     teamId = quest.teamId,
                     taskId = quest.taskId,
-                    status = TaskStatus.FAIL
+                    status = QuestStatus.FAIL
             )
         } catch (e: BadRequestException) {
             logger.warn("Fail to force stop the quest", e)

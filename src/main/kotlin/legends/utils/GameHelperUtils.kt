@@ -2,7 +2,7 @@ package legends.utils
 
 import legends.exceptions.BadRequestException
 import legends.models.QuestModel
-import legends.models.TaskStatus.*
+import legends.models.QuestStatus.*
 
 fun QuestModel?.validateRunningStatus(): QuestModel {
     val action = when (this?.status) {

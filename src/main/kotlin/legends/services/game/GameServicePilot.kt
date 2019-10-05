@@ -27,7 +27,7 @@ class GameServicePilot(
             return TeamState.pause(text = "Разгоревочный этап начался! Капитан команды может взять первое задание.")
         }
 
-        if (quest.status == TaskStatus.RUNNING) {
+        if (quest.status == QuestStatus.RUNNING) {
             return TeamState.play(quest)
         }
 
@@ -90,7 +90,7 @@ class GameServicePilot(
         gameDao.finishTask(
                 teamId = answer.teamId,
                 taskId = answer.taskId,
-                status = TaskStatus.SUCCESS,
+                status = QuestStatus.SUCCESS,
                 answer = answer.answer
         )
         teamDao.increaseScore(answer.teamId, quest.points)
@@ -109,7 +109,7 @@ class GameServicePilot(
         gameDao.finishTask(
                 teamId = teamId,
                 taskId = task.taskId,
-                status = TaskStatus.SKIP
+                status = QuestStatus.SKIP
         )
     }
 

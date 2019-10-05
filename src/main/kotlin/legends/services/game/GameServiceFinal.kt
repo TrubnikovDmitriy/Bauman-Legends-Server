@@ -7,7 +7,7 @@ import legends.dto.AnswerDto
 import legends.exceptions.BadRequestException
 import legends.logic.QuestTimer
 import legends.models.TaskState
-import legends.models.TaskStatus
+import legends.models.QuestStatus
 import legends.models.TaskType
 import legends.models.TeamState
 import legends.services.TeamService.Companion.MAX_TEAM_SIZE
@@ -29,7 +29,7 @@ class GameServiceFinal(
             return TeamState.pause(text = "Основной этап начался! Капитан команды может взять первое задание.")
         }
 
-        if (quest.status == TaskStatus.RUNNING) {
+        if (quest.status == QuestStatus.RUNNING) {
             return TeamState.play(quest)
         }
 
@@ -86,7 +86,7 @@ class GameServiceFinal(
         gameDao.finishTask(
                 teamId = answer.teamId,
                 taskId = answer.taskId,
-                status = TaskStatus.SUCCESS,
+                status = QuestStatus.SUCCESS,
                 answer = answer.answer
         )
         teamDao.increaseScore(answer.teamId, quest.points)

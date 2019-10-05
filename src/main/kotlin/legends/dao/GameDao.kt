@@ -42,7 +42,7 @@ class GameDao(dataSource: DataSource) {
         }
     }
 
-    fun finishTask(teamId: Long, taskId: Long, status: TaskStatus, answer: String? = null) {
+    fun finishTask(teamId: Long, taskId: Long, status: QuestStatus, answer: String? = null) {
         val timestamp = TimeUtils.currentTime(SECONDS)
         val affectedRows = jdbcTemplate.update(
                 """
@@ -83,7 +83,7 @@ class GameDao(dataSource: DataSource) {
         return getQuest(teamId, taskId) ?: throw QuestIsNotExists()
     }
 
-    fun getResultsForTeam(teamId: Long, status: TaskStatus): List<QuestModel> {
+    fun getResultsForTeam(teamId: Long, status: QuestStatus): List<QuestModel> {
         return jdbcTemplate.query(
                 "SELECT * FROM results WHERE team_id=? AND status=LOWER(?)::task_status",
                 arrayOf(teamId),

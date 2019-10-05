@@ -2,7 +2,7 @@ package legends.views
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import legends.models.QuestModel
-import legends.models.TaskStatus
+import legends.models.QuestStatus
 import legends.models.TaskType
 
 data class QuestView (
@@ -15,7 +15,7 @@ data class QuestView (
         @JsonProperty("start_time") val startTime: Long, // seconds
         @JsonProperty("finish_time") val finishTime: Long?, // seconds
         @JsonProperty("answer") val answer: String?,
-        @JsonProperty("task_status") val taskStatus: TaskStatus
+        @JsonProperty("task_status") val questStatus: QuestStatus
 ) {
     constructor(quest: QuestModel) : this(
             taskId = quest.taskId,
@@ -27,6 +27,6 @@ data class QuestView (
             startTime = quest.startTime,
             finishTime = quest.finishTime,
             answer = quest.answer,
-            taskStatus = quest.status
+            questStatus = quest.status
     )
 }
