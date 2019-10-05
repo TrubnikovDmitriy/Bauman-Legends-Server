@@ -5,6 +5,7 @@ import java.sql.ResultSet
 
 data class TaskState(
         val taskId: Long,
+        val taskName: String,
         val taskType: TaskType,
         val capacity: Int,
         val load: Int,
@@ -17,6 +18,7 @@ data class TaskState(
         override fun mapRow(rs: ResultSet, rowNum: Int): TaskState? {
             return TaskState(
                     taskId = rs.getLong("task_id"),
+                    taskName = rs.getString("task_name"),
                     taskType = TaskType.valueOfSafety(rs.getString("task_type")),
                     capacity = rs.getInt("capacity"),
                     load = rs.getInt("load"),

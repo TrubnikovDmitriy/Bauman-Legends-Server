@@ -12,6 +12,7 @@ data class QuestModel(
         val answer: String?,
         val status: TaskStatus,
         // Join with task
+        val taskName: String,
         val html: String,
         val taskType: TaskType,
         val duration: Long?, // seconds
@@ -26,6 +27,7 @@ data class QuestModel(
             return QuestModel(
                     teamId = rs.getLong("team_id"),
                     taskId = rs.getLong("task_id"),
+                    taskName = rs.getString("task_name"),
                     startTime = rs.getLong("start_time"),
                     finishTime = rs.getLong("finish_time").takeUnless { rs.wasNull() },
                     status = TaskStatus.valueOfSafety(rs.getString("status")),

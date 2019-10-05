@@ -2,7 +2,6 @@ package legends.dao
 
 import legends.exceptions.BadRequestException
 import legends.exceptions.QuestIsNotExists
-import legends.logic.QuestTimer
 import legends.models.*
 import legends.utils.TimeUtils
 import org.slf4j.LoggerFactory
@@ -141,9 +140,37 @@ class GameDao(dataSource: DataSource) {
         }
     }
 
-    fun getAllResults(): List<QuestModel> {
+    fun getAllFinalQuests(): List<QuestModel> {
         return jdbcTemplate.query(
-                "SELECT * FROM results",
+                """
+                    SELECT * FROM results r
+                        JOIN tasks t ON r.task_id=t.task_id
+                        WHERE task_type='main'
+                    ORDER BY team_id
+                    """,
+                QuestModel.Mapper()
+        )
+    }
+
+    fun getAllPilotQuests(): List<QuestModel> {
+        return jdbcTemplate.query(
+                """
+                    SELECT * FROM results r
+                        JOIN tasks t ON r.task_id=t.task_id
+                        WHERE task_type='photo' OR task_type='logic'
+                    ORDER BY team_id
+                    """,
+                QuestModel.Mapper()
+        )
+    }
+
+    fun getAllQuests(): List<QuestModel> {
+        return jdbcTemplate.query(
+                """
+                    SELECT * FROM results r
+                        JOIN tasks t ON r.task_id=t.task_id
+                    ORDER BY team_id
+                    """,
                 QuestModel.Mapper()
         )
     }
@@ -158,10 +185,10 @@ class GameDao(dataSource: DataSource) {
         )
     }
 
-    fun getTasksActualStatus(taskType: TaskType): List<TaskState> {
+    fun getTaskStates(taskType: TaskType): List<TaskState> {
         return jdbcTemplate.query(
                 """
-                    SELECT t.task_id, t.capacity, t.task_type,
+                    SELECT t.task_id, t.task_name, t.capacity, t.task_type,
                            COUNT(r.status) FILTER (WHERE r.status='running') AS load,
                            COUNT(r.status) AS hints
                     FROM tasks t
@@ -174,10 +201,10 @@ class GameDao(dataSource: DataSource) {
         )
     }
 
-    fun getTasksActualStatus(): List<TaskState> {
+    fun getTaskStates(): List<TaskState> {
         return jdbcTemplate.query(
                 """
-                    SELECT t.task_id, t.capacity, t.task_type,
+                    SELECT t.task_id, t.task_name, t.capacity, t.task_type,
                            COUNT(r.status) FILTER (WHERE r.status='running') AS load,
                            COUNT(r.status) AS hints
                     FROM tasks t

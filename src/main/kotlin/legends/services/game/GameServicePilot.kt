@@ -46,7 +46,7 @@ class GameServicePilot(
             }
         }
 
-        val allTasks = gameDao.getTasksActualStatus()
+        val allTasks = gameDao.getTaskStates()
         val completedTasks = gameDao.getCompletedTasksForTeam(teamId)
 
         val nextTaskId = selectTask(allTasks, completedTasks) ?: return TeamState

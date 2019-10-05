@@ -41,10 +41,10 @@ class GameServiceFinal(
     override fun startNextTask(captainId: Long): TeamState {
         val teamId = userDao.getUserOrThrow(captainId).checkCaptain()
 
-        val allTasks = gameDao.getTasksActualStatus(TaskType.MAIN)
+        val taskStates = gameDao.getTaskStates(TaskType.MAIN)
         val completedTaskIds = gameDao.getCompletedTaskIdsForTeam(teamId)
 
-        val nextTaskId = selectTask(allTasks, completedTaskIds) ?: return TeamState
+        val nextTaskId = selectTask(taskStates, completedTaskIds) ?: return TeamState
                 .stop("Поздравляем! Вы прошли все испытания, Легенды Бауманки 2019 завершены!")
 
         gameDao.startTask(teamId, nextTaskId)
