@@ -20,14 +20,14 @@ class GameController(private val gameService: GameService) {
     private val logger = LoggerFactory.getLogger(GameController::class.java)
 
     @GetMapping("/status")
-    fun status(): ResponseEntity<String> = ResponseEntity(GameState.status.name, HttpStatus.OK)
+    fun status(): ResponseEntity<String> = ResponseEntity(GameState.stage.name, HttpStatus.OK)
 
     @PostMapping("/status")
     fun setStatus(
             httpSession: HttpSession,
             @RequestBody state: GameStateUpdate
     ): ResponseEntity<Any> {
-        GameState.updateStatusBackdoor(state.status)
+        GameState.updateStatusBackdoor(state.stage)
         return ResponseEntity(HttpStatus.OK)
     }
 

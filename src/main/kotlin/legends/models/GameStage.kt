@@ -1,6 +1,6 @@
 package legends.models
 
-enum class GameStatus {
+enum class GameStage {
     REGISTRATION,
     PILOT,
     FINAL,

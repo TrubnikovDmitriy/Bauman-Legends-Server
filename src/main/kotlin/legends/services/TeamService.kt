@@ -7,9 +7,8 @@ import legends.dto.TeamSignUp
 import legends.exceptions.BadRequestException
 import legends.exceptions.LegendsException
 import legends.logic.GameState
-import legends.models.GameStatus
-import legends.models.GameStatus.PILOT
-import legends.models.GameStatus.REGISTRATION
+import legends.models.GameStage.PILOT
+import legends.models.GameStage.REGISTRATION
 import legends.models.TeamModel
 import legends.models.UserModel
 import legends.models.UserRole
@@ -32,7 +31,7 @@ class TeamService(
     @Synchronized
     @Transactional
     fun createTeam(userId: Long, teamSignUp: TeamSignUp): TeamModel {
-        when(GameState.status) {
+        when(GameState.stage) {
             REGISTRATION, PILOT -> Unit
             else -> throw BadRequestException { "Создавать команды можно только на этапе регистрации." }
         }
@@ -59,7 +58,7 @@ class TeamService(
     @Synchronized
     @Transactional
     fun updateTeamName(userId: Long, teamName: TeamSignUp): TeamModel {
-        when(GameState.status) {
+        when(GameState.stage) {
             REGISTRATION, PILOT -> Unit
             else -> throw BadRequestException { "Навзание команды разрешено менять только на этапе регистрации." }
         }
@@ -167,7 +166,7 @@ class TeamService(
 
     fun selfKickCaptain(captainId: Long) {
 
-        if (GameState.status != REGISTRATION) {
+        if (GameState.stage != REGISTRATION) {
             throw LegendsException(HttpStatus.BAD_REQUEST)
             { "Во время игровых этапов капитан не может покинуть команду." }
         }

@@ -6,7 +6,7 @@ import legends.dao.UserDao
 import legends.dto.AnswerDto
 import legends.logic.GameState
 import legends.logic.QuestTimer
-import legends.models.GameStatus.*
+import legends.models.GameStage.*
 import legends.models.TeamState
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -26,7 +26,7 @@ class GameServiceProvider(
 
 
     override fun getCurrentTask(userId: Long): TeamState {
-        return when (GameState.status) {
+        return when (GameState.stage) {
             PILOT -> pilot.getCurrentTask(userId)
             FINAL -> final.getCurrentTask(userId)
             REGISTRATION -> TeamState.stop("Легенды Бауманки начнутся 7 октября. Осталось совсем чуть-чуть!")
@@ -35,7 +35,7 @@ class GameServiceProvider(
     }
 
     override fun startNextTask(captainId: Long): TeamState {
-        return when (GameState.status) {
+        return when (GameState.stage) {
             PILOT -> pilot.startNextTask(captainId)
             FINAL -> final.startNextTask(captainId)
             REGISTRATION -> TeamState.stop("Первое задание можно будет получить 7 октября.")
@@ -44,21 +44,21 @@ class GameServiceProvider(
     }
 
     override fun tryAnswer(userId: Long, dto: AnswerDto): Boolean {
-        return when (GameState.status) {
+        return when (GameState.stage) {
             PILOT -> pilot.tryAnswer(userId, dto)
             FINAL -> final.tryAnswer(userId, dto)
             else -> {
-                logger.warn("Try to answer the task when game status is [${GameState.status}]")
+                logger.warn("Try to answer the task when game stage is [${GameState.stage}]")
                 false
             }
         }
     }
 
     override fun skipTask(userId: Long) {
-        when (GameState.status) {
+        when (GameState.stage) {
             PILOT -> pilot.skipTask(userId)
             FINAL -> final.skipTask(userId)
-            else -> logger.warn("Try to skip task when game status is [${GameState.status}]")
+            else -> logger.warn("Try to skip task when game stage is [${GameState.stage}]")
         }
     }
 }

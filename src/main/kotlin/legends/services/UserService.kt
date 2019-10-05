@@ -5,8 +5,8 @@ import legends.dto.UserSignIn
 import legends.dto.UserSignUp
 import legends.exceptions.BadRequestException
 import legends.logic.GameState
-import legends.models.GameStatus.PILOT
-import legends.models.GameStatus.REGISTRATION
+import legends.models.GameStage.PILOT
+import legends.models.GameStage.REGISTRATION
 import legends.models.UserModel
 import legends.models.UserRole
 import legends.utils.SecureUtils
@@ -24,7 +24,7 @@ class UserService(private val userDao: UserDao) {
         if (reason != null) {
             throw BadRequestException { reason }
         }
-        when(GameState.status) {
+        when(GameState.stage) {
             REGISTRATION, PILOT -> Unit
             else -> throw BadRequestException { "Регистрация на мероприятие завершена." }
         }

@@ -7,7 +7,7 @@ import legends.dao.UserDao
 import legends.exceptions.NotFoundException
 import legends.logic.GameState
 import legends.models.*
-import legends.models.GameStatus.*
+import legends.models.GameStage.*
 import legends.utils.GameHelperUtils.convertPhotoQuestAnswer
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -24,7 +24,7 @@ class ModeratorService(
     fun getAllQuests(userId: Long, withCompleted: Boolean): Map<Long, List<QuestModel>> {
         userDao.getUserOrThrow(userId).checkModerator()
 
-        val questList = when(GameState.status) {
+        val questList = when(GameState.stage) {
             REGISTRATION -> emptyList()
             PILOT -> gameDao.getAllPilotQuests()
             FINAL -> gameDao.getAllFinalQuests()

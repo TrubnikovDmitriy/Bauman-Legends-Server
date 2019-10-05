@@ -2,7 +2,7 @@ package legends.logic
 
 import legends.dao.GameDao
 import legends.exceptions.BadRequestException
-import legends.models.GameStatus
+import legends.models.GameStage
 import legends.models.QuestModel
 import legends.models.QuestStatus
 import legends.models.TaskType
@@ -34,7 +34,7 @@ class QuestTimer(private val gameDao: GameDao) {
 
 
     init {
-        if (GameState.status == GameStatus.FINAL) {
+        if (GameState.stage == GameStage.FINAL) {
             // Reschedule running quests after server reboot
             val runningQuests = gameDao.getAllRunningQuests().filter { it.taskType == TaskType.MAIN }
             logger.info("Number of running quests: [${runningQuests.size}]")
