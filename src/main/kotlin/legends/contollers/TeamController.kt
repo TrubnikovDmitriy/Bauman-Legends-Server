@@ -6,7 +6,6 @@ import legends.exceptions.TeamIsNotPresented
 import legends.services.TeamService
 import legends.utils.getUserIdOrThrow
 import legends.views.TeamView
-import legends.views.UserView
 import legends.views.toResponse
 import legends.views.toView
 import org.slf4j.LoggerFactory
@@ -56,10 +55,14 @@ class TeamController(private val teamService: TeamService) {
     }
 
     @GetMapping("/members")
-    fun getMembers(httpSession: HttpSession): ResponseEntity<List<UserView>> {
+    fun getMembers(httpSession: HttpSession): ResponseEntity<*> {
         val userId = httpSession.getUserIdOrThrow()
         val userList = teamService.getTeammates(userId)
-        return ResponseEntity(userList.toView(), HttpStatus.OK)
+        return if (userList != null) {
+            ResponseEntity(userList.toView(), HttpStatus.OK)
+        } else {
+            TeamIsNotPresented().toResponse()
+        }
     }
 
     @GetMapping("/all")

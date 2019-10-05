@@ -81,21 +81,21 @@ class UserDao(dataSource: DataSource) {
         return
     }
 
-    fun getUsersByTeamId(teamId: Long?): List<UserModel> {
-        return if (teamId != null) {
-            jdbcTemplate.query(
-                    """SELECT user_id, login, password, salt, team_id, role, first_name, last_name, study_group, vk
+    fun getUsersByTeamId(teamId: Long): List<UserModel> {
+        return jdbcTemplate.query(
+                """SELECT user_id, login, password, salt, team_id, role, first_name, last_name, study_group, vk
                             FROM users WHERE team_id=?""",
-                    arrayOf(teamId),
-                    UserModel.Mapper()
-            )
-        } else {
-            jdbcTemplate.query(
-                    """SELECT user_id, login, password, salt, team_id, role, first_name, last_name, study_group, vk
+                arrayOf(teamId),
+                UserModel.Mapper()
+        )
+    }
+
+    fun getUsersWithoutTeam(): List<UserModel> {
+        return jdbcTemplate.query(
+                """SELECT user_id, login, password, salt, team_id, role, first_name, last_name, study_group, vk
                             FROM users WHERE team_id IS NULL""",
-                    UserModel.Mapper()
-            )
-        }
+                UserModel.Mapper()
+        )
     }
 
     fun setRole(userId: Long, role: UserRole) {

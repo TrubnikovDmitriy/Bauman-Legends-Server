@@ -6,7 +6,6 @@ import legends.dto.TeamJoin
 import legends.dto.TeamSignUp
 import legends.exceptions.BadRequestException
 import legends.exceptions.LegendsException
-import legends.exceptions.TeamIsNotPresented
 import legends.logic.GameState
 import legends.models.GameStatus
 import legends.models.TeamModel
@@ -114,9 +113,9 @@ class TeamService(
         return teamDao.getTeamByUser(userId)
     }
 
-    fun getTeammates(userId: Long): List<UserModel> {
+    fun getTeammates(userId: Long): List<UserModel>? {
         val user = userDao.getUserOrThrow(userId)
-        user.teamId ?: throw TeamIsNotPresented()
+        user.teamId ?: return null
         return userDao.getUsersByTeamId(user.teamId)
     }
 
