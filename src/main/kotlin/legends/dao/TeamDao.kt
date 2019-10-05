@@ -42,6 +42,7 @@ class TeamDao(dataSource: DataSource) {
                     teamName = teamName,
                     leaderId = leaderId,
                     score = 0,
+                    money = 0,
                     inviteCode = inviteCode,
                     size = 1
             )
@@ -67,10 +68,11 @@ class TeamDao(dataSource: DataSource) {
     fun getTeamById(teamId: Long): TeamModel? {
         return try {
             jdbcTemplate.queryForObject(
-                    """SELECT t.team_id, t.team_name, t.leader_id, t.score, t.invite_code, COUNT(u.user_id) AS size 
-                        FROM teams t 
-                        LEFT JOIN users u ON t.team_id=u.team_id 
-                        WHERE t.team_id=? 
+                    """
+                        SELECT t.*, COUNT(u.user_id) AS size
+                        FROM teams t
+                            LEFT JOIN users u ON t.team_id=u.team_id
+                        WHERE t.team_id=?
                         GROUP BY t.team_id;""",
                     arrayOf(teamId),
                     TeamModel.Mapper()
@@ -83,12 +85,14 @@ class TeamDao(dataSource: DataSource) {
     fun getTeamByUser(userId: Long): TeamModel? {
         return try {
             jdbcTemplate.queryForObject(
-                    """SELECT t.team_id, t.team_name, t.leader_id, t.score, t.invite_code, COUNT(u.user_id) AS size 
-                        FROM users me 
-                         JOIN teams t ON me.team_id = t.team_id 
-                         LEFT JOIN users u ON t.team_id=u.team_id 
-                        WHERE me.user_id=? 
-                        GROUP BY t.team_id;""",
+                    """
+                        SELECT t.*, COUNT(u.user_id) AS size
+                        FROM users me
+                            JOIN teams t ON me.team_id = t.team_id
+                            LEFT JOIN users u ON t.team_id=u.team_id
+                        WHERE me.user_id=?
+                        GROUP BY t.team_id;
+                        """,
                     arrayOf(userId),
                     TeamModel.Mapper()
             )
@@ -101,16 +105,22 @@ class TeamDao(dataSource: DataSource) {
         jdbcTemplate.update("UPDATE teams SET score=score+? WHERE team_id=?", score, teamId)
     }
 
+    fun increaseMoney(teamId: Long, score: Int) {
+        jdbcTemplate.update("UPDATE teams SET money=money+? WHERE team_id=?", score, teamId)
+    }
+
     fun decreaseScore(teamId: Long, score: Int) {
         jdbcTemplate.update("UPDATE teams SET score=score-? WHERE team_id=?", score, teamId)
     }
 
     fun getAllTeams(): List<TeamModel> {
         return jdbcTemplate.query(
-                """SELECT t.team_id, t.team_name, t.leader_id, t.score, t.invite_code, COUNT(u.user_id) AS size 
-                        FROM teams t 
-                        LEFT JOIN users u ON t.team_id=u.team_id 
-                        GROUP BY t.team_id;""",
+                """
+                    SELECT t.*, COUNT(u.user_id) AS size
+                    FROM teams t
+                    LEFT JOIN users u ON t.team_id=u.team_id
+                    GROUP BY t.team_id;
+                    """,
                 TeamModel.Mapper()
         )
     }

@@ -8,6 +8,7 @@ data class TeamView(
         @JsonProperty("team_name") val teamName: String,
         @JsonProperty("leader_id") val leaderId: Long,
         @JsonProperty("score") val score: Int,
+        @JsonProperty("money") val money: Int,
         @JsonProperty("invite_code") val inviteCode: String?,
         @JsonProperty("size") val size: Int
 ) {
@@ -16,6 +17,7 @@ data class TeamView(
             teamName = team.teamName,
             leaderId = team.leaderId,
             score = team.score,
+            money = team.money,
             size = team.size,
             // Пригласительный код виден только капитану команды
             inviteCode = team.inviteCode.takeIf { userId == team.leaderId }
@@ -26,6 +28,7 @@ data class TeamView(
             teamName = team.teamName,
             leaderId = team.leaderId,
             score = team.score,
+            money = team.money,
             size = team.size,
             inviteCode = null
     )

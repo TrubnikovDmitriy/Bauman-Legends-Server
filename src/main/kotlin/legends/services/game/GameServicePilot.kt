@@ -103,7 +103,7 @@ open class GameServicePilot(
                 status = QuestStatus.SUCCESS,
                 answer = answer.answer
         )
-        teamDao.increaseScore(answer.teamId, quest.points)
+        teamDao.increaseMoney(answer.teamId, quest.points)
 
         return true
     }

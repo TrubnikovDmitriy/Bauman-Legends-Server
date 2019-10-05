@@ -8,6 +8,7 @@ data class TeamModel(
         val teamName: String,
         val leaderId: Long,
         val score: Int,
+        val money: Int,
         val inviteCode: String,
         val size: Int
 ) {
@@ -18,6 +19,7 @@ data class TeamModel(
                     teamName = rs.getString("team_name"),
                     leaderId = rs.getLong("leader_id"),
                     score = rs.getInt("score"),
+                    money = rs.getInt("money"),
                     inviteCode = rs.getString("invite_code"),
                     size = rs.getInt("size")
             )
