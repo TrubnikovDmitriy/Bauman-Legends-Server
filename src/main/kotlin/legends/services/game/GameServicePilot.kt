@@ -5,14 +5,12 @@ import legends.dao.TeamDao
 import legends.dao.UserDao
 import legends.dto.AnswerDto
 import legends.exceptions.BadRequestException
-import legends.exceptions.LegendsException
 import legends.exceptions.QuestIsNotExists
 import legends.models.*
 import legends.services.TeamService.Companion.MAX_TEAM_SIZE
 import legends.services.TeamService.Companion.MIN_TEAM_SIZE
 import legends.utils.GameHelperUtils.convertPhotoQuestAnswer
 import legends.utils.validateRunningStatus
-import org.springframework.http.HttpStatus
 import org.springframework.transaction.annotation.Transactional
 
 open class GameServicePilot(
@@ -20,6 +18,19 @@ open class GameServicePilot(
         private val userDao: UserDao,
         private val teamDao: TeamDao
 ) : GameService {
+
+    companion object {
+        private const val FIRST_PHOTO_ID = 1L
+
+        private val pilotTaskMap: Map<Long /* PhotoTaskId */, Long /* LogicTaskId */> = mapOf(
+                1L to 11L, // Королёв
+                2L to 12L, // Капсула
+                3L to 13L, // Львы
+                4L to 14L, // Памятники
+                5L to 15L, // Собака
+                6L to 16L  // Бауман RIP
+        )
+    }
 
     override fun getCurrentTask(userId: Long): TeamState {
         val quest = gameDao.getLastQuestForUser(userId)
@@ -129,17 +140,22 @@ open class GameServicePilot(
             completedTasks: List<QuestModel>
     ): Long? {
 
-        val completedTaskIds = completedTasks.map { it.taskId }
-
-        val lastTask = completedTasks.maxBy { it.finishTime ?: 0L }
-        val taskType = when (lastTask?.taskType) {
-            TaskType.LOGIC -> TaskType.PHOTO
-            TaskType.PHOTO -> TaskType.LOGIC
-            else -> TaskType.PHOTO
+        if (completedTasks.isEmpty()) {
+            // Первый фотоквест фиксирован и должен начинаться возле УЛК.
+            return FIRST_PHOTO_ID
         }
 
+        val lastTask = completedTasks.maxBy { it.finishTime ?: 0L }
+        if (lastTask?.taskType == TaskType.PHOTO) {
+            // После каждого фотоквеста идёт задание на логику
+            // и они жестко связаны друг с другом.
+            return pilotTaskMap[lastTask.taskId]
+        }
+
+        // Все последующие фотоквесты берутся в рандомном порядке
+        val completedTaskIds = completedTasks.map { it.taskId }
         val task = allTasks
-                .filter { it.taskType == taskType }
+                .filter { it.taskType == TaskType.PHOTO }
                 .toMutableList()
                 .apply {
                     removeIf { completedTaskIds.contains(it.taskId) }
@@ -147,8 +163,6 @@ open class GameServicePilot(
                 }
                 .firstOrNull()
 
-        return task?.taskId ?: throw LegendsException(HttpStatus.NOT_FOUND) {
-            "Поздарвляем! Ваша команда прошла все квесты разогревочного этапа, ждём Вас в финале!"
-        }
+        return task?.taskId
     }
 }
