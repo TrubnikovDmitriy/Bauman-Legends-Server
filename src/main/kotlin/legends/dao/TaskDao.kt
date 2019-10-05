@@ -7,6 +7,7 @@ import legends.models.TaskType
 import legends.utils.SqlUtils.convertToSqlArray
 import legends.utils.SqlUtils.setNullable
 import org.slf4j.LoggerFactory
+import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.dao.DuplicateKeyException
 import org.springframework.dao.EmptyResultDataAccessException
 import org.springframework.jdbc.core.JdbcTemplate
@@ -129,13 +130,22 @@ class TaskDao(private val dataSource: DataSource) {
     }
 
     fun deleteTask(taskId: Long) {
-        val affectedRows = jdbcTemplate.update("DELETE FROM tasks WHERE task_id=?", taskId)
-        if (affectedRows == 0) {
-            throw TaskIsNotExists(taskId)
+        try {
+            val affectedRows = jdbcTemplate.update("DELETE FROM tasks WHERE task_id=?", taskId)
+
+            if (affectedRows == 0) {
+                throw TaskIsNotExists(taskId)
+            }
+            if (affectedRows != 1) {
+                logger.error("Fail to delete task, taskId=[$taskId], affectedRows=[$affectedRows]")
+            }
+            return
+
+        } catch (e: DataIntegrityViolationException) {
+            logger.warn("Fail to delete task with taskId=[$taskId]", e)
+            throw BadRequestException {
+                "Нельзя удалять задания, которые уже проходились участниками."
+            }
         }
-        if (affectedRows != 1) {
-            logger.error("Fail to delete task, taskId=[$taskId], affectedRows=[$affectedRows]")
-        }
-        return
     }
 }
