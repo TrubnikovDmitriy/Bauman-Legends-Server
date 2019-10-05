@@ -10,6 +10,9 @@ import legends.models.TaskState
 import legends.models.TaskStatus
 import legends.models.TaskType
 import legends.models.TeamState
+import legends.services.TeamService.Companion.MAX_TEAM_SIZE
+import legends.services.TeamService.Companion.MIN_TEAM_SIZE
+import legends.utils.validateRunningStatus
 import org.springframework.transaction.annotation.Transactional
 
 class GameServiceFinal(
@@ -20,10 +23,10 @@ class GameServiceFinal(
 ) : GameService {
 
     override fun getCurrentTask(userId: Long): TeamState {
-        val quest = gameDao.getLastQuestForUser(userId)
+        val quest = gameDao.getLastQuestForUser(userId)?.takeIf { it.taskType == TaskType.MAIN }
 
         if (quest == null) {
-            return TeamState.pause(text = "Основной этап начался! Вы можете взять первое задание.")
+            return TeamState.pause(text = "Основной этап начался! Капитан команды может взять первое задание.")
         }
 
         if (quest.status == TaskStatus.RUNNING) {
@@ -40,6 +43,13 @@ class GameServiceFinal(
 
     override fun startNextTask(captainId: Long): TeamState {
         val teamId = userDao.getUserOrThrow(captainId).checkCaptain()
+        val membersCount = teamDao.getTeamMembersCount(teamId)
+
+        if (membersCount !in MIN_TEAM_SIZE..MAX_TEAM_SIZE) {
+            throw BadRequestException {
+                "К испытаниям допускаются только те команды, в составе которых от $MIN_TEAM_SIZE до $MAX_TEAM_SIZE игроков."
+            }
+        }
 
         val taskStates = gameDao.getTaskStates(TaskType.MAIN)
         val completedTaskIds = gameDao.getCompletedTaskIdsForTeam(teamId)
@@ -63,10 +73,10 @@ class GameServiceFinal(
             throw BadRequestException { "Вы не состоите в команде №${answer.teamId}" }
         }
 
-        val quest = gameDao.getQuest(teamId = answer.teamId, taskId = answer.taskId)
-        if (quest?.status != TaskStatus.RUNNING) {
-            throw BadRequestException { "Ваша команда в данный момент не выполняет задание №${answer.taskId}." }
-        }
+        val quest = gameDao.getQuest(
+                teamId = answer.teamId,
+                taskId = answer.taskId
+        ).validateRunningStatus()
 
         quest.answers.find {
             answer.answer.equals(it, ignoreCase = true)

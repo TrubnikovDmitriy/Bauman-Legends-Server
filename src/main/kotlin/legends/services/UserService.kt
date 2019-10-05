@@ -4,6 +4,9 @@ import legends.dao.UserDao
 import legends.dto.UserSignIn
 import legends.dto.UserSignUp
 import legends.exceptions.BadRequestException
+import legends.logic.GameState
+import legends.models.GameStatus.PILOT
+import legends.models.GameStatus.REGISTRATION
 import legends.models.UserModel
 import legends.models.UserRole
 import legends.utils.SecureUtils
@@ -20,6 +23,10 @@ class UserService(private val userDao: UserDao) {
         val reason = validateAndGetReason(dto)
         if (reason != null) {
             throw BadRequestException { reason }
+        }
+        when(GameState.status) {
+            REGISTRATION, PILOT -> Unit
+            else -> throw BadRequestException { "Регистрация на мероприятие завершена." }
         }
 
         val salt = secureUtils.generateSalt()

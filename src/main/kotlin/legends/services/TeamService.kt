@@ -8,6 +8,8 @@ import legends.exceptions.BadRequestException
 import legends.exceptions.LegendsException
 import legends.logic.GameState
 import legends.models.GameStatus
+import legends.models.GameStatus.PILOT
+import legends.models.GameStatus.REGISTRATION
 import legends.models.TeamModel
 import legends.models.UserModel
 import legends.models.UserRole
@@ -23,13 +25,17 @@ class TeamService(
 ) {
 
     companion object {
-        private const val MAX_TEAM_SIZE = 8
-        private const val MIN_TEAM_SIZE = 3
+        const val MAX_TEAM_SIZE = 8
+        const val MIN_TEAM_SIZE = 3
     }
 
     @Synchronized
     @Transactional
     fun createTeam(userId: Long, teamSignUp: TeamSignUp): TeamModel {
+        when(GameState.status) {
+            REGISTRATION, PILOT -> Unit
+            else -> throw BadRequestException { "Создавать команды можно только на этапе регистрации." }
+        }
 
         val userData = userDao.getUserOrThrow(userId)
         if (userData.teamId != null) {
@@ -53,8 +59,9 @@ class TeamService(
     @Synchronized
     @Transactional
     fun updateTeamName(userId: Long, teamName: TeamSignUp): TeamModel {
-        if (GameState.status != GameStatus.REGISTRATION) {
-            throw BadRequestException { "Навзание команды разрешено менять только на этапе регистрации." }
+        when(GameState.status) {
+            REGISTRATION, PILOT -> Unit
+            else -> throw BadRequestException { "Навзание команды разрешено менять только на этапе регистрации." }
         }
 
         val teamId = userDao.getUserOrThrow(userId).checkCaptain()
@@ -84,6 +91,9 @@ class TeamService(
         }
         if (!team.inviteCode.equals(join.inviteCode, ignoreCase = true)) {
             throw BadRequestException { "Неверный пригласительный код" }
+        }
+        if (user.role != UserRole.PLAYER) {
+            throw BadRequestException { "Только обычные игроки могут вступать в команды." }
         }
 
         userDao.setTeamId(userId = userId, teamId = join.teamId)
@@ -157,7 +167,7 @@ class TeamService(
 
     fun selfKickCaptain(captainId: Long) {
 
-        if (GameState.status != GameStatus.REGISTRATION) {
+        if (GameState.status != REGISTRATION) {
             throw LegendsException(HttpStatus.BAD_REQUEST)
             { "Во время игровых этапов капитан не может покинуть команду." }
         }

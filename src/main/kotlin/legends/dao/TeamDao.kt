@@ -9,6 +9,7 @@ import org.springframework.dao.DuplicateKeyException
 import org.springframework.dao.EmptyResultDataAccessException
 import org.springframework.http.HttpStatus
 import org.springframework.jdbc.core.JdbcTemplate
+import org.springframework.jdbc.core.queryForObject
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert
 import org.springframework.stereotype.Repository
 import javax.sql.DataSource
@@ -124,5 +125,13 @@ class TeamDao(dataSource: DataSource) {
         if (affectedRow != 1) {
             logger.error("Fail to delete team with team_id=[$teamId]")
         }
+    }
+
+    fun getTeamMembersCount(teamId: Long): Int {
+        return jdbcTemplate.queryForObject<Int>(
+                "SELECT COUNT(user_id) FROM users WHERE team_id=?",
+                Int::class.java,
+                teamId
+        )
     }
 }

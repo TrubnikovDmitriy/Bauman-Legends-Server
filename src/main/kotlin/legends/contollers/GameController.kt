@@ -5,6 +5,7 @@ import legends.dto.GameStateUpdate
 import legends.logic.GameState
 import legends.services.game.GameService
 import legends.utils.getUserIdOrThrow
+import legends.views.ErrorView
 import legends.views.TeamStateView
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -45,7 +46,7 @@ class GameController(private val gameService: GameService) {
     }
 
     @PostMapping("/answer")
-    fun answer(
+    fun tryAnswer(
             @RequestBody answer: AnswerDto,
             httpSession: HttpSession
     ): ResponseEntity<Any> {
@@ -54,7 +55,7 @@ class GameController(private val gameService: GameService) {
         return if (isCorrect) {
             ResponseEntity(HttpStatus.OK)
         } else {
-            ResponseEntity("Ответ \"${answer.answer}\" не подходит.", HttpStatus.BAD_REQUEST)
+            ResponseEntity(ErrorView("Ответ \"${answer.answer}\" не подходит."), HttpStatus.BAD_REQUEST)
         }
     }
 

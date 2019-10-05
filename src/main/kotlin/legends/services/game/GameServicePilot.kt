@@ -8,6 +8,9 @@ import legends.exceptions.BadRequestException
 import legends.exceptions.LegendsException
 import legends.exceptions.QuestIsNotExists
 import legends.models.*
+import legends.services.TeamService.Companion.MAX_TEAM_SIZE
+import legends.services.TeamService.Companion.MIN_TEAM_SIZE
+import legends.utils.validateRunningStatus
 import org.springframework.http.HttpStatus
 import org.springframework.transaction.annotation.Transactional
 
@@ -21,7 +24,7 @@ class GameServicePilot(
         val quest = gameDao.getLastQuestForUser(userId)
 
         if (quest == null) {
-            return TeamState.pause(text = "Разгоревочный этап начался! Вы можете взять первое задание.")
+            return TeamState.pause(text = "Разгоревочный этап начался! Капитан команды может взять первое задание.")
         }
 
         if (quest.status == TaskStatus.RUNNING) {
@@ -38,6 +41,13 @@ class GameServicePilot(
 
     override fun startNextTask(captainId: Long): TeamState {
         val teamId = userDao.getUserOrThrow(captainId).checkCaptain()
+        val membersCount = teamDao.getTeamMembersCount(teamId)
+
+        if (membersCount !in MIN_TEAM_SIZE..MAX_TEAM_SIZE) {
+            throw BadRequestException {
+                "К испытаниям допускаются только те команды, в составе которых от $MIN_TEAM_SIZE до $MAX_TEAM_SIZE игроков."
+            }
+        }
 
         val runningTask = gameDao.getCurrentQuestForTeam(teamId)
         if (runningTask != null) {
@@ -49,8 +59,9 @@ class GameServicePilot(
         val allTasks = gameDao.getTaskStates()
         val completedTasks = gameDao.getCompletedTasksForTeam(teamId)
 
-        val nextTaskId = selectTask(allTasks, completedTasks) ?: return TeamState
-                .stop("Поздравляем! Вы прошли все задания разогревочного этапа! Основной этап начнётся 11 октября.")
+        val nextTaskId = selectTask(allTasks, completedTasks) ?: return TeamState.stop(
+                "Поздравляем! Вы прошли все задания разогревочного этапа! " +
+                        "Основной этап начнётся 11 октября на территории Главного Здания МГТУ.")
 
         gameDao.startTask(teamId, nextTaskId)
 
@@ -67,10 +78,10 @@ class GameServicePilot(
             throw BadRequestException { "Вы не состоите в команде №${answer.teamId}" }
         }
 
-        val quest = gameDao.getQuest(teamId = answer.teamId, taskId = answer.taskId)
-        if (quest?.status != TaskStatus.RUNNING) {
-            throw BadRequestException { "Ваша команда в данный момент не выполняет задание №${answer.taskId}." }
-        }
+        val quest = gameDao.getQuest(
+                teamId = answer.teamId,
+                taskId = answer.taskId
+        ).validateRunningStatus()
 
         quest.answers.find {
             answer.answer.equals(it, ignoreCase = true)
