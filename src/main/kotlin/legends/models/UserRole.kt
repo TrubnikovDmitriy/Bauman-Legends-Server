@@ -5,7 +5,7 @@ enum class UserRole {
     MODERATOR,
     PLAYER,
     CAPTAIN,
-    TESTER;
+    REVISOR;
 
     companion object  {
         fun valueOfSafety(value: String): UserRole {
@@ -14,7 +14,7 @@ enum class UserRole {
                 MODERATOR.name -> MODERATOR
                 PLAYER.name -> PLAYER
                 CAPTAIN.name -> CAPTAIN
-                TESTER.name -> TESTER
+                REVISOR.name -> REVISOR
                 else -> PLAYER
             }
         }

@@ -52,12 +52,12 @@ class ModeratorController(private val moderatorService: ModeratorService) {
     }
 
     // TODO: add QuestStatus in TeamModel
-//    @GetMapping("/teams")
-//    fun getTeams(
-//            httpSession: HttpSession
-//    ): ResponseEntity<List<TraceView>> {
-//        val userId = httpSession.getUserIdOrThrow()
-//        val teams = moderatorService.getAllTeams(userId)
-//        return ResponseEntity(teams.toView(), HttpStatus.OK)
-//    }
+    @GetMapping("/teams")
+    fun getTeams(
+            httpSession: HttpSession
+    ): ResponseEntity<List<TeamView>> {
+        val userId = httpSession.getUserIdOrThrow()
+        val teams = moderatorService.getAllTeams(userId)
+        return ResponseEntity(teams.toView(), HttpStatus.OK)
+    }
 }

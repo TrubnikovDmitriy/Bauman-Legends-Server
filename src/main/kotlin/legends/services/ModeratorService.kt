@@ -38,7 +38,7 @@ class ModeratorService(
     }
 
     fun getAllTeams(userId: Long): List<TeamModel> {
-        userDao.getUserOrThrow(userId).checkModerator()
+        userDao.getUserOrThrow(userId).checkRevisor()
         return teamDao.getAllTeams()
     }
 
@@ -48,7 +48,7 @@ class ModeratorService(
     }
 
     fun getTaskForTeam(userId: Long, teamId: Long): TaskModel {
-        userDao.getUserOrThrow(userId).checkModerator()
+        userDao.getUserOrThrow(userId).checkRevisor()
 
         val lastTask = gameDao.getLastTaskForTeam(teamId) ?: throw NotFoundException {
             "Команда №$teamId еще не приступила к выполнению заданий."
