@@ -3,6 +3,7 @@ package legends.services
 import legends.dao.UserDao
 import legends.dto.UserSignIn
 import legends.dto.UserSignUp
+import legends.dto.UserUpdate
 import legends.exceptions.BadRequestException
 import legends.logic.GameState
 import legends.models.GameStage.PILOT
@@ -10,6 +11,7 @@ import legends.models.GameStage.REGISTRATION
 import legends.models.UserModel
 import legends.models.UserRole
 import legends.utils.SecureUtils
+import legends.utils.ValidationUtils
 import legends.utils.ValidationUtils.INVALID_ID
 import legends.utils.ValidationUtils.validateAndGetReason
 import org.springframework.stereotype.Service
@@ -46,6 +48,15 @@ class UserService(private val userDao: UserDao) {
             user
         else
             null
+    }
+
+    fun updateProfile(userId: Long, profile: UserUpdate): UserModel {
+        val reason = ValidationUtils.validateUpdateProfile(profile)
+        if (reason != null) {
+            throw BadRequestException { reason }
+        }
+        userDao.updateUser(userId, profile)
+        return userDao.getUserOrThrow(userId)
     }
 
     fun findUserById(userId: Long): UserModel? {

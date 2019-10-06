@@ -2,6 +2,7 @@ package legends.contollers
 
 import legends.dto.UserSignIn
 import legends.dto.UserSignUp
+import legends.dto.UserUpdate
 import legends.models.UserModel
 import legends.services.UserService
 import legends.utils.getUserId
@@ -36,14 +37,30 @@ class UserController(private val userService: UserService) {
             httpSession: HttpSession
     ): ResponseEntity<UserView> {
 
-        val userData = userService.signIn(body)
-        httpSession.setUserId(userData?.userId)
+        val user = userService.signIn(body)
+        httpSession.setUserId(user?.userId)
 
-        return if (userData != null) {
-            ResponseEntity(UserView(userData), HttpStatus.OK)
+        return if (user != null) {
+            ResponseEntity(UserView(user), HttpStatus.OK)
         } else {
             ResponseEntity(HttpStatus.BAD_REQUEST)
         }
+    }
+
+    @PostMapping("/update")
+    fun updateProfile(
+            @RequestBody body: UserUpdate,
+            httpSession: HttpSession
+    ): ResponseEntity<UserView> {
+        val userId = httpSession.getUserIdOrThrow()
+<<<<<<< Updated upstream
+        userService.updateProfile(userId, body)
+        return ResponseEntity(HttpStatus.OK)
+=======
+        logger.info("Update profile: userId=[$userId], updateData=[$body]")
+        val user = userService.updateProfile(userId, body)
+        return ResponseEntity(UserView(user), HttpStatus.OK)
+>>>>>>> Stashed changes
     }
 
     @GetMapping("/info")

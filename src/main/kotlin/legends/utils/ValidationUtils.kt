@@ -3,6 +3,7 @@ package legends.utils
 import legends.dto.TaskDto
 import legends.dto.TeamSignUp
 import legends.dto.UserSignUp
+import legends.dto.UserUpdate
 import legends.models.TaskType.LOGIC
 import legends.models.TaskType.PHOTO
 
@@ -76,6 +77,16 @@ object ValidationUtils {
     fun validateNewTeam(dto: TeamSignUp): String? {
         if (dto.teamName.trim().length < 2) {
             return "Слишком короткое задание."
+        }
+        return null
+    }
+
+    /**
+     * @return `null` in case of success validation
+     */
+    fun validateUpdateProfile(dto: UserUpdate): String? {
+        if (dto.vkRef.trim().isEmpty()) {
+            return "Отправлена пустая ссылка на ВК."
         }
         return null
     }

@@ -1,5 +1,6 @@
 package legends.dao
 
+import legends.dto.UserUpdate
 import legends.exceptions.BadRequestException
 import legends.exceptions.UserNotExists
 import legends.models.UserModel
@@ -88,6 +89,10 @@ class UserDao(dataSource: DataSource) {
                 arrayOf(teamId),
                 UserModel.Mapper()
         )
+    }
+
+    fun updateUser(userId: Long, profile: UserUpdate) {
+        jdbcTemplate.update("UPDATE users SET vk=? WHERE user_id=?", profile.vkRef, userId)
     }
 
     fun getUsersWithoutTeam(): List<UserModel> {
