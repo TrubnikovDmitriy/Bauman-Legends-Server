@@ -26,6 +26,7 @@ class UserController(private val userService: UserService) {
             @RequestBody body: UserSignUp,
             httpSession: HttpSession
     ): ResponseEntity<UserView> {
+        logger.trace("Sign up: firstName=[${body.firstName}], lastName=[${body.lastName}], login=[${body.login}]")
         val userData = userService.signUp(body)
         httpSession.setUserId(userData.userId)
         return ResponseEntity(UserView(userData), HttpStatus.CREATED)
@@ -36,6 +37,7 @@ class UserController(private val userService: UserService) {
             @RequestBody body: UserSignIn,
             httpSession: HttpSession
     ): ResponseEntity<UserView> {
+        logger.info("Sign in: login=[${body.login}]")
 
         val user = userService.signIn(body)
         httpSession.setUserId(user?.userId)
@@ -53,14 +55,9 @@ class UserController(private val userService: UserService) {
             httpSession: HttpSession
     ): ResponseEntity<UserView> {
         val userId = httpSession.getUserIdOrThrow()
-<<<<<<< Updated upstream
-        userService.updateProfile(userId, body)
-        return ResponseEntity(HttpStatus.OK)
-=======
         logger.info("Update profile: userId=[$userId], updateData=[$body]")
         val user = userService.updateProfile(userId, body)
         return ResponseEntity(UserView(user), HttpStatus.OK)
->>>>>>> Stashed changes
     }
 
     @GetMapping("/info")
@@ -68,6 +65,8 @@ class UserController(private val userService: UserService) {
         val userModel: UserModel? = httpSession.getUserId()?.let {
             userService.findUserById(it)
         }
+        logger.info("Get profile: userId=[${userModel?.userId}], login=[${userModel?.login}]")
+
         return if (userModel != null) {
             ResponseEntity(UserView(userModel), HttpStatus.OK)
         } else {
@@ -77,6 +76,7 @@ class UserController(private val userService: UserService) {
 
     @GetMapping("/logout")
     fun logout(httpSession: HttpSession): ResponseEntity<Any> {
+        logger.info("Log out: userId=[${httpSession.getUserId()}]")
         httpSession.invalidate()
         return ResponseEntity(HttpStatus.OK)
     }
@@ -84,6 +84,7 @@ class UserController(private val userService: UserService) {
     @DeleteMapping("/delete")
     fun delete(httpSession: HttpSession): ResponseEntity<Any> {
         val userId = httpSession.getUserIdOrThrow()
+        logger.warn("Delete account: userId=[$userId]")
 
         userService.deleteUser(userId)
         httpSession.invalidate()

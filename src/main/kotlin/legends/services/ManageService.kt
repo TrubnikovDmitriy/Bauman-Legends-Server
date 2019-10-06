@@ -13,13 +13,13 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
-class ModeratorService(
+class ManageService(
         private val gameDao: GameDao,
         private val teamDao: TeamDao,
         private val taskDao: TaskDao,
         private val userDao: UserDao
 ) {
-    private val logger = LoggerFactory.getLogger(ModeratorService::class.java)
+    private val logger = LoggerFactory.getLogger(ManageService::class.java)
 
     fun getAllQuests(userId: Long, withCompleted: Boolean): Map<Long, List<QuestModel>> {
         userDao.getUserOrThrow(userId).checkModerator()

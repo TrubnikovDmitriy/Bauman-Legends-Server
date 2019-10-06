@@ -8,13 +8,13 @@ import java.util.concurrent.TimeUnit
 data class TaskDto (
         @JsonProperty(required = false, value = "task_id") val taskId: Long?,
         @JsonProperty(required = true, value = "task_name") val taskName: String,
-        @JsonProperty(required = true, value = "html") val html: String,
-        @JsonProperty(required = false, value = "img_path") val imagePath: String?,
         @JsonProperty(required = true, value = "task_type") val taskType: TaskType,
         @JsonProperty(required = false, value = "duration") val duration: Long?, // minutes
         @JsonProperty(required = true, value = "points") val points: Int,
         @JsonProperty(required = true, value = "answers") val answers: List<String>,
-        @JsonProperty(required = true, value = "capacity") val capacity: Int
+        @JsonProperty(required = true, value = "capacity") val capacity: Int,
+        @JsonProperty(required = false, value = "img_path") val imagePath: String?,
+        @JsonProperty(required = true, value = "html") val html: String
 ) {
     fun convert(taskId: Long): TaskModel {
         return TaskModel(

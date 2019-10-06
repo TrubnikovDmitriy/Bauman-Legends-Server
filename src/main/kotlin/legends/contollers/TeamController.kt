@@ -26,8 +26,11 @@ class TeamController(private val teamService: TeamService) {
             httpSession: HttpSession
     ): ResponseEntity<TeamView> {
         val userId = httpSession.getUserIdOrThrow()
+        logger.trace("Create team: userId=[$userId], teamName=[${team.teamName}]")
+
         val teamData = teamService.createTeam(userId, team)
         val teamView = TeamView(userId, teamData)
+
         return ResponseEntity(teamView, HttpStatus.CREATED)
     }
 
@@ -37,8 +40,11 @@ class TeamController(private val teamService: TeamService) {
             httpSession: HttpSession
     ): ResponseEntity<TeamView> {
         val userId = httpSession.getUserIdOrThrow()
+        logger.info("Update team: userId=[$userId], teamName=[${team.teamName}]")
+
         val teamData = teamService.updateTeamName(userId, team)
         val teamView = TeamView(userId, teamData)
+
         return ResponseEntity(teamView, HttpStatus.OK)
     }
 
@@ -46,6 +52,8 @@ class TeamController(private val teamService: TeamService) {
     fun getTeam(httpSession: HttpSession): ResponseEntity<*> {
         val userId = httpSession.getUserIdOrThrow()
         val teamData = teamService.getTeamByUserId(userId)
+        logger.info("Get team info: userId=[$userId], team=[$teamData]")
+
         return if (teamData != null) {
             val teamView = TeamView(userId, teamData)
             ResponseEntity(teamView, HttpStatus.OK)
@@ -58,6 +66,8 @@ class TeamController(private val teamService: TeamService) {
     fun getMembers(httpSession: HttpSession): ResponseEntity<*> {
         val userId = httpSession.getUserIdOrThrow()
         val userList = teamService.getTeammates(userId)
+        logger.info("Get members of team: userId=[$userId], members=[${userList?.size}]")
+
         return if (userList != null) {
             ResponseEntity(userList.toView(), HttpStatus.OK)
         } else {
@@ -77,13 +87,16 @@ class TeamController(private val teamService: TeamService) {
             httpSession: HttpSession
     ): ResponseEntity<TeamView> {
         val userId = httpSession.getUserIdOrThrow()
+        logger.info("Join to team: userId=[$userId], join=[$join]")
         val team = teamService.joinUserToTeam(userId, join)
+
         return ResponseEntity(TeamView(team), HttpStatus.OK)
     }
 
     @DeleteMapping("/leave")
     fun leaveTeam(httpSession: HttpSession): ResponseEntity<Any> {
         val userId = httpSession.getUserIdOrThrow()
+        logger.warn("Leave team: userId=[$userId]")
         teamService.selfKick(userId)
         return ResponseEntity(HttpStatus.OK)
     }
@@ -94,6 +107,7 @@ class TeamController(private val teamService: TeamService) {
             httpSession: HttpSession
     ): ResponseEntity<Any> {
         val userId = httpSession.getUserIdOrThrow()
+        logger.warn("Kick from team: captainId=[$userId], kickId=[$kickId]")
         teamService.kickUser(userId, kickId)
         return ResponseEntity(HttpStatus.OK)
     }
@@ -104,6 +118,7 @@ class TeamController(private val teamService: TeamService) {
             httpSession: HttpSession
     ): ResponseEntity<TeamView> {
         val oldCaptainId = httpSession.getUserIdOrThrow()
+        logger.info("Change captain: oldCaptainId=[$oldCaptainId], newCaptainId=[$newCaptainId]")
         val teamData = teamService.changePartyLeader(oldCaptainId, newCaptainId)
         return ResponseEntity(TeamView(oldCaptainId, teamData), HttpStatus.OK)
     }

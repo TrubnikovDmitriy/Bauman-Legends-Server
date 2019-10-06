@@ -1,24 +1,22 @@
 package legends.contollers
 
+import legends.dto.GameStateUpdate
 import legends.logic.GameState
 import legends.models.TaskType
-import legends.services.ModeratorService
+import legends.services.ManageService
 import legends.utils.getUserIdOrThrow
 import legends.views.*
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import javax.servlet.http.HttpSession
 
 @RestController
-@RequestMapping("/moderator")
-class ModeratorController(private val moderatorService: ModeratorService) {
+@RequestMapping("/manage")
+class ManageController(private val manageService: ManageService) {
 
-    private val logger = LoggerFactory.getLogger(ModeratorController::class.java)
+    private val logger = LoggerFactory.getLogger(ManageController::class.java)
 
     @GetMapping("/traces")
     fun getTraces(
@@ -26,7 +24,8 @@ class ModeratorController(private val moderatorService: ModeratorService) {
             @RequestParam("complete") withCompleted: Boolean = false
     ): ResponseEntity<List<TraceView>> {
         val userId = httpSession.getUserIdOrThrow()
-        val quests = moderatorService.getAllQuests(userId, withCompleted)
+        logger.info("Get traces: moderatorId=[$userId]")
+        val quests = manageService.getAllQuests(userId, withCompleted)
         val traceViews = quests.toTraceView(GameState.getMaxTaskCount())
         return ResponseEntity(traceViews, HttpStatus.OK)
     }
@@ -37,7 +36,8 @@ class ModeratorController(private val moderatorService: ModeratorService) {
             @RequestParam("task_type") taskType: TaskType
     ): ResponseEntity<List<TaskStateView>> {
         val userId = httpSession.getUserIdOrThrow()
-        val taskStates = moderatorService.getTaskStates(userId, taskType)
+        logger.info("Get tasks: moderatorId=[$userId]")
+        val taskStates = manageService.getTaskStates(userId, taskType)
         return ResponseEntity(taskStates.toView(), HttpStatus.OK)
     }
 
@@ -47,7 +47,8 @@ class ModeratorController(private val moderatorService: ModeratorService) {
             @RequestParam("team_id") teamId: Long
     ): ResponseEntity<TaskView> {
         val userId = httpSession.getUserIdOrThrow()
-        val task = moderatorService.getTaskForTeam(userId, teamId)
+        val task = manageService.getTaskForTeam(userId, teamId)
+        logger.info("Get quest for team: moderatorId=[$userId], task=[$task]")
         return ResponseEntity(TaskView(task), HttpStatus.OK)
     }
 
@@ -57,7 +58,19 @@ class ModeratorController(private val moderatorService: ModeratorService) {
             httpSession: HttpSession
     ): ResponseEntity<List<TeamView>> {
         val userId = httpSession.getUserIdOrThrow()
-        val teams = moderatorService.getAllTeams(userId)
+        logger.info("Get teams: moderatorId=[$userId]")
+        val teams = manageService.getAllTeams(userId)
         return ResponseEntity(teams.toView(), HttpStatus.OK)
+    }
+
+    @PostMapping("/stage")
+    fun setStatus(
+            httpSession: HttpSession,
+            @RequestBody state: GameStateUpdate
+    ): ResponseEntity<Any> {
+        val adminId = httpSession.getUserIdOrThrow()
+        logger.warn("Change stage: adminId=[$adminId], stage=[$state]")
+        GameState.updateStatusBackdoor(state.stage)
+        return ResponseEntity(HttpStatus.OK)
     }
 }

@@ -1,7 +1,6 @@
 package legends.contollers
 
 import legends.dto.AnswerDto
-import legends.dto.GameStateUpdate
 import legends.logic.GameState
 import legends.services.game.GameService
 import legends.utils.getUserIdOrThrow
@@ -22,25 +21,18 @@ class GameController(private val gameService: GameService) {
     @GetMapping("/status")
     fun status(): ResponseEntity<String> = ResponseEntity(GameState.stage.name, HttpStatus.OK)
 
-    @PostMapping("/status")
-    fun setStatus(
-            httpSession: HttpSession,
-            @RequestBody state: GameStateUpdate
-    ): ResponseEntity<Any> {
-        GameState.updateStatusBackdoor(state.stage)
-        return ResponseEntity(HttpStatus.OK)
-    }
-
     @GetMapping("/info")
-    fun info(httpSession: HttpSession): ResponseEntity<TeamStateView> {
+    fun currentQuest(httpSession: HttpSession): ResponseEntity<TeamStateView> {
         val userId = httpSession.getUserIdOrThrow()
         val currentTask = gameService.getCurrentTask(userId)
+        logger.info("Get current quest: [$currentTask]")
         return ResponseEntity(TeamStateView(currentTask), HttpStatus.OK)
     }
 
     @GetMapping("/next")
     fun start(httpSession: HttpSession): ResponseEntity<TeamStateView> {
         val userId = httpSession.getUserIdOrThrow()
+        logger.info("Take next quest: captainId=[$userId]")
         val nextTask = gameService.startNextTask(userId)
         return ResponseEntity(TeamStateView(nextTask), HttpStatus.OK)
     }
@@ -51,6 +43,7 @@ class GameController(private val gameService: GameService) {
             httpSession: HttpSession
     ): ResponseEntity<Any> {
         val userId = httpSession.getUserIdOrThrow()
+        logger.info("Try answer: [$answer]")
         val isCorrect = gameService.tryAnswer(userId, answer)
         return if (isCorrect) {
             ResponseEntity(HttpStatus.OK)
@@ -62,6 +55,7 @@ class GameController(private val gameService: GameService) {
     @GetMapping("/skip")
     fun skip(httpSession: HttpSession): ResponseEntity<Any> {
         val userId = httpSession.getUserIdOrThrow()
+        logger.info("Skip quest: [$userId]")
         gameService.skipTask(userId)
         return ResponseEntity(HttpStatus.OK)
     }
