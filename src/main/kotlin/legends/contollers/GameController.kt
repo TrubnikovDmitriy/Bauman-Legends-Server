@@ -25,7 +25,11 @@ class GameController(private val gameService: GameService) {
     fun currentQuest(httpSession: HttpSession): ResponseEntity<TeamStateView> {
         val userId = httpSession.getUserIdOrThrow()
         val currentTask = gameService.getCurrentTask(userId)
-        logger.info("Get current quest: [$currentTask]")
+        logger.info("""Get current quest: 
+            status=[${currentTask.status}], 
+            task=[${currentTask.quest?.taskName}], 
+            text=[${currentTask.text}]
+        """.trimIndent())
         return ResponseEntity(TeamStateView(currentTask), HttpStatus.OK)
     }
 

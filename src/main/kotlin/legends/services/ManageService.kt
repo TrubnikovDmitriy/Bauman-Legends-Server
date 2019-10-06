@@ -52,8 +52,11 @@ class ManageService(
     fun getTaskForTeam(userId: Long, teamId: Long): TaskModel {
         userDao.getUserOrThrow(userId).checkRevisor()
 
-        val lastTask = gameDao.getLastTaskForTeam(teamId) ?: throw NotFoundException {
-            "Команда №$teamId еще не приступила к выполнению заданий."
+        val lastTask = gameDao.getLastTaskForTeam(teamId)
+
+        if (lastTask == null) {
+            teamDao.getTeamById(teamId) ?: throw NotFoundException { "Команды №$teamId не существует." }
+            throw NotFoundException { "Команда №$teamId еще не приступила к выполнению заданий." }
         }
 
         return when(lastTask.taskType) {
