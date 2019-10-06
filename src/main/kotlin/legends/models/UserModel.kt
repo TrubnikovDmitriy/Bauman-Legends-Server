@@ -67,4 +67,11 @@ data class UserModel(
             { "Действие отклонено, так как вы не являетесь модератором." }
         }
     }
+
+    fun checkAdmin() {
+        if (role != UserRole.ADMIN) {
+            throw LegendsException(HttpStatus.FORBIDDEN)
+            { "Действие отклонено, так как вы не являетесь администратором." }
+        }
+    }
 }

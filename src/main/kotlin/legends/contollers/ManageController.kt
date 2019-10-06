@@ -1,6 +1,6 @@
 package legends.contollers
 
-import legends.dto.GameStateUpdate
+import legends.dto.GameStageUpdate
 import legends.logic.GameState
 import legends.models.TaskType
 import legends.services.ManageService
@@ -66,11 +66,11 @@ class ManageController(private val manageService: ManageService) {
     @PostMapping("/stage")
     fun setStatus(
             httpSession: HttpSession,
-            @RequestBody state: GameStateUpdate
+            @RequestBody stage: GameStageUpdate
     ): ResponseEntity<Any> {
         val adminId = httpSession.getUserIdOrThrow()
-        logger.warn("Change stage: adminId=[$adminId], stage=[$state]")
-        GameState.updateStatusBackdoor(state.stage)
+        logger.warn("Change stage: adminId=[$adminId], stage=[$stage]")
+        manageService.updateGameStage(adminId, stage)
         return ResponseEntity(HttpStatus.OK)
     }
 }

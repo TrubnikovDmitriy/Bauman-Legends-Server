@@ -4,6 +4,8 @@ import legends.dao.GameDao
 import legends.dao.TaskDao
 import legends.dao.TeamDao
 import legends.dao.UserDao
+import legends.dto.GameStageUpdate
+import legends.exceptions.BadRequestException
 import legends.exceptions.NotFoundException
 import legends.logic.GameState
 import legends.models.*
@@ -64,5 +66,14 @@ class ManageService(
             }
             else -> lastTask
         }
+    }
+
+    fun updateGameStage(adminId: Long, stageUpdate: GameStageUpdate) {
+        userDao.getUserOrThrow(adminId).checkRevisor()
+        val secretWord = System.getenv("LB_ADMIN_SECRET") ?: "lb2019"
+        if (secretWord != stageUpdate.secret) {
+            throw BadRequestException { "Неверное кодовое слово." }
+        }
+        GameState.updateStage(stageUpdate.stage)
     }
 }

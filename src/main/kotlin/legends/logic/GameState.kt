@@ -1,19 +1,14 @@
 package legends.logic
 
-import legends.exceptions.LegendsException
 import legends.models.GameStage
-import legends.models.UserModel
-import legends.models.UserRole
-import org.springframework.http.HttpStatus
-
 
 object GameState {
 
     @Volatile var stage: GameStage = GameStage.REGISTRATION
         private set
 
-    @Volatile private var maxFinalTaskCount: Int = 10
-    @Volatile private var maxPilotTaskCount: Int = 6
+    private const val maxFinalTaskCount: Int = 10
+    private const val maxPilotTaskCount: Int = 6
 
     fun getMaxTaskCount(): Int {
         return when(stage) {
@@ -24,16 +19,7 @@ object GameState {
         }
     }
 
-    fun updateStatus(admin: UserModel, gameStage: GameStage) {
-        if (admin.role != UserRole.ADMIN) {
-            throw LegendsException(HttpStatus.FORBIDDEN)
-            { "Только администратор может переключать этапы игры" }
-        }
-        stage = gameStage
-    }
-
-    @Deprecated("Backdoor for testing")
-    fun updateStatusBackdoor(gameStage: GameStage) {
+    fun updateStage(gameStage: GameStage) {
         stage = gameStage
     }
 }
