@@ -12,9 +12,6 @@ import legends.utils.ValidationUtils.validateAndGetReason
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
-import java.io.File
-import java.io.IOException
-import java.nio.file.Files
 
 @Service
 class TaskService(
@@ -97,27 +94,5 @@ class TaskService(
     fun deleteTask(userId: Long, taskId: Long) {
         userDao.getUserOrThrow(userId).checkModerator()
         taskDao.deleteTask(taskId)
-    }
-
-    @Deprecated(level = DeprecationLevel.HIDDEN, message = "It's not ready")
-    fun deleteImage(userId: Long, imagePath: String) {
-        userDao.getUserOrThrow(userId).checkModerator()
-        try {
-            val imageFile = File(imagePath)
-
-            if (!imageFile.isFile) {
-                throw BadRequestException { "Удалять можно лишь загруженные изображения." }
-            }
-            if (!IMAGE_NAME_PATTERN.matches(imageFile.name)) {
-                throw BadRequestException { "Удаление файла [${imageFile.name}] запрещено." }
-            }
-
-            Files.deleteIfExists(imageFile.toPath())
-
-        } catch (e: IOException) {
-            logger.error("Failed to delete file", e)
-            throw LegendsException(HttpStatus.BAD_REQUEST)
-            { "Не удалось удалить указанный файл" }
-        }
     }
 }

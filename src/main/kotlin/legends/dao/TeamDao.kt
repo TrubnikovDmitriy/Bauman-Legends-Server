@@ -1,5 +1,6 @@
 package legends.dao
 
+import legends.exceptions.BadRequestException
 import legends.exceptions.LegendsException
 import legends.exceptions.TeamNotExists
 import legends.models.TeamModel
@@ -109,8 +110,22 @@ class TeamDao(dataSource: DataSource) {
         jdbcTemplate.update("UPDATE teams SET money=money+? WHERE team_id=?", score, teamId)
     }
 
-    fun decreaseScore(teamId: Long, score: Int) {
-        jdbcTemplate.update("UPDATE teams SET score=score-? WHERE team_id=?", score, teamId)
+    fun decreaseScore(teamId: Long, cost: Int) {
+        val affectedRows = jdbcTemplate.update(
+                """
+                    UPDATE teams SET score=score-?
+                    WHERE team_id=? AND score>=?
+                    """,
+                cost, teamId, cost
+        )
+        if (affectedRows == 0) {
+            logger.info("Not enough money for teamId=[$teamId], cost=[$cost]")
+            throw BadRequestException { "Не хватает экстра-баллов для совершения операции." }
+        }
+        if (affectedRows != 1) {
+            logger.error("Fail to decrease money teamId=[$teamId], cost=[$cost], affectedRows=[$affectedRows]")
+            throw BadRequestException { "Не удалось совершить операцию" }
+        }
     }
 
     fun getAllTeams(): List<TeamModel> {

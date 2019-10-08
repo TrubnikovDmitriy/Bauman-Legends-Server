@@ -1,10 +1,10 @@
 package legends.contollers
 
+import legends.dto.HintDto
 import legends.dto.TaskDto
 import legends.services.TaskService
 import legends.utils.getUserIdOrThrow
-import legends.views.TaskView
-import legends.views.toView
+import legends.views.*
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity

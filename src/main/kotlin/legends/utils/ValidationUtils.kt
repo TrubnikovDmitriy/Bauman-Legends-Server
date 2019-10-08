@@ -1,9 +1,6 @@
 package legends.utils
 
-import legends.dto.TaskDto
-import legends.dto.TeamSignUp
-import legends.dto.UserSignUp
-import legends.dto.UserUpdate
+import legends.dto.*
 import legends.models.TaskType.LOGIC
 import legends.models.TaskType.PHOTO
 
@@ -87,6 +84,19 @@ object ValidationUtils {
     fun validateUpdateProfile(dto: UserUpdate): String? {
         if (dto.vkRef.trim().isEmpty()) {
             return "Отправлена пустая ссылка на ВК."
+        }
+        return null
+    }
+
+    /**
+     * @return `null` in case of success validation
+     */
+    fun validateHint(dto: HintDto): String? {
+        if (dto.html.trim().isEmpty()) {
+            return "Отправлен пустой текст подсказки."
+        }
+        if (dto.cost < 0) {
+            return "Стоимость подсказки не может быть отрицательной."
         }
         return null
     }
