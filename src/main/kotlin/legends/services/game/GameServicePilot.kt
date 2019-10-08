@@ -36,7 +36,7 @@ open class GameServicePilot(
         val quest = gameDao.getLastQuestForUser(userId)
 
         if (quest == null) {
-            return TeamState.pause(text = "Разгоревочный этап начался! Капитан команды может взять первое задание.")
+            return TeamState.pause(text = "Разогревочный этап начался! Капитан команды может взять первое задание.")
         }
 
         if (quest.status == QuestStatus.RUNNING) {
