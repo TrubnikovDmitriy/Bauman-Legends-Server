@@ -56,7 +56,7 @@ class HintService(
         val teamId = userDao.getUserOrThrow(captainId).checkCaptain()
         val hint = hintDao.getHintOrThrow(hintId)
 
-        teamDao.decreaseScore(teamId, hint.cost)
+        teamDao.decreaseMoney(teamId, hint.cost)
         hintDao.openHintForTeam(hintId, teamId)
 
         return hint
