@@ -36,12 +36,20 @@ class QuestTimer(private val gameDao: GameDao) {
     init {
         if (GameState.stage == GameStage.FINAL) {
             // Reschedule running quests after server reboot
-            val runningQuests = gameDao.getAllRunningQuests().filter { it.taskType == TaskType.MAIN }
-            logger.info("Number of running quests: [${runningQuests.size}]")
+            rescheduleAllQuests()
+        }
+    }
 
-            for (quest in runningQuests) {
-                startTimer(quest)
-            }
+    final fun rescheduleAllQuests() {
+        for (quest in questTimers.values) {
+            quest.cancel(false)
+        }
+
+        val runningQuests = gameDao.getAllRunningQuests().filter { it.taskType == TaskType.MAIN }
+        logger.info("Number of running quests: [${runningQuests.size}]")
+
+        for (quest in runningQuests) {
+            startTimer(quest)
         }
     }
 

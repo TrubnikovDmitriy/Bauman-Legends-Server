@@ -8,6 +8,7 @@ import legends.dto.GameStageUpdate
 import legends.exceptions.BadRequestException
 import legends.exceptions.NotFoundException
 import legends.logic.GameState
+import legends.logic.QuestTimer
 import legends.models.*
 import legends.models.GameStage.*
 import legends.utils.GameHelperUtils.convertPhotoQuestAnswer
@@ -19,7 +20,8 @@ class ManageService(
         private val gameDao: GameDao,
         private val teamDao: TeamDao,
         private val taskDao: TaskDao,
-        private val userDao: UserDao
+        private val userDao: UserDao,
+        private val questTimer: QuestTimer
 ) {
     private val logger = LoggerFactory.getLogger(ManageService::class.java)
 
@@ -77,6 +79,17 @@ class ManageService(
         if (secretWord != stageUpdate.secret) {
             throw BadRequestException { "Неверное кодовое слово." }
         }
+        val oldStage = GameState.stage
         GameState.updateStage(stageUpdate.stage)
+
+        updateStage(from = oldStage, to = stageUpdate.stage)
+    }
+
+    private fun updateStage(from: GameStage, to: GameStage) {
+        if (from == to) return
+
+        if (to == FINAL) {
+            questTimer.rescheduleAllQuests()
+        }
     }
 }
