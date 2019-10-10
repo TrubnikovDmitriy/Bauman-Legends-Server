@@ -82,7 +82,7 @@ object ValidationUtils {
      * @return `null` in case of success validation
      */
     fun validateUpdateProfile(dto: UserUpdate): String? {
-        if (dto.vkRef.trim().isEmpty()) {
+        if (dto.vkRef.isBlank()) {
             return "Отправлена пустая ссылка на ВК."
         }
         return null
@@ -92,7 +92,7 @@ object ValidationUtils {
      * @return `null` in case of success validation
      */
     fun validateHint(dto: HintDto): String? {
-        if (dto.html.trim().isEmpty()) {
+        if (dto.html.isBlank()) {
             return "Отправлен пустой текст подсказки."
         }
         if (dto.cost < 0) {
