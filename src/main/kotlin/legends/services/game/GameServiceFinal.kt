@@ -5,6 +5,7 @@ import legends.dao.TeamDao
 import legends.dao.UserDao
 import legends.dto.AnswerDto
 import legends.exceptions.BadRequestException
+import legends.logic.GameState
 import legends.logic.QuestTimer
 import legends.models.QuestStatus
 import legends.models.TaskState
@@ -13,6 +14,7 @@ import legends.models.TeamState
 import legends.services.TeamService.Companion.MAX_TEAM_SIZE
 import legends.services.TeamService.Companion.MIN_TEAM_SIZE
 import legends.utils.validateRunningStatus
+import org.slf4j.LoggerFactory
 import org.springframework.transaction.annotation.Transactional
 
 open class GameServiceFinal(
@@ -21,6 +23,8 @@ open class GameServiceFinal(
         private val teamDao: TeamDao,
         private val questTimer: QuestTimer
 ) : GameService {
+
+    private val logger = LoggerFactory.getLogger(GameServiceFinal::class.java)
 
     override fun getCurrentTask(userId: Long): TeamState {
         val quest = gameDao.getLastQuestForUser(userId)?.takeIf { it.taskType == TaskType.MAIN }
@@ -33,9 +37,10 @@ open class GameServiceFinal(
             return TeamState.play(quest)
         }
 
-        val availableTaskIds = gameDao.getAvailableTasks(quest.teamId, TaskType.MAIN)
-        if (availableTaskIds.isEmpty()) {
-            return TeamState.stop("Поздравляем Вы прошли все задания! Легенды Бауманки 2019 завершены!")
+        val completedTaskIds = gameDao.getCompletedTaskIdsForTeam(quest.teamId)
+        if (completedTaskIds.size == GameState.getMaxTaskCount()) {
+            return TeamState.stop("Поздравляем Вы прошли все задания! " +
+                    "Легенды Бауманки 2019 завершены! Но есть еще побочные квесты...")
         }
 
         return TeamState.pause(quest = quest)
@@ -101,14 +106,35 @@ open class GameServiceFinal(
             completedTaskIds: List<Long>
     ): Long? {
 
-        return allTasks
-                .filter { it.taskType == TaskType.MAIN && it.loadFactor < 1f }
+        if (completedTaskIds.size == GameState.getMaxTaskCount()) {
+            return null
+        }
+
+        val sortedTaskList = allTasks
+                .filter { it.taskType == TaskType.MAIN  }
                 .toMutableList()
                 .apply {
                     removeIf { completedTaskIds.contains(it.taskId) }
                     sortBy { it.hints }
                     sortBy { it.loadFactor }
                 }
-                .firstOrNull()?.taskId
+
+        val nextTaskId = sortedTaskList.firstOrNull { it.loadFactor < 1f }?.taskId
+
+        if (nextTaskId == null && sortedTaskList.isNotEmpty()) {
+            logger.error("Tasks overload [$sortedTaskList]")
+            throw BadRequestException {
+                "К сожалению, все точки сейчас заняты. Пожалуйста, попробуйте еще раз через 5 минут."
+            }
+        }
+
+        if (nextTaskId == null) {
+            logger.error("There is no available tasks: completedTaskIds=[$completedTaskIds], allTasks=[$allTasks]")
+            throw BadRequestException {
+                "Не удалось взять следующее задание. Попробуйте позже."
+            }
+        }
+
+        return nextTaskId
     }
 }
