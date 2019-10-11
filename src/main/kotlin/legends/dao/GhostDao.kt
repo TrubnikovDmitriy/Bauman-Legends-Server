@@ -30,13 +30,13 @@ class GhostDao(dataSource: DataSource) {
     fun getGhostByKeyword(keyword: String): GhostModel? {
         return try {
             jdbcTemplate.queryForObject(
-                    "SELECT * FROM ghosts g WHERE keyword=?",
+                    "SELECT * FROM ghosts g WHERE LOWER(keyword)=LOWER(?)",
                     arrayOf(keyword),
                     GhostModel.Mapper()
             )
         } catch (e: EmptyResultDataAccessException) {
             logger.info("Wrong keyword [$keyword]")
-            throw BadRequestException { "Неверный спелл" }
+            throw BadRequestException { "Неверное ключ-слово." }
         }
     }
 

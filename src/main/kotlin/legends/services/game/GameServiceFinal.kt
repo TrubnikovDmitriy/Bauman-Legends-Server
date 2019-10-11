@@ -39,8 +39,8 @@ open class GameServiceFinal(
 
         val completedTaskIds = gameDao.getCompletedTaskIdsForTeam(quest.teamId)
         if (completedTaskIds.size == GameState.getMaxTaskCount()) {
-            return TeamState.stop("Поздравляем Вы прошли все задания! " +
-                    "Легенды Бауманки 2019 завершены! Но есть еще побочные квесты...")
+            return TeamState.stop("Поздравляем! Вы прошли почти все задания, осталось лишь одно. " +
+                    "Ждём Вас на 5 этаже возле лестницы, ведущей в высотку.")
         }
 
         return TeamState.pause(quest = quest)
