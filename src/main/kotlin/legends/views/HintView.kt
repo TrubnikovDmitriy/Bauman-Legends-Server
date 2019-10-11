@@ -35,7 +35,7 @@ fun List<OpenHintModel>.toPlayerView(): List<HintView> = map { openHint ->
     HintView(
             hintId = openHint.hint.hintId,
             taskId = openHint.hint.taskId,
-            html = openHint.hint.html.takeIf { openHint.isOpen },
+            html = null,
             cost = openHint.hint.cost
     )
 }
