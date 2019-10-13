@@ -100,4 +100,22 @@ object ValidationUtils {
         }
         return null
     }
+
+    /**
+     * @return `null` in case of success validation
+     */
+    fun validateFeedback(dto: FeedbackDto): String? {
+        val marks = arrayOf(
+                dto.legendsMark,
+                dto.finalMark,
+                dto.pilotMark,
+                dto.ghostMark,
+                dto.siteMark,
+                dto.taskMark
+        )
+        for (mark in marks) {
+            if (mark !in 1..10) return "Оценки должны лежать в диапазоне [1;10]."
+        }
+        return null
+    }
 }
