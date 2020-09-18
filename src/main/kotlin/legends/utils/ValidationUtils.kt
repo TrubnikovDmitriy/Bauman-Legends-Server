@@ -73,7 +73,7 @@ object ValidationUtils {
      */
     fun validateNewTeam(dto: TeamSignUp): String? {
         if (dto.teamName.trim().length < 2) {
-            return "Слишком короткое задание."
+            return "Слишком короткое название команды."
         }
         return null
     }
