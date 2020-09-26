@@ -67,8 +67,8 @@ class HintDao(private val dataSource: DataSource) {
         return jdbcTemplate.query(
                 """
                     SELECT h.*, oh.team_id FROM results r
-                        JOIN hints h on r.task_id=h.task_id
-                        LEFT JOIN open_hints oh ON h.hint_id=oh.hint_id
+                        JOIN hints h ON r.task_id=h.task_id
+                        LEFT JOIN open_hints oh ON h.hint_id=oh.hint_id AND r.team_id=oh.team_id
                     WHERE r.status='running' AND r.team_id=?;
                     """,
                 arrayOf(teamId),

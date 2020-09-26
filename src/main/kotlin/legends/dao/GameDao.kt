@@ -239,13 +239,16 @@ class GameDao(dataSource: DataSource) {
         )
     }
 
-    fun getCompletedTaskIdsForTeam(teamId: Long): List<Long> {
+    fun getCompletedTaskIdsForTeam(teamId: Long, taskType: TaskType): List<Long> {
         return jdbcTemplate.query(
                 """
                     SELECT r.task_id FROM results r 
-                    WHERE r.team_id=? AND r.status<>'running'
+                        JOIN tasks t on r.task_id = t.task_id
+                    WHERE r.team_id=? 
+                        AND t.task_type=LOWER(?)::task_type 
+                        AND r.status<>'running' 
                     """,
-                arrayOf(teamId)
+                arrayOf(teamId, taskType.name)
         ) { rs, _ -> rs.getLong(1) }
     }
 
