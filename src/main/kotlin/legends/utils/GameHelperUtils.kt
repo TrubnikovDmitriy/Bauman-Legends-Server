@@ -14,7 +14,7 @@ object GameHelperUtils {
      * формируется как хеш от настоящего ответа и номера команды.
      */
     fun convertPhotoQuestAnswer(answers: List<String>, teamId: Long): String {
-        val answer = answers.min() ?: throw IllegalStateException("Answers size is null")
+        val answer = answers.minOrNull() ?: throw IllegalStateException("Answers size is null")
         val byteAnswer = secureUtils.getHash(answer, teamId.toString().toByteArray())
         val uuidAnswer = secureUtils.uuidFromBytes(byteAnswer)
         return uuidAnswer.substring(9..22)

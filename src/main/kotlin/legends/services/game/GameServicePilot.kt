@@ -146,7 +146,7 @@ open class GameServicePilot(
             return FIRST_PHOTO_ID
         }
 
-        val lastTask = completedTasks.maxBy { it.finishTime ?: 0L }
+        val lastTask = completedTasks.maxByOrNull { it.finishTime ?: 0L }
         if (lastTask?.taskType == TaskType.PHOTO) {
             // После каждого фотоквеста идёт задание на логику
             // и они жестко связаны друг с другом.
