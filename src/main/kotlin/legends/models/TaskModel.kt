@@ -1,5 +1,6 @@
 package legends.models
 
+import legends.utils.AnswersCoder.decodeAnswer
 import org.springframework.jdbc.core.RowMapper
 import java.sql.ResultSet
 
@@ -26,7 +27,7 @@ data class TaskModel(
                     taskType = TaskType.valueOfSafety(rs.getString("task_type")),
                     duration = rs.getLong("duration").takeUnless { rs.wasNull() },
                     points = rs.getInt("points"),
-                    answers = (rs.getArray("answers").array as Array<String>).asList(),
+                    answers = (rs.getArray("answers").array as Array<String>).map { it.decodeAnswer() },
                     skipPossible = rs.getBoolean("skip_possible"),
                     capacity = rs.getInt("capacity")
             )

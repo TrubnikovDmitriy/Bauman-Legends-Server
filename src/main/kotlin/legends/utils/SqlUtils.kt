@@ -1,6 +1,7 @@
 package legends.utils
 
 import legends.exceptions.LegendsException
+import legends.utils.AnswersCoder.encodeAnswer
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import java.sql.PreparedStatement
@@ -15,8 +16,9 @@ object SqlUtils {
 
     fun convertToSqlArray(array: Collection<String>, dataSource: DataSource): SqlArray {
         try {
+            val encodedAnswers = array.map { it.encodeAnswer() }.toTypedArray()
             dataSource.connection.use { connection ->
-                return connection.createArrayOf("text" /*for `Int` use "integer"*/, array.toTypedArray())
+                return connection.createArrayOf("text" /*for `Int` use "integer"*/, encodedAnswers)
             }
         } catch (e: SQLException) {
             logger.error("Failed to convert kotlin Collection to SQL array", e)

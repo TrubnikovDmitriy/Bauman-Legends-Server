@@ -1,5 +1,6 @@
 package legends.models
 
+import legends.utils.AnswersCoder.decodeAnswer
 import org.springframework.jdbc.core.RowMapper
 import java.sql.ResultSet
 
@@ -37,7 +38,7 @@ data class QuestModel(
                     points = rs.getInt("points"),
                     skipPossible = rs.getBoolean("skip_possible"),
                     answer = rs.getString("answer").takeUnless { rs.wasNull() },
-                    answers = (rs.getArray("answers").array as Array<String>).asList(),
+                    answers = (rs.getArray("answers").array as Array<String>).map { it.decodeAnswer() },
                     capacity = rs.getInt("capacity")
             )
         }
