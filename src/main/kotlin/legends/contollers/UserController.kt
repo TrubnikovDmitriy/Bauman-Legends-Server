@@ -8,6 +8,7 @@ import legends.services.UserService
 import legends.utils.getUserId
 import legends.utils.getUserIdOrThrow
 import legends.utils.setUserId
+import legends.views.ErrorView
 import legends.views.UserView
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -36,7 +37,7 @@ class UserController(private val userService: UserService) {
     fun signIn(
             @RequestBody body: UserSignIn,
             httpSession: HttpSession
-    ): ResponseEntity<UserView> {
+    ): ResponseEntity<Any> {
         logger.info("Sign in: login=[${body.login}]")
 
         val user = userService.signIn(body)
@@ -45,7 +46,7 @@ class UserController(private val userService: UserService) {
         return if (user != null) {
             ResponseEntity(UserView(user), HttpStatus.OK)
         } else {
-            ResponseEntity(HttpStatus.BAD_REQUEST)
+            ResponseEntity(ErrorView("Неверный логин или пароль"), HttpStatus.BAD_REQUEST)
         }
     }
 
