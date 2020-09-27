@@ -29,8 +29,8 @@ class GameServiceProvider(
         return when (GameState.stage) {
             PILOT -> pilot.getCurrentTask(userId)
             FINAL -> final.getCurrentTask(userId)
-            REGISTRATION -> TeamState.stop("Легенды Бауманки начнутся 7 октября. Осталось совсем чуть-чуть!")
-            FINISH -> TeamState.stop("Поздравляем! Вы прошли все испытания, Легенды Бауманки 2019 завершены!")
+            REGISTRATION -> TeamState.stop("Легенды Бауманки начнутся 5 октября. Осталось совсем чуть-чуть!")
+            FINISH -> TeamState.stop("Поздравляем! Вы прошли все испытания, Легенды Бауманки 2020 завершены!")
         }
     }
 
@@ -38,7 +38,7 @@ class GameServiceProvider(
         return when (GameState.stage) {
             PILOT -> pilot.startNextTask(captainId)
             FINAL -> final.startNextTask(captainId)
-            REGISTRATION -> TeamState.stop("Первое задание можно будет получить 7 октября.")
+            REGISTRATION -> TeamState.stop("Первое задание можно будет получить 5 октября.")
             FINISH -> TeamState.stop("Легенды Бауманки завершены.")
         }
     }

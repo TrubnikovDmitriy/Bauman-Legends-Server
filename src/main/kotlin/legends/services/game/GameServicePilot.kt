@@ -46,7 +46,7 @@ open class GameServicePilot(
         val availableTaskIds = gameDao.getAvailableTasks(quest.teamId)
         if (availableTaskIds.none { it.taskType == TaskType.PHOTO || it.taskType == TaskType.LOGIC }) {
             return TeamState.stop("Поздравляем! Вы прошли все задания разогревочного этапа! " +
-                    "Основной этап начнётся 11 октября на территории Главного Здания МГТУ.")
+                    "Основной этап начнётся 9 октября на территории Главного Здания МГТУ.")
         }
 
         return TeamState.pause(quest = quest)
@@ -74,7 +74,7 @@ open class GameServicePilot(
 
         val nextTaskId = selectTask(allTasks, completedTasks) ?: return TeamState.stop(
                 "Поздравляем! Вы прошли все задания разогревочного этапа! " +
-                        "Основной этап начнётся 11 октября на территории Главного Здания МГТУ.")
+                        "Основной этап начнётся 9 октября на территории Главного Здания МГТУ.")
 
         gameDao.startTask(teamId, nextTaskId)
 

@@ -75,7 +75,7 @@ class ManageService(
 
     fun updateGameStage(adminId: Long, stageUpdate: GameStageUpdate) {
         userDao.getUserOrThrow(adminId).checkRevisor()
-        val secretWord = System.getenv("LB_ADMIN_SECRET") ?: "lb2019"
+        val secretWord = System.getenv("LB_ADMIN_SECRET") ?: "lb2020"
         if (secretWord != stageUpdate.secret) {
             throw BadRequestException { "Неверное кодовое слово." }
         }
