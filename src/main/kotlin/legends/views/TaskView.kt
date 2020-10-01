@@ -13,7 +13,8 @@ data class TaskView (
         @JsonProperty("points") val points: Int,
         @JsonProperty("answers") val answers: List<String>,
         @JsonProperty("capacity") val capacity: Int,
-        @JsonProperty("skip") val skip: Boolean
+        @JsonProperty("skip") val skip: Boolean,
+        @JsonProperty("max_attempts") val maxAttempts: Int?
 ) {
     constructor(task: TaskModel) : this(
             taskId = task.taskId,
@@ -24,7 +25,8 @@ data class TaskView (
             points = task.points,
             answers = task.answers,
             skip = task.skipPossible,
-            capacity = task.capacity
+            capacity = task.capacity,
+            maxAttempts = task.maxAttempts
     )
 }
 

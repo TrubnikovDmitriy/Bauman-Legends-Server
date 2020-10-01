@@ -7,10 +7,7 @@ import legends.dto.AnswerDto
 import legends.exceptions.BadRequestException
 import legends.logic.GameState
 import legends.logic.QuestTimer
-import legends.models.QuestStatus
-import legends.models.TaskState
-import legends.models.TaskType
-import legends.models.TeamState
+import legends.models.*
 import legends.services.TeamService.Companion.MAX_TEAM_SIZE
 import legends.services.TeamService.Companion.MIN_TEAM_SIZE
 import legends.utils.validateRunningStatus
@@ -33,8 +30,10 @@ open class GameServiceFinal(
             return TeamState.pause(text = "Основной этап начался! Капитан команды может взять первое задание.")
         }
 
+        val attemptCount = gameDao.getAttemptsCount(quest.teamId, quest.taskId)
+
         if (quest.status == QuestStatus.RUNNING) {
-            return TeamState.play(quest)
+            return TeamState.play(quest, attemptCount)
         }
 
         val completedTaskIds = gameDao.getCompletedTaskIdsForTeam(quest.teamId, TaskType.MAIN)
@@ -43,7 +42,7 @@ open class GameServiceFinal(
                     "Ждём Вас на 5 этаже Главного Здания.")
         }
 
-        return TeamState.pause(quest = quest)
+        return TeamState.pause(quest = quest, attempts = attemptCount)
     }
 
     override fun startNextTask(captainId: Long): TeamState {
@@ -66,12 +65,12 @@ open class GameServiceFinal(
         val quest = gameDao.getQuestOrThrow(teamId, nextTaskId)
         questTimer.startTimer(quest)
 
-        return TeamState.play(quest)
+        return TeamState.play(quest, attempts = 0)
     }
 
-    @Transactional
     override fun tryAnswer(userId: Long, dto: AnswerDto): Boolean {
         val answer = dto.convert()
+        if (answer.answer.isBlank()) return false
         val user = userDao.getUserOrThrow(userId)
 
         user.checkTeam(answer.teamId)
@@ -81,24 +80,48 @@ open class GameServiceFinal(
                 taskId = answer.taskId
         ).validateRunningStatus()
 
+        checkAttempts(quest, answer)
+        gameDao.saveAttempt(user.userId, answer)
+
         quest.answers.find {
             answer.answer.equals(it, ignoreCase = true)
         } ?: return false
 
-        questTimer.cancelTimer(quest)
-        gameDao.finishTask(
-                teamId = answer.teamId,
-                taskId = answer.taskId,
-                status = QuestStatus.SUCCESS,
-                answer = answer.answer
-        )
-        teamDao.increaseScore(answer.teamId, quest.points)
-
+        finishTask(quest, answer, QuestStatus.SUCCESS)
         return true
     }
 
     override fun skipTask(userId: Long) {
         throw BadRequestException { "Нельзя пропустить задание основного этапа." }
+    }
+
+    @Synchronized
+    @Transactional
+    open fun finishTask(quest: QuestModel, answer: AnswerModel, status: QuestStatus) {
+        questTimer.cancelTimer(quest)
+        gameDao.finishTask(
+                teamId = answer.teamId,
+                taskId = answer.taskId,
+                status = status,
+                answer = answer.answer
+        )
+        teamDao.increaseScore(answer.teamId, quest.points)
+    }
+
+    private fun checkAttempts(quest: QuestModel, answer: AnswerModel) {
+        if (quest.maxAttempts == null) {
+            return
+        }
+        val attempts = gameDao.getAttemptsCount(
+                teamId = answer.teamId,
+                taskId = answer.taskId
+        )
+        if (attempts >= quest.maxAttempts) {
+            finishTask(quest, answer, QuestStatus.FAIL)
+            throw BadRequestException {
+                "Количество попыток ответа на задание превышено [$attempts/${quest.maxAttempts}]."
+            }
+        }
     }
 
     private fun selectTask(

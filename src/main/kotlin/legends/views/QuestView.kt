@@ -15,7 +15,8 @@ data class QuestView (
         @JsonProperty("start_time") val startTime: Long, // seconds
         @JsonProperty("finish_time") val finishTime: Long?, // seconds
         @JsonProperty("answer") val answer: String?,
-        @JsonProperty("task_status") val questStatus: QuestStatus
+        @JsonProperty("task_status") val questStatus: QuestStatus,
+        @JsonProperty("max_attempts") val maxAttempts: Int?
 ) {
     constructor(quest: QuestModel) : this(
             taskId = quest.taskId,
@@ -27,6 +28,7 @@ data class QuestView (
             startTime = quest.startTime,
             finishTime = quest.finishTime,
             answer = quest.answer,
-            questStatus = quest.status
+            questStatus = quest.status,
+            maxAttempts = quest.maxAttempts
     )
 }

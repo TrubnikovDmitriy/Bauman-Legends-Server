@@ -26,11 +26,7 @@ class TaskDao(private val dataSource: DataSource) {
     fun getTaskById(taskId: Long): TaskModel? {
         return try {
             jdbcTemplate.queryForObject(
-                    """
-                    SELECT task_id, task_name, html, img_path, task_type, duration, points, answers, skip_possible, capacity 
-                    FROM tasks 
-                    WHERE task_id=?
-                    """,
+                    "SELECT * FROM tasks WHERE task_id=?",
                     arrayOf(taskId),
                     TaskModel.Mapper()
             )
@@ -54,8 +50,8 @@ class TaskDao(private val dataSource: DataSource) {
             connection.prepareStatement(
                     """
                     INSERT INTO tasks 
-                    (task_name, html, img_path, task_type, duration, points, answers, skip_possible, capacity) 
-                    VALUES (?, ?, ?, LOWER(?)::task_type, ?, ?, ?, ?, ?) 
+                    (task_name, html, img_path, task_type, duration, points, answers, skip_possible, capacity, max_attempts) 
+                    VALUES (?, ?, ?, LOWER(?)::task_type, ?, ?, ?, ?, ?, ?) 
                     RETURNING task_id
                     """,
                     Statement.RETURN_GENERATED_KEYS
@@ -69,6 +65,7 @@ class TaskDao(private val dataSource: DataSource) {
                 setArray(7, sqlArray)
                 setBoolean(8, task.skipPossible)
                 setInt(9, task.capacity)
+                setNullable(10, task.maxAttempts, this)
             }
         }
 
@@ -87,10 +84,10 @@ class TaskDao(private val dataSource: DataSource) {
             val affectedRows = jdbcTemplate.update(
                     """
                     UPDATE tasks 
-                    SET (task_name, html, img_path, task_type, duration, points, answers, capacity)=(?, ?, ?, LOWER(?)::task_type, ?, ?, ?, ?) 
+                    SET (task_name, html, img_path, task_type, duration, points, answers, capacity, max_attempts)=(?, ?, ?, LOWER(?)::task_type, ?, ?, ?, ?, ?) 
                     WHERE task_id=?
                     """,
-                    task.taskName, task.html, task.imagePath, task.taskType.name, task.duration, task.points, sqlArray, task.capacity, task.taskId
+                    task.taskName, task.html, task.imagePath, task.taskType.name, task.duration, task.points, sqlArray, task.capacity, task.maxAttempts, task.taskId
             )
 
             if (affectedRows == 0) {
@@ -109,11 +106,7 @@ class TaskDao(private val dataSource: DataSource) {
 
     fun getTasksByType(taskType: TaskType): List<TaskModel> {
         return jdbcTemplate.query(
-                """
-                    SELECT task_id, task_name, html, img_path, task_type, duration, points, answers, skip_possible, capacity 
-                    FROM tasks 
-                    WHERE task_type=LOWER(?)::task_type
-                    """,
+                "SELECT * FROM tasks WHERE task_type=LOWER(?)::task_type",
                 arrayOf(taskType.name),
                 TaskModel.Mapper()
         )
@@ -121,10 +114,7 @@ class TaskDao(private val dataSource: DataSource) {
 
     fun getAllTasks(): List<TaskModel> {
         return jdbcTemplate.query(
-                """
-                    SELECT task_id, task_name, html, img_path, task_type, duration, points, answers, skip_possible, capacity 
-                    FROM tasks 
-                    """,
+                "SELECT * FROM tasks",
                 TaskModel.Mapper()
         )
     }

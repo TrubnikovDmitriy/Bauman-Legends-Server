@@ -14,7 +14,8 @@ data class TaskDto (
         @JsonProperty(required = true, value = "answers") val answers: List<String>,
         @JsonProperty(required = true, value = "capacity") val capacity: Int,
         @JsonProperty(required = false, value = "img_path") val imagePath: String?,
-        @JsonProperty(required = true, value = "html") val html: String
+        @JsonProperty(required = true, value = "html") val html: String,
+        @JsonProperty(required = false, value = "max_attempts") val maxAttempts: Int?
 ) {
     fun convert(taskId: Long): TaskModel {
         return TaskModel(
@@ -27,7 +28,8 @@ data class TaskDto (
                 points = points,
                 answers = answers.map { it.trim() },
                 capacity = capacity,
-                skipPossible = (taskType == TaskType.LOGIC)
+                skipPossible = (taskType == TaskType.LOGIC),
+                maxAttempts = maxAttempts
         )
     }
 }

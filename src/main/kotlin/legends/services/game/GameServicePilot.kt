@@ -40,7 +40,7 @@ open class GameServicePilot(
         }
 
         if (quest.status == QuestStatus.RUNNING) {
-            return TeamState.play(quest)
+            return TeamState.play(quest, attempts = 0)
         }
 
         val availableTaskIds = gameDao.getAvailableTasks(quest.teamId)
@@ -79,7 +79,7 @@ open class GameServicePilot(
         gameDao.startTask(teamId, nextTaskId)
 
         val quest = gameDao.getQuestOrThrow(teamId, nextTaskId)
-        return TeamState.play(quest)
+        return TeamState.play(quest, attempts = 0)
     }
 
     @Transactional

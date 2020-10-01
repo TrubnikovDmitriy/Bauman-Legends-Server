@@ -293,4 +293,23 @@ class GameDao(dataSource: DataSource) {
             }
         }
     }
+
+    fun saveAttempt(userId: Long, answer: AnswerModel) {
+        val timestamp = TimeUtils.currentTime(SECONDS)
+        val affectedRows = jdbcTemplate.update(
+                "INSERT INTO attempts(team_id, task_id, user_id, answer, time) VALUES (?, ?, ?, ?, ?)",
+                answer.teamId, answer.taskId, userId, answer.answer, timestamp
+        )
+        if (affectedRows != 1) {
+            logger.error("Fail to add answer [$answer]")
+        }
+    }
+
+    fun getAttemptsCount(teamId: Long, taskId: Long): Int {
+        return jdbcTemplate.queryForObject(
+                "SELECT COUNT(a.answer) FROM attempts a WHERE team_id=? AND task_id=?",
+                Int::class.java,
+                teamId, taskId
+        )
+    }
 }

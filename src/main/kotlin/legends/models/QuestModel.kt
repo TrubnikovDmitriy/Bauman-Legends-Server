@@ -20,7 +20,8 @@ data class QuestModel(
         val points: Int,
         val answers: List<String>,
         val capacity: Int,
-        val skipPossible: Boolean
+        val skipPossible: Boolean,
+        val maxAttempts: Int?
 ) {
     @Suppress("UNCHECKED_CAST")
     class Mapper : RowMapper<QuestModel> {
@@ -39,7 +40,8 @@ data class QuestModel(
                     skipPossible = rs.getBoolean("skip_possible"),
                     answer = rs.getString("answer").takeUnless { rs.wasNull() },
                     answers = (rs.getArray("answers").array as Array<String>).map { it.decodeAnswer() },
-                    capacity = rs.getInt("capacity")
+                    capacity = rs.getInt("capacity"),
+                    maxAttempts = rs.getInt("max_attempts").takeUnless { rs.wasNull() }
             )
         }
     }

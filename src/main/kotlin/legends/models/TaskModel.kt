@@ -14,7 +14,8 @@ data class TaskModel(
         val points: Int,
         val answers: List<String>,
         val capacity: Int,
-        val skipPossible: Boolean
+        val skipPossible: Boolean,
+        val maxAttempts: Int?
 ) {
     @Suppress("UNCHECKED_CAST")
     class Mapper : RowMapper<TaskModel> {
@@ -29,7 +30,8 @@ data class TaskModel(
                     points = rs.getInt("points"),
                     answers = (rs.getArray("answers").array as Array<String>).map { it.decodeAnswer() },
                     skipPossible = rs.getBoolean("skip_possible"),
-                    capacity = rs.getInt("capacity")
+                    capacity = rs.getInt("capacity"),
+                    maxAttempts = rs.getInt("max_attempts").takeUnless { rs.wasNull() }
             )
         }
     }

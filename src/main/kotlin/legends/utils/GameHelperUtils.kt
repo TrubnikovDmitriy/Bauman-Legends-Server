@@ -25,10 +25,10 @@ object GameHelperUtils {
 fun QuestModel?.validateRunningStatus(): QuestModel {
     val action = when (this?.status) {
         RUNNING -> return this
-        SUCCESS -> "уже ответила на это задание"
-        SKIP -> "пропустила это задание"
-        FAIL -> "не успела ответить на это задание"
-        else -> "в данный момент не выполняет это задание"
+        SUCCESS -> "Ваша команда уже ответила на это задание"
+        SKIP -> "Ваша команда пропустила это задание"
+        FAIL -> "Вашей команде не удалось ответить на это задание"
+        else -> "Ваша команда в данный момент не выполняет это задание"
     }
-    throw BadRequestException { "Ваша команда $action. Пожалуйста, обновите страницу." }
+    throw BadRequestException { "$action. Пожалуйста, обновите страницу." }
 }
