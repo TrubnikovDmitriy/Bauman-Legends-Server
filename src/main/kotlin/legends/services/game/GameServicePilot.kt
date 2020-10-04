@@ -20,15 +20,15 @@ open class GameServicePilot(
 ) : GameService {
 
     companion object {
-        private const val FIRST_PHOTO_ID = 1L
+        private const val FIRST_PHOTO_ID = 28L
 
         private val pilotTaskMap: Map<Long /* PhotoTaskId */, Long /* LogicTaskId */> = mapOf(
-                1L to 11L, // Королёв
-                2L to 12L, // Капсула
-                3L to 13L, // Львы
-                4L to 14L, // Памятники
-                5L to 15L, // Собака
-                6L to 16L  // Бауман RIP
+                28L to 34L, // Королёв
+                30L to 36L, // Капсула
+                29L to 35L, // Львы
+                31L to 37L, // Глобус
+                26L to 32L, // Собака
+                27L to 33L  // Бауман RIP
         )
     }
 
