@@ -1,12 +1,9 @@
 package legends.contollers
 
 import legends.dto.FeedbackDto
-import legends.dto.GhostKeywordDto
 import legends.services.FeedbackService
-import legends.services.GhostService
 import legends.utils.getUserIdOrThrow
-import legends.views.GhostView
-import legends.views.toView
+import legends.views.WitnessView
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -23,7 +20,7 @@ class FeedbackController(private val feedbackService: FeedbackService) {
     fun saveFeedback(
             httpSession: HttpSession,
             @RequestBody feedback: FeedbackDto
-    ): ResponseEntity<List<GhostView>> {
+    ): ResponseEntity<List<WitnessView>> {
         val userId = httpSession.getUserIdOrThrow()
         logger.info("Save feedback: userId=[$userId]")
         feedbackService.saveFeedback(userId, feedback)
