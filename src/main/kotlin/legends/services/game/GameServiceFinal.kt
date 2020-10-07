@@ -39,7 +39,7 @@ open class GameServiceFinal(
         val completedTaskIds = gameDao.getCompletedTaskIdsForTeam(quest.teamId, TaskType.MAIN)
         if (completedTaskIds.size == GameState.getMaxTaskCount()) {
             return TeamState.stop("Поздравляем! Вы прошли почти все задания, осталось лишь одно. " +
-                    "Ждём Вас на 5 этаже Главного Здания.")
+                    "Ждём Вас тут 55°45'52.1\"N 37°41'18.4\"E")
         }
 
         return TeamState.pause(quest = quest, attempts = attemptCount)
@@ -85,7 +85,10 @@ open class GameServiceFinal(
 
         quest.answers.find {
             answer.answer.equals(it, ignoreCase = true)
-        } ?: return false
+        } ?: run {
+            checkAttempts(quest, answer) // check if attempts is exceeded
+            return false
+        }
 
         finishTask(quest, answer, QuestStatus.SUCCESS)
         return true
