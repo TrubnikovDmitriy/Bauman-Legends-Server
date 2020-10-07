@@ -5,6 +5,7 @@ import legends.logic.GameState
 import legends.services.game.GameService
 import legends.utils.getUserIdOrThrow
 import legends.views.ErrorView
+import legends.views.FactView
 import legends.views.TeamStateView
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -62,5 +63,15 @@ class GameController(private val gameService: GameService) {
         logger.info("Skip quest: [$userId]")
         gameService.skipTask(userId)
         return ResponseEntity(HttpStatus.OK)
+    }
+
+    @GetMapping("/fact")
+    fun getFact(
+            httpSession: HttpSession
+    ): ResponseEntity<FactView> {
+        val userId = httpSession.getUserIdOrThrow()
+        logger.warn("Get fact: userId=[$userId]")
+        val fact = gameService.getFact(userId)
+        return ResponseEntity(FactView(fact), HttpStatus.OK)
     }
 }

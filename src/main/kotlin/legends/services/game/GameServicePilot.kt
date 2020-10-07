@@ -166,4 +166,6 @@ open class GameServicePilot(
 
         return task?.taskId
     }
+
+    override fun getFact(userId: Long): FactModel? = null
 }

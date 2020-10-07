@@ -6,6 +6,7 @@ import legends.dao.UserDao
 import legends.dto.AnswerDto
 import legends.logic.GameState
 import legends.logic.QuestTimer
+import legends.models.FactModel
 import legends.models.GameStage.*
 import legends.models.TeamState
 import org.slf4j.LoggerFactory
@@ -59,6 +60,14 @@ class GameServiceProvider(
             PILOT -> pilot.skipTask(userId)
             FINAL -> final.skipTask(userId)
             else -> logger.warn("Try to skip task when game stage is [${GameState.stage}]")
+        }
+    }
+
+    override fun getFact(userId: Long): FactModel? {
+        return when (GameState.stage) {
+            PILOT -> pilot.getFact(userId)
+            FINAL -> final.getFact(userId)
+            else -> null
         }
     }
 }

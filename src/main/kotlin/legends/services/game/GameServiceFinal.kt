@@ -160,4 +160,12 @@ open class GameServiceFinal(
 
         return nextTaskId
     }
+
+    override fun getFact(userId: Long): FactModel? {
+        val quest = gameDao.getLastQuestForUser(userId)?.takeIf { it.taskType == TaskType.MAIN }
+        if (quest?.status != QuestStatus.SUCCESS) {
+            return null
+        }
+        return gameDao.getFact(quest.taskId)
+    }
 }

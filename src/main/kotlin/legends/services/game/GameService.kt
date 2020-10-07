@@ -1,6 +1,7 @@
 package legends.services.game
 
 import legends.dto.AnswerDto
+import legends.models.FactModel
 import legends.models.TeamState
 
 interface GameService {
@@ -12,4 +13,6 @@ interface GameService {
     fun tryAnswer(userId: Long, dto: AnswerDto): Boolean
 
     fun skipTask(userId: Long)
+
+    fun getFact(userId: Long): FactModel?
 }

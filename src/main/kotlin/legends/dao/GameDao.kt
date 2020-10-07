@@ -312,4 +312,16 @@ class GameDao(dataSource: DataSource) {
                 teamId, taskId
         )
     }
+
+    fun getFact(taskId: Long): FactModel? {
+        return try {
+            jdbcTemplate.queryForObject(
+                    "SELECT * FROM facts WHERE task_id=?",
+                    arrayOf(taskId),
+                    FactModel.Mapper()
+            )
+        } catch (e: EmptyResultDataAccessException) {
+            null
+        }
+    }
 }
