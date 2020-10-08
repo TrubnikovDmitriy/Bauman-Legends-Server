@@ -4,7 +4,10 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import legends.models.BaumanModel
 
 data class BaumanFragmentsView(
-        @JsonProperty("fragment_ids") val fragmentId: List<Int>
+        @JsonProperty("document_id") val documentId: Int,
+        @JsonProperty("url") val url: String
 ) {
-    constructor(model: BaumanModel) : this(model.fragments)
+    constructor(model: BaumanModel) : this(model.documentId, model.url)
 }
+
+fun List<BaumanModel>.toView(): List<BaumanFragmentsView>  = map { BaumanFragmentsView(it) }
