@@ -45,9 +45,17 @@ open class GameServiceFinal(
         return TeamState.pause(quest = quest, attempts = attemptCount)
     }
 
+    @Synchronized
+    @Transactional
     override fun startNextTask(captainId: Long): TeamState {
         val teamId = userDao.getUserOrThrow(captainId).checkCaptain()
         val membersCount = teamDao.getTeamMembersCount(teamId)
+
+        val currentStatus = gameDao.getLastQuestForUser(captainId, TaskType.MAIN)?.status
+        if (currentStatus == QuestStatus.RUNNING) {
+            throw BadRequestException { "Вы уже выполняете задание" }
+        }
+
 
         if (membersCount !in MIN_TEAM_SIZE..MAX_TEAM_SIZE) {
             throw BadRequestException {
