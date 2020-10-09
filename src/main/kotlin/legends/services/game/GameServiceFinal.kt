@@ -24,7 +24,7 @@ open class GameServiceFinal(
     private val logger = LoggerFactory.getLogger(GameServiceFinal::class.java)
 
     override fun getCurrentTask(userId: Long): TeamState {
-        val quest = gameDao.getLastQuestForUser(userId)?.takeIf { it.taskType == TaskType.MAIN }
+        val quest = gameDao.getLastQuestForUser(userId, TaskType.MAIN)
 
         if (quest == null) {
             return TeamState.pause(text = "Основной этап начался! Капитан команды может взять первое задание.")
@@ -165,7 +165,7 @@ open class GameServiceFinal(
     }
 
     override fun getFact(userId: Long): FactModel? {
-        val quest = gameDao.getLastQuestForUser(userId)?.takeIf { it.taskType == TaskType.MAIN }
+        val quest = gameDao.getLastQuestForUser(userId, TaskType.MAIN)
         if (quest?.status != QuestStatus.SUCCESS) {
             return null
         }

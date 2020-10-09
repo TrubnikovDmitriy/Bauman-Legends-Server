@@ -260,10 +260,29 @@ class GameDao(dataSource: DataSource) {
                         JOIN users u ON u.team_id=r.team_id
                         JOIN tasks t ON r.task_id=t.task_id
                     WHERE u.user_id=?
-                    ORDER BY r.finish_time DESC NULLS FIRST 
+                    ORDER BY r.finish_time DESC NULLS FIRST
                     LIMIT 1
                     """,
                     arrayOf(userId),
+                    QuestModel.Mapper()
+            )
+        } catch (e: EmptyResultDataAccessException) {
+            null
+        }
+    }
+
+    fun getLastQuestForUser(userId: Long, taskType: TaskType): QuestModel? {
+        return try {
+            jdbcTemplate.queryForObject(
+                    """
+                    SELECT t.*, r.* FROM results r
+                        JOIN users u ON u.team_id=r.team_id
+                        JOIN tasks t ON r.task_id=t.task_id
+                    WHERE u.user_id=? AND t.task_type=LOWER(?)::task_type
+                    ORDER BY r.finish_time DESC NULLS FIRST
+                    LIMIT 1
+                    """,
+                    arrayOf(userId, taskType.name),
                     QuestModel.Mapper()
             )
         } catch (e: EmptyResultDataAccessException) {
